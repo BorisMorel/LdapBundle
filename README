@@ -1,0 +1,27 @@
+security:
+  providers:
+    ldap:
+      id: imag_ldap.security.user.provider
+        
+  firewalls:
+    login:
+      pattern: ^/login$
+      security: false
+     
+    restricted_area:
+      pattern: ^/
+      ldap-login: true
+      
+  encoders:
+    IMAG\SecurityBundle\User\LdapUser: plaintext
+
+  factories:
+    - "%kernel.root_dir%/../src/IMAG/LdapBundle/Resources/config/security_factories.xml"
+
+imag_ldap:
+  provider:
+    ldap:
+      host: your.host.foo
+      port: 389
+      user_base_dn: ou=people,dc=host,dc=foo
+      user_attribute: uid
