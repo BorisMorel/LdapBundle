@@ -12,20 +12,15 @@ use Symfony\Component\Security\Http\Firewall\AbstractAuthenticationListener,
   Symfony\Component\EventDispatcher\EventDispatcherInterface,
   Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderInterface,
   Symfony\Component\HttpFoundation\Request,
-  IMAG\LdapBundle\Authentication\Token\LdapToken;
+  Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException,
+  IMAG\LdapBundle\Authentication\Token\LdapToken
+  ;
 
 class LdapListener extends AbstractAuthenticationListener
 {
   public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, SessionAuthenticationStrategyInterface $sessionStrategy, $providerKey, array $options = array(), AuthenticationSuccessHandlerInterface $successHandler = null, AuthenticationFailureHandlerInterface $failureHandler = null, LoggerInterface $logger = null, EventDispatcherInterface $dispatcher = null, CsrfProviderInterface $csrfProvider = null)
   {
-    parent::__construct($securityContext, $authenticationManager, $sessionStrategy, $providerKey, array_merge(
-      array(
-        'username_parameter' => '_username',
-        'password_parameter' => '_password',
-        'csrf_parameter'     => '_csrf_token',
-        'intention'          => 'authenticate',
-        'post_only'          => true,
-      ), $options), $successHandler, $failureHandler, $logger, $dispatcher);
+    parent::__construct($securityContext, $authenticationManager, $sessionStrategy, $providerKey, $options, $successHandler, $failureHandler, $logger, $dispatcher);
     
     $this->csrfProvider = $csrfProvider;
   }
@@ -39,10 +34,10 @@ class LdapListener extends AbstractAuthenticationListener
         
       return null;
     }
-
+  
     if (null !== $this->csrfProvider) {
       $csrfToken = $request->get($this->options['csrf_parameter'], null, true);
-
+      
       if (false === $this->csrfProvider->isCsrfTokenValid($this->options['intention'], $csrfToken)) {
         throw new InvalidCsrfTokenException('Invalid CSRF token.');
       }

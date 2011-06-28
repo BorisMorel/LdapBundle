@@ -2,7 +2,7 @@
 
 namespace IMAG\LdapBundle\Manager;
 
-class LdapManager implements LdapManagerInterface
+class LdapManager implements ManagerInterface
 {
   private
     $params = array(),
@@ -77,7 +77,7 @@ class LdapManager implements LdapManagerInterface
 
     $filter = isset($this->params['user_filter']) ? $this->params['user_filter'] : '';
 
-    $search = ldap_search($this->_ress,$this->params['user_base_dn'],sprintf('%s(%s=%s)', $filter, $this->params['user_attribute'], $this->user));
+    $search = ldap_search($this->_ress,$this->params['user_base_dn'],sprintf('(&%s(%s=%s))', $filter, $this->params['user_attribute'], $this->user));
    
     if($search) 
       {

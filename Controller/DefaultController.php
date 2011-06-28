@@ -26,7 +26,16 @@ class DefaultController extends Controller
         
     return $this->render('IMAGLdapBundle:Default:login.html.twig', array(
       'last_username' => $this->get('request')->getSession()->get(SecurityContext::LAST_USERNAME),
-      'error'         => $error
+      'error'         => $error,
+      'token'         => $this->generateToken(),
     ));
+  }
+
+  private function generateToken()
+  {
+    $token = $this->get('form.csrf_provider')
+      ->generateCsrfToken('ldap_authenticate');
+
+    return $token;
   }
 }

@@ -2,7 +2,7 @@
 
 namespace IMAG\LdapBundle\Manager;
 
-interface LdapManagerInterface
+interface ManagerInterface
 {
   function __construct(array $params);
   function exists($username);
