@@ -16,6 +16,7 @@
 
     <service id="imag_ldap.security.authentication.form_entry_point" class="%imag_ldap.security.authentication.form_entry_point.class%" public="false" abstract="true">
       <argument type="service" id="http_kernel" />
+      <argument type="service" id="security.http_utils" />
     </service>
     
     <service id="imag_ldap.security.user.provider" class="%imag_ldap.security.user.provider.class%">
@@ -37,6 +38,7 @@
       <argument type="service" id="security.context" />
       <argument type="service" id="security.authentication.manager" />
       <argument type="service" id="security.authentication.session_strategy" />
+      <argument type="service" id="security.http_utils" />
       <argument />
       <argument type="collection"></argument>
       <argument type="service" id="security.authentication.success_handler" on-invalid="null" />

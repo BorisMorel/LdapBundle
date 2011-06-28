@@ -2,7 +2,7 @@
 
 namespace IMAG\LdapBundle\Manager;
 
-class LdapManager implements ManagerInterface
+class LdapManager implements LdapManagerInterface
 {
   private
     $params = array(),

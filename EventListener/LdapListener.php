@@ -13,14 +13,25 @@ use Symfony\Component\Security\Http\Firewall\AbstractAuthenticationListener,
   Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderInterface,
   Symfony\Component\HttpFoundation\Request,
   Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException,
-  IMAG\LdapBundle\Authentication\Token\LdapToken
+  IMAG\LdapBundle\Authentication\Token\LdapToken,
+  Symfony\Component\Security\Http\HttpUtils
   ;
 
 class LdapListener extends AbstractAuthenticationListener
 {
-  public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, SessionAuthenticationStrategyInterface $sessionStrategy, $providerKey, array $options = array(), AuthenticationSuccessHandlerInterface $successHandler = null, AuthenticationFailureHandlerInterface $failureHandler = null, LoggerInterface $logger = null, EventDispatcherInterface $dispatcher = null, CsrfProviderInterface $csrfProvider = null)
+  public function __construct(SecurityContextInterface $securityContext, 
+                              AuthenticationManagerInterface $authenticationManager, 
+                              SessionAuthenticationStrategyInterface $sessionStrategy, 
+                              HttpUtils $httpUtils,
+                              $providerKey, 
+                              array $options = array(), 
+                              AuthenticationSuccessHandlerInterface $successHandler = null, 
+                              AuthenticationFailureHandlerInterface $failureHandler = null, 
+                              LoggerInterface $logger = null, 
+                              EventDispatcherInterface $dispatcher = null, 
+                              CsrfProviderInterface $csrfProvider = null)
   {
-    parent::__construct($securityContext, $authenticationManager, $sessionStrategy, $providerKey, $options, $successHandler, $failureHandler, $logger, $dispatcher);
+    parent::__construct($securityContext, $authenticationManager, $sessionStrategy, $httpUtils, $providerKey, $options, $successHandler, $failureHandler, $logger, $dispatcher);
     
     $this->csrfProvider = $csrfProvider;
   }
