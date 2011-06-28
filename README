@@ -1,3 +1,6 @@
+TODO:
+ - Implement getRoles() to retrieve from ldap the user's roles.
+
 security:
   providers:
     ldap:
