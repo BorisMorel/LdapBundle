@@ -10,7 +10,8 @@ security:
      
     restricted_area:
       pattern: ^/
-      ldap-login: true
+      security: true
+      ldap-login: ~
       
   encoders:
     IMAG\SecurityBundle\User\LdapUser: plaintext
@@ -24,4 +25,5 @@ imag_ldap:
       host: your.host.foo
       port: 389
       user_base_dn: ou=people,dc=host,dc=foo
+      user_filter: ($(foo=bar)(ObjectClass=Person)) #Optional
       user_attribute: uid
