@@ -1,6 +1,3 @@
-TODO:
- - Implement getRoles() to retrieve from ldap the user's roles.
-
 security:
   providers:
     ldap:
@@ -23,10 +20,14 @@ security:
     - "%kernel.root_dir%/../src/IMAG/LdapBundle/Resources/config/security_factories.xml"
 
 imag_ldap:
-  provider:
-    ldap:
-      host: your.host.foo
-      port: 389
-      user_base_dn: ou=people,dc=host,dc=foo
-      user_filter: ($(foo=bar)(ObjectClass=Person)) #Optional
-      user_attribute: uid
+  client:
+    host: your.host.foo
+    port: 389
+  user:
+    base_dn: ou=people,dc=host,dc=foo
+    filter: ($(foo=bar)(ObjectClass=Person)) #Optional
+    name_attribute: uid
+  role:
+    base_dn: ou=group, dc=host, dc=foo
+    name_attribute: cn
+    user_attribute: member
