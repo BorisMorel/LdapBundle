@@ -20,13 +20,17 @@ class LdapManager implements LdapManagerInterface
   public function exists($username)
   {
     return (bool)
-      $this->setUsername($username)
-      ->search();
+      $this
+      ->setUsername($username)
+      ->addUser();
   }
 
   public function auth()
   {    
-    return (bool)$this->search()
+    return (bool)
+      $this
+      ->addUser()
+      ->addRoles()
       ->bind();
   }
  
@@ -38,6 +42,18 @@ class LdapManager implements LdapManagerInterface
   public function getUsername()
   {
     return $this->user;
+  }
+
+  public function getRoles()
+  {
+    $tab = array();
+    $roles = $this->_ldapUser['roles'];
+    
+    for($i = 0 ; $i < $roles['count'] ; $i++) {
+      array_push($tab,$roles[$i][$this->params['role']['name_attribute']][0]);
+    }
+ 
+    return $tab;
   }
 
   public function setUsername($username)
@@ -56,9 +72,9 @@ class LdapManager implements LdapManagerInterface
 
   private function connect()
   {
-    $port = isset($this->params['port']) ? $this->params['port'] : '389';
+    $port = isset($this->params['client']['port']) ? $this->params['client']['port'] : '389';
    
-    $ress = @ldap_connect($this->params['host'], $port);
+    $ress = @ldap_connect($this->params['client']['host'], $port);
     
     if(!$ress || !@ldap_bind($ress))
       {
@@ -70,37 +86,63 @@ class LdapManager implements LdapManagerInterface
     return $this;
   }
 
-  private function search()
+  private function search(array $params)
   {
-    if(!$this->user)
-      throw new \Exception('User is not defined, pls use setUser');
-
-    $filter = isset($this->params['user_filter']) ? $this->params['user_filter'] : '';
-
-    $search = ldap_search($this->_ress,$this->params['user_base_dn'],sprintf('(&%s(%s=%s))', $filter, $this->params['user_attribute'], $this->user));
-   
-    if($search) 
-      {
-        $entries = ldap_get_entries($this->_ress,$search);
-        if(is_array($entries) && $entries['count'] == 1)
-          {
-            $this->_ldapUser = $entries[0];
-          }else
-          {
-            return false;
-          }
+    if(!$params)
+      throw new \Exception('$params must be define');
+    
+    $search = ldap_search($this->_ress, $params['base_dn'], $params['filter']);
+  
+    if($search) {
+      $entries = ldap_get_entries($this->_ress, $search);
+    
+      if(is_array($entries)) {
+        return $entries;
+      } else {
+        return false;
       }
-
-    return $this;    
+    }
   }
 
   private function bind()
   {
     if(!$this->pass)
-      throw new \Exception('Pass is not defined, pls use setPass');
+      throw new \Exception('Password is not defined, pls use setPass');
 
     $bind = @ldap_bind($this->_ress, $this->_ldapUser['dn'], $this->pass);
 
     return (bool)$bind;
+  }
+
+  private function addRoles()
+  {
+    if(!$this->_ldapUser)
+      throw new \Exception('AddRoles() must be involved only when search() have return an user');
+
+    $entries = $this->search(array(
+      'base_dn' => $this->params['role']['base_dn'],
+      'filter'  => sprintf('%s=%s', $this->params['role']['user_attribute'], $this->_ldapUser['dn'])
+    ));
+  
+    $this->_ldapUser['roles'] = $entries;
+    
+    return $this;
+  }
+
+  private function addUser()
+  {
+    if(!$this->user)
+      throw new \Exception('User is not defined, pls use setUser');
+    
+    $filter = isset($this->params['user']['filter']) ? $this->params['user']['filter'] : '';
+    
+    $entries = $this->search(array(
+      'base_dn' => $this->params['user']['base_dn'],
+      'filter'  => sprintf('(&%s(%s=%s))', $filter, $this->params['user']['name_attribute'], $this->user)
+    ));
+
+    $this->_ldapUser = $entries[0];
+    
+    return $this;
   }
 }

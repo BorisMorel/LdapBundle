@@ -9,6 +9,7 @@ interface LdapManagerInterface
   function auth();
   function getMail();
   function getUsername();
+  function getRoles();
   function setUsername($username);
   function setPassword($password);
 }

@@ -17,7 +17,7 @@ class LdapUser implements UserInterface
 
   public function getRoles()
   {
-    return array();
+    return $this->_ldapManager->getRoles();
   }
 
   public function getPassword()
@@ -38,11 +38,11 @@ class LdapUser implements UserInterface
 
   public function eraseCredentials()
   {
-
+    return null; //With ldap No credentials with stored ; Maybe forgotten the roles
   }
 
   public function equals(UserInterface $user)
   {
-    
+    return ($user === $this);
   }
 }

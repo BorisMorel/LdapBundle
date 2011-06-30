@@ -20,7 +20,7 @@ class IMAGLdapExtension extends Extension
     $processor = new Processor();
     
     $config = $processor->process($configuration->getConfigTree(), $configs);
-    $container->setParameter('imag_ldap.ldap_manager.params', $config['provider']['ldap']);
+    $container->setParameter('imag_ldap.ldap_manager.params', $config);
   }
 
   public function getAlias()
