@@ -117,7 +117,7 @@ class LdapManager implements LdapManagerInterface
   private function addRoles()
   {
     if(!$this->_ldapUser)
-      throw new \Exception('AddRoles() must be involved only when search() have return an user');
+      throw new \Exception('AddRoles() must be involved only when addUser() have return an user');
 
     $entries = $this->search(array(
       'base_dn' => $this->params['role']['base_dn'],
@@ -140,6 +140,12 @@ class LdapManager implements LdapManagerInterface
       'base_dn' => $this->params['user']['base_dn'],
       'filter'  => sprintf('(&%s(%s=%s))', $filter, $this->params['user']['name_attribute'], $this->user)
     ));
+
+    if($entries['count'] > 1)
+      throw new \Exception("This search can only return a single user");
+    
+    if($entries['count'] == 0)
+      return false;
 
     $this->_ldapUser = $entries[0];
     
