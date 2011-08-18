@@ -1,3 +1,7 @@
+##Infos
+This bundle work with the latest version (2.0)
+
+##security.yml
 security:
   providers:
     ldap:
