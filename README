@@ -1,5 +1,5 @@
 ##Infos
-This bundle work with the latest version (2.0)
+This bundle work with the latest version of Symfony (2.0)
 
 ##security.yml
 security:
