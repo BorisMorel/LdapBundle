@@ -43,6 +43,15 @@ class LdapUser implements UserInterface
 
   public function equals(UserInterface $user)
   {
-    return ($user === $this);
+    if (!$user instanceof LdapUser) {
+      return false;
+    }
+    
+    if ($this->getUserName() !==  $user->getUserName()) {
+      return false;
+    }
+    //TODO Implement getRoles()
+
+    return true;
   }
 }
