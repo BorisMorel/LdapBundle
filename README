@@ -32,7 +32,7 @@ imag_ldap:
     port: 389
   user:
     base_dn: ou=people,dc=host,dc=foo
-    filter: ($(foo=bar)(ObjectClass=Person)) #Optional
+    filter: (&(foo=bar)(ObjectClass=Person)) #Optional
     name_attribute: uid
   role:
     base_dn: ou=group, dc=host, dc=foo
