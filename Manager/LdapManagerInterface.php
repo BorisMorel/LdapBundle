@@ -7,7 +7,7 @@ interface LdapManagerInterface
   function __construct(array $params);
   function exists($username);
   function auth();
-  function getMail();
+  function getEmail();
   function getUsername();
   function getRoles();
   function setUsername($username);

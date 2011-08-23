@@ -24,7 +24,17 @@ class LdapUserProvider implements UserProviderInterface
     if(!$this->ldapManager->exists($username))
         throw new UsernameNotFoundException(sprintf('User "%s" not found', $username));
 
-    return new LdapUser($this->ldapManager);
+    $lm = $this->ldapManager
+      ->setUsername($username)
+      ->compile();
+    
+    $ldapUser = new LdapUser();
+    $ldapUser
+      ->setUsername($lm->getUsername())
+      ->setEmail($lm->getEmail())
+      ->setRoles($lm->getRoles());
+    
+    return $ldapUser;
   }
 
   public function refreshUser(UserInterface $user)

@@ -30,11 +30,18 @@ class LdapManager implements LdapManagerInterface
     return (bool)
       $this
       ->addUser()
-      ->addRoles()
       ->bind();
   }
+
+  public function compile()
+  {
+    return 
+      $this
+      ->addUser()
+      ->addRoles();
+  }
  
-  public function getMail()
+  public function getEmail()
   {
     return $this->_ldapUser['mail'][0];
   }
