@@ -1,3 +1,6 @@
+##Changes
+The key ldap-login under the firewall is rename in imag_ldap.
+
 ##Infos
 This bundle work with the latest version of Symfony (2.0)
 
@@ -15,8 +18,8 @@ security:
     restricted_area:
       pattern: ^/
       security: true
-      ldap-login: ~
-      
+      imag_ldap: ~
+              
   encoders:
     IMAG\SecurityBundle\User\LdapUser: plaintext
 

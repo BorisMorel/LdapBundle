@@ -26,7 +26,7 @@ class LdapFactory extends AbstractFactory
 
   public function getKey()
   {
-    return 'ldap_login';
+    return 'imag_ldap';
   }
 
   public function addConfiguration(NodeDefinition $node)
