@@ -36,5 +36,6 @@ imag_ldap:
     name_attribute: uid
   role:
     base_dn: ou=group, dc=host, dc=foo
+    filter: (ou=group) #Optional
     name_attribute: cn
     user_attribute: member
