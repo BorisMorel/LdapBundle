@@ -4,7 +4,7 @@ namespace IMAG\LdapBundle\User;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class LdapUser implements UserInterface
+class LdapUser implements UserInterface, \Serializable
 {
   protected 
     $username,
