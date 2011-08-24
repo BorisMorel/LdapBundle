@@ -7,7 +7,7 @@ use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProvid
   Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
   Symfony\Component\Security\Core\User\UserInterface,
   Symfony\Component\Security\Core\Exception\AuthenticationException,
-  IMAG\LdapBundle\Manager\LdapManagerInterface,
+  IMAG\LdapBundle\Manager\LdapManagerUserInterface,
   IMAG\LdapBundle\Authentication\Token\LdapToken;
 
 class LdapAuthenticationProvider implements AuthenticationProviderInterface
@@ -17,7 +17,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
     $ldapManager,
     $providerKey;
  
-  public function __construct(UserProviderInterface $userProvider, LdapManagerInterface $ldapManager, $providerKey)
+  public function __construct(UserProviderInterface $userProvider, LdapManagerUserInterface $ldapManager, $providerKey)
   {
     $this->userProvider = $userProvider;
     $this->ldapManager = $ldapManager;
@@ -27,7 +27,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
   public function authenticate(TokenInterface $token)
   {
     $user = $this->userProvider->loadUserByUsername($token->getUsername());
-
+   
     if($this->bind($user, $token)) {
       $ldapToken = new LdapToken($user, '', $user->getRoles());
       $ldapToken->setAuthenticated(true);

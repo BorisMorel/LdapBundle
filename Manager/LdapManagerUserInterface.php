@@ -2,11 +2,12 @@
 
 namespace IMAG\LdapBundle\Manager;
 
-interface LdapManagerInterface
+interface LdapManagerUserInterface
 {
-  function __construct(array $params);
+  function __construct(LdapConnectionInterface $conn);
   function exists($username);
   function auth();
+  function doPass();
   function getEmail();
   function getUsername();
   function getRoles();

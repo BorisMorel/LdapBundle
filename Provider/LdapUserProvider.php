@@ -4,7 +4,7 @@ namespace IMAG\LdapBundle\Provider;
 
 use Symfony\Component\Security\Core\User\UserProviderInterface,
   Symfony\Component\Security\Core\User\UserInterface,
-  IMAG\LdapBundle\Manager\LdapManagerInterface,
+  IMAG\LdapBundle\Manager\LdapManagerUserInterface,
   Symfony\Component\Security\Core\Exception\UsernameNotFoundException,
   Symfony\Component\Security\Core\Exception\UnsupportedUserException,
   IMAG\LdapBundle\User\LdapUser;
@@ -14,7 +14,7 @@ class LdapUserProvider implements UserProviderInterface
   private 
     $ldapManager;
 
-  public function __construct(LdapManagerInterface $ldapManager)
+  public function __construct(LdapManagerUserInterface $ldapManager)
   {
     $this->ldapManager = $ldapManager;
   }
@@ -26,7 +26,7 @@ class LdapUserProvider implements UserProviderInterface
 
     $lm = $this->ldapManager
       ->setUsername($username)
-      ->compile();
+      ->doPass();
     
     $ldapUser = new LdapUser();
     $ldapUser
