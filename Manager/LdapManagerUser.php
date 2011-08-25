@@ -57,7 +57,7 @@ class LdapManagerUser implements LdapManagerUserInterface
 
   public function getEmail()
   {
-    return;
+    return $this->_ldapUser['mail'][0];
   }
 
   public function getUsername()
@@ -104,13 +104,12 @@ class LdapManagerUser implements LdapManagerUserInterface
       'base_dn' => $this->params['role']['base_dn'],
       'filter'  => sprintf('%s=%s', $this->params['role']['user_attribute'], $this->_ldapUser['dn'])
     ));
-    
-    for($i = 0 ; $i < $entries['count'] ; $i++) {
-      array_push($tab,$entries[$i][$this->params['role']['name_attribute']][0]);
-    }
 
+    for($i = 0 ; $i < $entries['count'] ; $i++) {
+      array_push($tab,sprintf('ROLE_%s',self::slugify($entries[$i][$this->params['role']['name_attribute']][0])));
+    }
     $this->_ldapUser['roles'] = $tab;
-    
+   
     return $this;
   }
 
@@ -121,5 +120,14 @@ class LdapManagerUser implements LdapManagerUserInterface
     
     return (bool)
       $this->ldapConnection->bind($this->_ldapUser['dn'], $this->password);
+  }
+
+  private static function slugify($role)
+  {
+    $role = preg_replace('/\W+/', '_', $role);
+    $role = trim($role, '_');
+    $role = strtoupper($role);
+    
+    return $role;
   }
 }

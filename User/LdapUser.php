@@ -65,17 +65,17 @@ class LdapUser implements UserInterface, \Serializable
 
   public function equals(UserInterface $user)
   {
-    if(!$user instanceOf LdapUser) {
+    if (!$user instanceOf LdapUser) {
       return false;
     }
 
-    if($user->getUsername() !== $this->username) {
+    if ($user->getUsername() !== $this->username) {
       return false;
     }
-    if($user->getEmail() !== $this->email) {
+    if ($user->getEmail() !== $this->email) {
       return false;
     }
-    if($user->getRoles() !== $this->roles) {
+    if ($user->getRoles() !== $this->roles) {
       return false;
     }
       
