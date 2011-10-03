@@ -39,3 +39,4 @@ imag_ldap:
     filter: (ou=group) #Optional
     name_attribute: cn
     user_attribute: member
+    user_id: ['dn' or 'username'] #Optional
