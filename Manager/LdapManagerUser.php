@@ -7,7 +7,8 @@ class LdapManagerUser implements LdapManagerUserInterface
   private
     $ldapConnection,
     $username,
-    $password;
+    $password,
+    $_ldapUser;
 
   public function __construct(LdapConnectionInterface $conn)
   {
@@ -102,7 +103,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     
     $entries = $this->ldapConnection->search(array(
       'base_dn' => $this->params['role']['base_dn'],
-      'filter'  => sprintf('%s=%s', $this->params['role']['user_attribute'], $this->_ldapUser['dn'])
+      'filter'  => sprintf('%s=%s', $this->params['role']['user_attribute'], $this->getUserId())
     ));
 
     for($i = 0 ; $i < $entries['count'] ; $i++) {
@@ -129,5 +130,22 @@ class LdapManagerUser implements LdapManagerUserInterface
     $role = strtoupper($role);
     
     return $role;
+  }
+                                               
+  private function getUserId()
+  {
+    switch($this->params['role']['user_id'])
+    {
+    case 'dn':
+      return $this->_ldapUser['dn'];
+      break;
+      
+    case 'username':
+      return $this->username;
+      break;
+
+    default:
+      throw new \Exception(sprintf('The value can\'t be retrieve for this user_id : %s', $this->params['role']['user_id']));
+    }
   }
 }
