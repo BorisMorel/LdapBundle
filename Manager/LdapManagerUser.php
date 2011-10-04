@@ -101,9 +101,11 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     $tab = array();
     
+    $filter = isset($this->params['role']['filter']) ? $this->params['role']['filter'] : '';
+
     $entries = $this->ldapConnection->search(array(
       'base_dn' => $this->params['role']['base_dn'],
-      'filter'  => sprintf('%s=%s', $this->params['role']['user_attribute'], $this->getUserId())
+      'filter'  => sprintf('(&%s(%s=%s)', $filter, $this->params['role']['user_attribute'], $this->getUserId())
     ));
 
     for($i = 0 ; $i < $entries['count'] ; $i++) {
