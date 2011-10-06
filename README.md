@@ -80,9 +80,10 @@ imag_ldap:
     name_attribute: uid
   role:
     base_dn: ou=group, dc=host, dc=foo
-    filter: null #Optional
+    filter: (ou=group) #Optional
     name_attribute: cn
     user_attribute: member
+    user_id: [ dn or username ]
 ```
 
 **You need to configure the parameters under the imag_ldap section.**
