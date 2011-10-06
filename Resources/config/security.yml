@@ -1,10 +1,3 @@
-##Changes
-The key ldap-login under the firewall is rename in imag_ldap.
-
-##Infos
-This bundle work with the latest version of Symfony (2.0)
-
-##security.yml
 security:
   providers:
     ldap:
@@ -36,7 +29,6 @@ imag_ldap:
     name_attribute: uid
   role:
     base_dn: ou=group, dc=host, dc=foo
-    filter: (ou=group) #Optional
+    filter: null #Optional
     name_attribute: cn
     user_attribute: member
-    user_id: ['dn' or 'username'] #Optional
