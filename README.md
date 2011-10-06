@@ -88,8 +88,10 @@ imag_ldap:
 **You need to configure the parameters under the imag_ldap section.**
 
 **Note:**
+
 > If are not set the optional parameters have default values.
 > You can disable this ; Just set parameter to NULL.
+
 ``` yaml
 imag_ldap:
   # ...
