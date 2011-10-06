@@ -89,7 +89,7 @@ imag_ldap:
 
 **Note:**
 
-> If are not set the optional parameters have default values.
+> If are not set, the optional parameters have default values.
 > You can disable this ; Just set parameter to NULL.
 
 ``` yaml
