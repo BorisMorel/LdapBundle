@@ -3,6 +3,10 @@ LdapBundle
 
 LdapBundle provides a Ldap authentication system without the `apache mod_ldap`. He use `php-ldap` package with a form to authenticate the users. LdapBundle also can be used for the authorization. He retrieves the  Ldap users' roles.
 
+Contact
+-------
+You can try to contact me on freenode irc ; channel #symfony-fr ; pseudo : aways
+
 Install
 -------
 1. Download LdapBundle
