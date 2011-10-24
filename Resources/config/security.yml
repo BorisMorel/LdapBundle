@@ -12,6 +12,9 @@ security:
       pattern: ^/
       security: true
       imag_ldap: ~
+      logout:
+        path:           /logout
+        target:         /
               
   encoders:
     IMAG\SecurityBundle\User\LdapUser: plaintext

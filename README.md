@@ -15,6 +15,7 @@ Install
 4. Configure LdapBundle security.yml
 6. Import LdapBundle security.yml
 7. Import LdapBundle routing
+8. Implement Logout
 
 ### Download LdapBundle
 
@@ -122,3 +123,15 @@ imports:
 imag_ldap:
   resource: "@IMAGLdapBundle/Resources/config/routing.yml"
 ```
+
+### Implement Logout
+
+Just create a link with logout target.
+
+``` html
+<a href="{{ path('logout') }}">logout</a>
+```
+
+**Note:**
+You can refer to the official Symfony documentation :
+http://symfony.com/doc/2.0/book/security.html#logging-out
