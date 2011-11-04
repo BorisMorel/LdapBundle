@@ -2,12 +2,12 @@
 
 namespace IMAG\LdapBundle\DependencyInjection;
 
-use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition,
+use Symfony\Component\Config\Definition\ConfigurationInterface,
   Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
-class Configuration
+class Configuration implements ConfigurationInterface
 {
-  public function getConfigTree()
+  public function getConfigTreeBuilder()
   {
     $treeBuilder = new TreeBuilder();
     $rootNode = $treeBuilder->root('imag_ldap');
@@ -43,6 +43,6 @@ class Configuration
         ->end()
         ;
 
-    return $treeBuilder->buildTree();      
+    return $treeBuilder;      
   }
 }

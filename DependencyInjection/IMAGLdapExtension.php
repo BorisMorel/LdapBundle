@@ -2,11 +2,9 @@
 
 namespace IMAG\LdapBundle\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\DefinitionDecorator,
-  Symfony\Component\HttpKernel\DependencyInjection\Extension,
+use Symfony\Component\HttpKernel\DependencyInjection\Extension,
   Symfony\Component\DependencyInjection\ContainerBuilder,
   Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
-  Symfony\Component\Config\Definition\Processor,
   Symfony\Component\Config\FileLocator;
 
 class IMAGLdapExtension extends Extension
@@ -17,9 +15,8 @@ class IMAGLdapExtension extends Extension
     $loader->load('security_ldap.xml');
 
     $configuration = new Configuration();
-    $processor = new Processor();
-    
-    $config = $processor->process($configuration->getConfigTree(), $configs);
+
+    $config = $this->processConfiguration($configuration, $configs);
     $container->setParameter('imag_ldap.ldap_connection.params', $config);
   }
 
