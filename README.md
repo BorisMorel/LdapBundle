@@ -70,7 +70,7 @@ security:
       imag_ldap: ~
               
   encoders:
-    IMAG\SecurityBundle\User\LdapUser: plaintext
+    IMAG\LdapBundle\User\LdapUser: plaintext
 
   factories:
     - "%kernel.root_dir%/../src/IMAG/LdapBundle/Resources/config/security_factories.xml"
