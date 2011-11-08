@@ -1,14 +1,25 @@
 <?php
 
 namespace IMAG\LdapBundle\Manager;
+use Monolog\Logger;
+
 class LdapConnection implements LdapConnectionInterface
 {
     private $params = array(), $_ress;
+    /**
+     * @var Logger
+     */
+    private $logger;
 
     public function __construct(array $params)
     {
         $this->params = $params;
         $this->connect();
+    }
+
+    public function setLogger(Logger $logger)
+    {
+        $this->logger = $logger;
     }
 
     public function search(array $params)
@@ -21,20 +32,29 @@ class LdapConnection implements LdapConnectionInterface
                     sprintf('You must defined %s', print_r($diff, true)));
         }
 
-        $search = @ldap_search($this->_ress, $params['base_dn'],
-                $params['filter']);
+        $attrs = array();
+        
+        if (isset($params['attrs'])) {
+            $attrs = $params['attrs'];
+        }
+        
+        $this->info(
+                        sprintf('ldap_search base_dn %s, filter %s',
+                                print_r($params['base_dn'], true),
+                                print_r($params['filter'], true)));
+                                
+        $search = ldap_search($this->_ress, $params['base_dn'],
+                $params['filter'], $attrs);
 
         if ($search) {
             $entries = ldap_get_entries($this->_ress, $search);
-
+            
             if (is_array($entries)) {
                 return $entries;
             } else {
                 return false;
             }
-        } else {
-            var_dump($params); exit();
-        }
+        } 
     }
 
     public function bind($user_dn, $password)
@@ -100,11 +120,32 @@ class LdapConnection implements LdapConnectionInterface
                     $this->params['client']['password']);
 
             if (!$bindress) {
-                throw new \Exception('The credentials you have configured are not valid');
+                throw new \Exception(
+                        'The credentials you have configured are not valid');
             }
         }
 
         return $this;
+    }
+
+    private function info($message)
+    {
+        if (!$this->logger) {
+            return;
+        }
+
+        $this->logger
+                ->info($message);
+    }
+
+    private function err($message)
+    {
+        if (!$this->logger) {
+            return;
+        }
+
+        $this->logger
+                ->err($message);
     }
 
 }
