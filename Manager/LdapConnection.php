@@ -83,9 +83,13 @@ class LdapConnection implements LdapConnectionInterface
   private function connect()
   {
     $port = isset($this->params['client']['port']) ? $this->params['client']['port'] : '389';
-   
+
     $ress = @ldap_connect($this->params['client']['host'], $port);
-    
+
+    if (isset($this->params['client']['version']) && $this->params['client']['version'] !== null) {
+        ldap_set_option($ress, LDAP_OPT_PROTOCOL_VERSION, $this->params['client']['version']);
+    }
+
     if(!$ress || !@ldap_bind($ress))
       {
         throw new \Exception('unable connect to Ldap');
