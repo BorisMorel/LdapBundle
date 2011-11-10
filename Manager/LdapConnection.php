@@ -120,7 +120,10 @@ class LdapConnection implements LdapConnectionInterface
             ldap_set_option($ress, LDAP_OPT_PROTOCOL_VERSION, $this->params['client']['version']);
         }
 
-        if ($this->params['client']['username']) {
+        if (isset($this->params['client']['username']) && $this->params['client']['version'] !== null) {
+            if(!isset($this->params['client']['password'])) {
+                throw new \Exception('You must uncomment password key');
+            }
             $bindress = @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
         
             if (!$bindress) {
