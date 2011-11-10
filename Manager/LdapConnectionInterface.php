@@ -2,9 +2,12 @@
 
 namespace IMAG\LdapBundle\Manager;
 
+use Monolog\Logger;
+
 interface LdapConnectionInterface
 {
-  function __construct(array $params);
+  function __construct(array $params, Logger $logger);
+  function setLogger(Logger $logger);
   function search(array $params);
   function bind($user_dn, $password);
   function getParameters();
