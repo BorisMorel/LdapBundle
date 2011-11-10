@@ -6,21 +6,23 @@ use Monolog\Logger;
 
 class LdapConnection implements LdapConnectionInterface
 {
-    private 
-        $params = array(), 
-        $_ress,
-        $logger
-        ;
+    /**
+     * @var array
+     */
+    private $params = array();
+    
+    private  $_ress;
+    
+    /**
+     * @var Logger
+     */
+    private  $logger;
 
-    public function __construct(array $params)
+    public function __construct(array $params, Logger $logger)
     {
         $this->params = $params;
-        $this->connect();
-    }
-
-    public function setLogger(Logger $logger)
-    {
         $this->logger = $logger;
+        $this->connect();
     }
 
     public function search(array $params)
