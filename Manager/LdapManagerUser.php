@@ -44,18 +44,9 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $this;
     }
 
-    public function setUsername($username)
+    public function getDn()
     {
-        $this->username = $username;
-
-        return $this;
-    }
-
-    public function setPassword($password)
-    {
-        $this->password = $password;
-
-        return $this;
+        return $this->_ldapUser['dn'];
     }
 
     public function getEmail()
@@ -71,6 +62,20 @@ class LdapManagerUser implements LdapManagerUserInterface
     public function getRoles()
     {
         return $this->_ldapUser['roles'];
+    }
+
+    public function setUsername($username)
+    {
+        $this->username = $username;
+
+        return $this;
+    }
+
+    public function setPassword($password)
+    {
+        $this->password = $password;
+
+        return $this;
     }
 
     private function addLdapUser()
