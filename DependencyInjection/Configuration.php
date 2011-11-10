@@ -18,6 +18,8 @@ class Configuration implements ConfigurationInterface
               ->scalarNode('host')->isRequired()->cannotBeEmpty()->end()
               ->scalarNode('port')->defaultValue(389)->end()
               ->scalarNode('version')->end()
+              ->scalarNode('username')->defaultValue(null)->end()
+              ->scalarNode('password')->defaultValue(null)->end()
             ->end()
           ->end()
           ->arrayNode('user')
