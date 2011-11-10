@@ -8,6 +8,7 @@ interface LdapManagerUserInterface
   function exists($username);
   function auth();
   function doPass();
+  function getDn();
   function getEmail();
   function getUsername();
   function getRoles();

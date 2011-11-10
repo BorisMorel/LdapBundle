@@ -32,8 +32,9 @@ class LdapUserProvider implements UserProviderInterface
     $ldapUser
       ->setUsername($lm->getUsername())
       ->setEmail($lm->getEmail())
-      ->setRoles($lm->getRoles());
-    
+      ->setRoles($lm->getRoles())
+      ->setDn($lm->getDn());
+
     return $ldapUser;
   }
 
