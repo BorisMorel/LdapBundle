@@ -80,6 +80,9 @@ imag_ldap:
     host: your.host.foo
     port: 389
 #    version: 3 # Optional
+#    username: foo # Optional
+#    password: bar # Optional
+
   user:
     base_dn: ou=people,dc=host,dc=foo
     filter: (&(foo=bar)(ObjectClass=Person)) #Optional
