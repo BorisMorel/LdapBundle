@@ -29,7 +29,7 @@ imag_ldap:
 #    version: 3 # Optional
 
   user:
-    base_dn: ou=people,dc=host,dc=foo
+    base_dn: ou=people, dc=host, dc=foo
     filter: (&(foo=bar)(ObjectClass=Person)) #Optional
     name_attribute: uid
 
@@ -38,3 +38,4 @@ imag_ldap:
     filter: null #Optional
     name_attribute: cn
     user_attribute: member
+#    user_id: [ dn or username ] #Default dn
