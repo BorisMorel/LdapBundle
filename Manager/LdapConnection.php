@@ -115,6 +115,10 @@ class LdapConnection implements LdapConnectionInterface
         if (isset($this->params['client']['version']) && $this->params['client']['version'] !== null) {
             ldap_set_option($ress, LDAP_OPT_PROTOCOL_VERSION, $this->params['client']['version']);
         }
+        
+        if (isset($this->params['client']['referrals_enabled']) && $this->params['client']['referrals_enabled'] !== null) {
+            ldap_set_option($ress, LDAP_OPT_REFERRALS, $this->params['client']['referrals_enabled']);
+        }
 
         if (isset($this->params['client']['username']) && $this->params['client']['version'] !== null) {
             if(!isset($this->params['client']['password'])) {
