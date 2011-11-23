@@ -20,6 +20,7 @@ class Configuration implements ConfigurationInterface
               ->scalarNode('version')->end()
               ->scalarNode('username')->end()
               ->scalarNode('password')->end()
+              ->scalarNode('referrals_enabled')->end()
             ->end()
           ->end()
           ->arrayNode('user')
