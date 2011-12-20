@@ -55,22 +55,26 @@ public function registerBundles()
 # src/IMAG/LdapBundle/Resources/config/security.yml
 
 security:
+  firewalls:
+    restricted_area:
+      pattern:          ^/
+      anonymous:        ~
+      provider:         ldap
+      imag_ldap:        ~
+      logout:
+        path:           /logout
+        target:         /
+
   providers:
     ldap:
       id: imag_ldap.security.user.provider
-        
-  firewalls:
-    login:
-      pattern: ^/login$
-      security: false
-     
-    restricted_area:
-      pattern: ^/
-      security: true
-      imag_ldap: ~
-              
+                
   encoders:
     IMAG\LdapBundle\User\LdapUser: plaintext
+
+  access_control:
+    - { path: ^/login,          roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/,               roles: IS_AUTHENTICATED_FULLY }
 
   factories:
     - "%kernel.root_dir%/../src/IMAG/LdapBundle/Resources/config/security_factories.xml"
@@ -85,11 +89,11 @@ imag_ldap:
 
   user:
     base_dn: ou=people,dc=host,dc=foo
-    filter: (&(foo=bar)(ObjectClass=Person)) #Optional
+#    filter: (&(foo=bar)(ObjectClass=Person)) #Optional
     name_attribute: uid
   role:
     base_dn: ou=group, dc=host, dc=foo
-    filter: (ou=group) #Optional
+#    filter: (ou=group) #Optional
     name_attribute: cn
     user_attribute: member
     user_id: [ dn or username ]
