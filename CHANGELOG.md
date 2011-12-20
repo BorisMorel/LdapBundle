@@ -4,11 +4,13 @@ Security.yml
 ## Ldap configuration
 The default values for the filters nodes are removed.
 Please set explicitly this values.
+
 ``` yaml
 user:
   filter: (ou=people)
 role:
   filter: (ou=group)
+
 ```
 ### Before:
 ``` php
@@ -23,10 +25,10 @@ role:
 ```
 
 ### Now:
+``` php
 <?php
 // DependencyInjection/Configuration.php
 
-``` php
 user:
 ->scalarNode('filter')->end()
 
@@ -51,6 +53,7 @@ security:
 ```
 
 ### Before:
+
 ```yaml
 # src/IMAG/LdapBundle/Resources/config/security.yml
 
@@ -67,6 +70,7 @@ security:
 ```
 
 ### Now:
+
 ```yaml
 # src/IMAG/LdapBundle/Resources/config/security.yml
 
