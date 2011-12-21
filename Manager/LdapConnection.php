@@ -110,6 +110,10 @@ class LdapConnection implements LdapConnectionInterface
             ? $this->params['client']['port'] 
             : '389';
 
+        if (!function_exists('ldap_connect')) {
+            throw new \RuntimeException("IMAGLdapBundle requires php ldap support");
+        }
+
         $ress = @ldap_connect($this->params['client']['host'], $port);
 
         if (isset($this->params['client']['version']) && $this->params['client']['version'] !== null) {
