@@ -162,4 +162,23 @@ class LdapConnection implements LdapConnectionInterface
             ->err($message);
     }
 
+    /**
+     * Escape string for use in LDAP search filter.
+     *
+     * @link http://www.php.net/manual/de/function.ldap-search.php#90158
+     * See RFC2254 for more information.
+     * @link http://msdn.microsoft.com/en-us/library/ms675768(VS.85).aspx
+     * @link http://www-03.ibm.com/systems/i/software/ldap/underdn.html
+     */
+    public function escape($str)
+    {
+        $metaChars = array('*', '(', ')', '\\', chr(0));
+
+        $quotedMetaChars = array();
+        foreach ($metaChars as $key => $value) {
+            $quotedMetaChars[$key] = '\\'.str_pad(dechex(ord($value)), 2, '0');
+        }
+        $str = str_replace($metaChars, $quotedMetaChars, $str);
+        return ($str);
+    }
 }
