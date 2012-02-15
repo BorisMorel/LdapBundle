@@ -66,6 +66,10 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function setUsername($username)
     {
+        if ($username === "*") {
+            throw new \InvalidArgumentException("Invalid username given.");
+        }
+
         $this->username = $username;
 
         return $this;
@@ -94,7 +98,8 @@ class LdapManagerUser implements LdapManagerUserInterface
                 'filter' => sprintf('(&%s(%s=%s))', 
                                     $filter,
                                     $this->params['user']['name_attribute'],
-                                    $this->username)
+                                    $this->ldapConnection->escape($this->username)
+                                  )
             ));
 
         if ($entries['count'] > 1) {
@@ -128,7 +133,8 @@ class LdapManagerUser implements LdapManagerUserInterface
                 'filter'   => sprintf('(&%s(%s=%s))', 
                                       $filter,
                                       $this->params['role']['user_attribute'],
-                                      $this->getUserId()),
+                                      $this->ldapConnection->escape($this->getUserId())
+                ),
                 'attrs'    => array(
                     $this->params['role']['name_attribute']
                 )
