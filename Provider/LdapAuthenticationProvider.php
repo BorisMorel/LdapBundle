@@ -8,7 +8,8 @@ use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProvid
   Symfony\Component\Security\Core\User\UserInterface,
   Symfony\Component\Security\Core\Exception\AuthenticationException,
   IMAG\LdapBundle\Manager\LdapManagerUserInterface,
-  IMAG\LdapBundle\Authentication\Token\LdapToken;
+  IMAG\LdapBundle\Authentication\Token\LdapToken,
+  Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 class LdapAuthenticationProvider implements AuthenticationProviderInterface
 {
@@ -50,7 +51,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
   
   public function supports(TokenInterface $token)
   {
-    return $token instanceof LdapToken;
+    return $token instanceof LdapToken || $token instanceof UsernamePasswordToken;
   }
 
 }
