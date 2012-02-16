@@ -28,7 +28,7 @@ class Configuration implements ConfigurationInterface
               ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
               ->scalarNode('filter')->end()
               ->scalarNode('name_attribute')->defaultValue('uid')->end()
-              ->arrayNode('attributes')->defaultValue(array())->end()
+              ->arrayNode('attributes')->defaultValue(array())->ignoreExtraKeys(true)->end()
             ->end()
           ->end()
           ->arrayNode('role')
