@@ -54,6 +54,17 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $this->_ldapUser['mail'][0];
     }
 
+    public function getAttributes()
+    {
+        $attributes = array();
+        foreach ($this->params['user']['attributes'] as $attrName) {
+            if (isset($this->_ldapUser[$attrName][0])) {
+                $attributes[$attrName] = $this->_ldapUser[$attrName][0];
+            }
+        }
+        return $attributes;
+    }
+
     public function getUsername()
     {
         return $this->username;
