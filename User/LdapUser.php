@@ -10,7 +10,8 @@ class LdapUser implements UserInterface, \Serializable
         $username,
         $email,
         $roles,
-        $dn;
+        $dn,
+        $attributes;
 
     public function getRoles()
     {
@@ -48,6 +49,19 @@ class LdapUser implements UserInterface, \Serializable
         $this->dn = $dn;
 
         return $this;
+    }
+
+    public function setAttributes(array $attributes)
+    {
+        $this->attributes = $attributes;
+    }
+
+    public function getAttribute($name)
+    {
+        if (isset($this->attributes[$name])) {
+            return $this->attributes[$name];
+        }
+        return null;
     }
 
     public function setUsername($username)
