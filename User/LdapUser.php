@@ -102,7 +102,7 @@ class LdapUser implements UserInterface, \Serializable
         if ($user->getEmail() !== $this->email) {
             return false;
         }
-        if ($user->getRoles() !== $this->roles) {
+        if (count( array_diff( $user->getRoles(), $this->roles) ) > 0 ) {
             return false;
         }
         if ($user->getDn() !== $this->dn) {
