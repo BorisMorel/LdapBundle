@@ -1,7 +1,7 @@
 LdapBundle
 ==========
 
-LdapBundle provides a Ldap authentication system without the `apache mod_ldap`. He use `php-ldap` package with a form to authenticate the users. LdapBundle also can be used for the authorization. He retrieves the  Ldap users' roles.
+LdapBundle provides a Ldap authentication system without the `apache mod_ldap`. It uses `php-ldap` extension with a form to authenticate the users. LdapBundle also can be used for the authorization. It retrieves the  Ldap users' roles.
 
 Contact
 -------
@@ -17,10 +17,24 @@ Install
 7. Import LdapBundle routing
 8. Implement Logout
 
-### Download LdapBundle
+### Get the Bundle
+
+#### Method a) Using the `deps` file
+
+Add the following lines to your  `deps` file and then run `php bin/vendors
+install`:
+
+```
+[LdapBundle]
+    git=https://github.com/BorisMorel/LdapBundle.git
+    target=bundles/IMAG/LdapBundle
+
+#### Method b) Using submodules
+
+Run the following commands to bring in the needed libraries as submodules.
 
 ``` bash
-$ git clone git://github.com/BorisMorel/LdapBundle.git src/IMAG/LdapBundle
+$ git clone git://github.com/BorisMorel/LdapBundle.git vendor/bundles/IMAG/LdapBundle
 ```
 
 ### Configure the Autoloader
@@ -31,7 +45,7 @@ $ git clone git://github.com/BorisMorel/LdapBundle.git src/IMAG/LdapBundle
 
 $loader->registerNamespaces(array(
      // ...
-    'IMAG' => __DIR__.'/../src',
+    'IMAG' => __DIR__.'/../vendor/bundles',
 ));
 ```
 
@@ -51,6 +65,7 @@ public function registerBundles()
 ```
 
 ### Configure security.yml
+
 ``` yaml
 # src/IMAG/LdapBundle/Resources/config/security.yml
 
@@ -77,7 +92,7 @@ security:
     - { path: ^/,               roles: IS_AUTHENTICATED_FULLY }
 
   factories:
-    - "%kernel.root_dir%/../src/IMAG/LdapBundle/Resources/config/security_factories.xml"
+    - "%kernel.root_dir%/../vendor/bundles/IMAG/LdapBundle/Resources/config/security_factories.xml"
 
 imag_ldap:
   client:
