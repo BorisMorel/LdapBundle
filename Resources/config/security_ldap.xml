@@ -4,6 +4,7 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
   <parameters>
+    <parameter key="imag_ldap.security.user.class">IMAG\LdapBundle\User\LdapUser</parameter>
     <parameter key="imag_ldap.security.user.provider.class">IMAG\LdapBundle\Provider\LdapUserProvider</parameter>
     <parameter key="imag_ldap.ldap_connection.class">IMAG\LdapBundle\Manager\LdapConnection</parameter>
     <parameter key="imag_ldap.ldap_manager.class">IMAG\LdapBundle\Manager\LdapManagerUser</parameter>
@@ -24,6 +25,7 @@
 
     <service id="imag_ldap.security.user.provider" class="%imag_ldap.security.user.provider.class%">
       <argument type="service" id="imag_ldap.ldap_manager" />
+      <argument>%imag_ldap.security.user.class%</argument>
     </service>
 
     <service id="imag_ldap.ldap_connection" class="%imag_ldap.ldap_connection.class%" public="false">
