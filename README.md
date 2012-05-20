@@ -28,6 +28,7 @@ install`:
 [LdapBundle]
     git=https://github.com/BorisMorel/LdapBundle.git
     target=bundles/IMAG/LdapBundle
+```
 
 #### Method b) Using submodules
 
