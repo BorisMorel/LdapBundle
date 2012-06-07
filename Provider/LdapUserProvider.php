@@ -50,6 +50,6 @@ class LdapUserProvider implements UserProviderInterface
     
   public function supportsClass($class)
   {
-    return (bool)$class === 'IMAG\LdapBundle\User\LdapUser';
+    return (bool) ($class === 'IMAG\LdapBundle\User\LdapUser');
   }
 }
