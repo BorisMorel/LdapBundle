@@ -42,7 +42,7 @@ class LdapConnection implements LdapConnectionInterface
                     print_r($params['filter'], true)
             ));
 
-        \Doctrine\Common\Util\Debug::dump($this->_ress);
+        \Doctrine\Common\Util\Debug::dump($this->_ress); die;
 
         $search = ldap_search(
             $this->_ress,
