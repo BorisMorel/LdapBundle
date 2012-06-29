@@ -22,7 +22,7 @@ class LdapUserProvider implements UserProviderInterface
   public function loadUserByUsername($username)
   {
     if (empty($username)) {
-        return;
+        throw new UsernameNotFoundException('The username is not provided.');
     }
 
     if(!$this->ldapManager->exists($username))
