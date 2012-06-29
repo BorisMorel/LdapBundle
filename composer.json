@@ -1,0 +1,17 @@
+{
+    "name":    "imag/ldapbundle",
+    "version": "master",
+    "dist": {
+        "url":  "https://github.com/BorisMorel/LdapBundle/zipball/master",
+        "type": "zip"
+    },
+    "source": {
+        "url":  "https://github.com/BorisMorel/LdapBundle.git",
+        "type": "git",
+        "reference": "origin/master"
+    },
+    "autoload": {
+        "psr-0": { "IMAG\\LdapBundle": "" }
+    },
+    "target-dir": "IMAG/LdapBundle"
+}

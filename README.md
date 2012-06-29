@@ -1,14 +1,13 @@
-LdapBundle
-==========
+# LdapBundle
 
 LdapBundle provides a Ldap authentication system without the `apache mod_ldap`. It uses `php-ldap` extension with a form to authenticate the users. LdapBundle also can be used for the authorization. It retrieves the  Ldap users' roles.
 
-Contact
--------
+## Contact
+
 You can try to contact me on freenode irc ; channel #symfony-fr ; pseudo : aways
 
-Install
--------
+## Install
+
 1. Download LdapBundle
 2. Configure the Autoloader
 3. Enable the Bundle
@@ -77,6 +76,9 @@ security:
       anonymous:        ~
       provider:         ldap
       imag_ldap:        ~
+      # alternative configuration
+      # imag_ldap:
+      #   login_path:   /ninja/login
       logout:
         path:           /logout
         target:         /
@@ -92,6 +94,7 @@ security:
     - { path: ^/login,          roles: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/,               roles: IS_AUTHENTICATED_FULLY }
 
+  # obsolete in SF 2.1
   factories:
     - "%kernel.root_dir%/../vendor/bundles/IMAG/LdapBundle/Resources/config/security_factories.xml"
 
