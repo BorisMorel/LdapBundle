@@ -18,8 +18,16 @@ use IMAG\LdapBundle\Manager\LdapManagerUserInterface,
  */
 class LdapUserProvider implements UserProviderInterface
 {
+    /**
+     * @var \IMAG\LdapBundle\Manager\LdapManagerUserInterface
+     */
     private $ldapManager;
 
+    /**
+     * Constructor
+     *
+     * @param \IMAG\LdapBundle\Manager\LdapManagerUserInterface $ldapManager
+     */
     public function __construct(LdapManagerUserInterface $ldapManager)
     {
         $this->ldapManager = $ldapManager;
