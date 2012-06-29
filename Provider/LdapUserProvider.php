@@ -11,23 +11,27 @@ use Symfony\Component\Security\Core\User\UserProviderInterface,
 
 class LdapUserProvider implements UserProviderInterface
 {
-  private 
+  private
     $ldapManager;
 
   public function __construct(LdapManagerUserInterface $ldapManager)
   {
     $this->ldapManager = $ldapManager;
   }
-  
+
   public function loadUserByUsername($username)
   {
+    if (empty($username)) {
+        return;
+    }
+
     if(!$this->ldapManager->exists($username))
         throw new UsernameNotFoundException(sprintf('User "%s" not found', $username));
 
     $lm = $this->ldapManager
       ->setUsername($username)
       ->doPass();
-    
+
     $ldapUser = new LdapUser();
     $ldapUser
       ->setUsername($lm->getUsername())
@@ -47,7 +51,7 @@ class LdapUserProvider implements UserProviderInterface
 
     return $this->loadUserByUsername($user->getUsername());
   }
-    
+
   public function supportsClass($class)
   {
     return (bool) ($class === 'IMAG\LdapBundle\User\LdapUser');
