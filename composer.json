@@ -1,5 +1,7 @@
 {
     "name":    "imag/ldapbundle",
+    "description": "LDAP Bundle for Symfony 2",
+    "homepage": "http://github.com/shiroyuki/LdapBundle",
     "version": "1.1",
     "dist": {
         "url":  "https://github.com/shiroyuki/LdapBundle/zipball/master",
