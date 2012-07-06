@@ -1,0 +1,16 @@
+{
+    "name": "imag/ldapbundle",
+    "description": "LDAP Bundle for Symfony 2",
+    "homepage": "http://github.com/BorisMorel/LdapBundle",
+    "version": "1.2",
+    "source": {
+        "url": "https://github.com/BorisMorel/LdapBundle.git",
+        "type": "git",
+        "reference": "origin/master"
+    },
+    "autoload": {
+        "psr-0": { "IMAG\\LdapBundle": "" }
+    },
+
+    "target-dir": "IMAG/LdapBundle"
+}
