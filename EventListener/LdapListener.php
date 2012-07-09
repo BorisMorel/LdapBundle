@@ -19,20 +19,20 @@ use Symfony\Component\Security\Http\Firewall\AbstractAuthenticationListener,
 
 class LdapListener extends AbstractAuthenticationListener
 {
-  public function __construct(SecurityContextInterface $securityContext, 
-                              AuthenticationManagerInterface $authenticationManager, 
-                              SessionAuthenticationStrategyInterface $sessionStrategy, 
+  public function __construct(SecurityContextInterface $securityContext,
+                              AuthenticationManagerInterface $authenticationManager,
+                              SessionAuthenticationStrategyInterface $sessionStrategy,
                               HttpUtils $httpUtils,
-                              $providerKey, 
-                              array $options = array(), 
-                              AuthenticationSuccessHandlerInterface $successHandler = null, 
-                              AuthenticationFailureHandlerInterface $failureHandler = null, 
-                              LoggerInterface $logger = null, 
-                              EventDispatcherInterface $dispatcher = null, 
+                              $providerKey,
+                              AuthenticationSuccessHandlerInterface $successHandler = null,
+                              AuthenticationFailureHandlerInterface $failureHandler = null,
+                              array $options = array(),
+                              LoggerInterface $logger = null,
+                              EventDispatcherInterface $dispatcher = null,
                               CsrfProviderInterface $csrfProvider = null)
   {
     parent::__construct($securityContext, $authenticationManager, $sessionStrategy, $httpUtils, $providerKey, $options, $successHandler, $failureHandler, $logger, $dispatcher);
-    
+
     $this->csrfProvider = $csrfProvider;
   }
 
@@ -42,13 +42,13 @@ class LdapListener extends AbstractAuthenticationListener
       if (null !== $this->logger) {
         $this->logger->debug(sprintf('Authentication method not supported: %s.', $request->getMethod()));
       }
-        
+
       return null;
     }
-  
+
     if (null !== $this->csrfProvider) {
       $csrfToken = $request->get($this->options['csrf_parameter'], null, true);
-      
+
       if (false === $this->csrfProvider->isCsrfTokenValid($this->options['intention'], $csrfToken)) {
         throw new InvalidCsrfTokenException('Invalid CSRF token.');
       }
@@ -61,6 +61,6 @@ class LdapListener extends AbstractAuthenticationListener
 
     return $this->authenticationManager->authenticate(new LdapToken($username, $password));
   }
-  
-  
+
+
 }
