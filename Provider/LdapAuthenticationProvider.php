@@ -2,30 +2,43 @@
 
 namespace IMAG\LdapBundle\Provider;
 
-use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface,
-    Symfony\Component\Security\Core\User\UserProviderInterface,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
-    Symfony\Component\Security\Core\User\UserInterface,
-    Symfony\Component\Security\Core\Exception\AuthenticationException,
-    IMAG\LdapBundle\Manager\LdapManagerUserInterface,
-    IMAG\LdapBundle\Authentication\Token\LdapToken,
-    Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+
+use IMAG\LdapBundle\Authentication\Token\LdapToken;
+use IMAG\LdapBundle\Manager\LdapManagerUserInterface;
 
 class LdapAuthenticationProvider implements AuthenticationProviderInterface
 {
     private
         $userProvider,
         $ldapManager,
-        $providerKey;
- 
+        $providerKey,
+        $hideUserNotFoundExceptions;
+
     /**
      * Constructor
+     *
+     * Please note that $hideUserNotFoundExceptions is true by default in order
+     * to prevent a possible brute-force attack.
      *
      * @param UserProviderInterface    $userProvider
      * @param LdapManagerUserInterface $ldapManager
      * @param string                   $providerKey
+     * @param Boolean                  $hideUserNotFoundExceptions
      */
-    public function __construct(UserProviderInterface $userProvider, LdapManagerUserInterface $ldapManager, $providerKey)
+    public function __construct(
+        UserProviderInterface $userProvider,
+        LdapManagerUserInterface $ldapManager,
+        $providerKey,
+        $hideUserNotFoundExceptions = true
+    )
     {
         $this->userProvider = $userProvider;
         $this->ldapManager = $ldapManager;
@@ -45,20 +58,28 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             throw new AuthenticationException('Incorrect provider key');
         }
 
-        $user = $this->userProvider
-                     ->loadUserByUsername($token->getUsername());
-     
+        try {
+            $user = $this->userProvider
+                         ->loadUserByUsername($token->getUsername());
+        } catch (UsernameNotFoundException $userNotFoundException) {
+            if (!$this->hideUserNotFoundExceptions) {
+                throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
+            }
+
+            throw $userNotFoundException;
+        }
+
         if ($this->bind($user, $token)) {
             $ldapToken = new LdapToken($user, '', $user->getRoles());
             $ldapToken->setAuthenticated(true);
             $ldapToken->setAttributes($token->getAttributes());
-            
-            return $ldapToken;                
+
+            return $ldapToken;
         }
 
         throw new AuthenticationException('The LDAP authentication failed.');
     }
- 
+
     /**
      * Authenticate the user with LDAP bind.
      *
@@ -75,7 +96,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             ->setPassword($token->getCredentials())
             ->auth();
     }
-    
+
     /**
      * Check whether this provider supports the given token.
      *
