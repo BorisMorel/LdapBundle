@@ -70,7 +70,7 @@ class LdapConnection implements LdapConnectionInterface
 
         // Accoding to the LDAP RFC 4510-4511, the password can be blank.
 
-        return ldap_bind($this->_ress, $user_dn, $password);
+        return @ldap_bind($this->_ress, $user_dn, $password);
     }
 
     public function getParameters()
