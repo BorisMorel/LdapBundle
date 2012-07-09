@@ -8,11 +8,9 @@ use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapConnection implements LdapConnectionInterface
 {
-    private
-        $params = array(),
-        $_ress,
-        $logger
-        ;
+    private $params = array();
+    private $_ress;
+    private $logger;
 
     public function __construct(array $params, Logger $logger)
     {
@@ -32,11 +30,7 @@ class LdapConnection implements LdapConnectionInterface
             throw new \Exception(sprintf('You must defined %s', print_r($diff, true)));
         }
 
-        $attrs = array();
-
-        if (isset($params['attrs'])) {
-            $attrs = $params['attrs'];
-        }
+        $attrs = isset($params['attrs']) ? $params['attrs'] : array();
 
         $this->info(
             sprintf('ldap_search base_dn %s, filter %s',
@@ -54,22 +48,19 @@ class LdapConnection implements LdapConnectionInterface
         if ($search) {
             $entries = ldap_get_entries($this->_ress, $search);
 
-            if (is_array($entries)) {
-                return $entries;
-            } else {
-                return false;
-            }
+            return is_array($entries) ? $entries : false;
         }
+
+        return false;
     }
 
     public function bind($user_dn, $password='')
     {
-        if (empty($user_dn) && is_string($user_dn)) {
+        if (empty($user_dn) || ! is_string($user_dn)) {
             throw new ConnectionException('LDAP user\'s DN (user_dn) must be provided (as a string).');
         }
 
         // Accoding to the LDAP RFC 4510-4511, the password can be blank.
-
         return @ldap_bind($this->_ress, $user_dn, $password);
     }
 
@@ -125,19 +116,14 @@ class LdapConnection implements LdapConnectionInterface
         }
 
         if (isset($this->params['client']['username']) && $this->params['client']['version'] !== null) {
-            if(!isset($this->params['client']['password'])) {
+            if (!isset($this->params['client']['password'])) {
                 throw new \Exception('You must uncomment password key');
             }
+
             $bindress = @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
 
             if (!$bindress) {
                 throw new \Exception('The credentials you have configured are not valid');
-            }
-        } else {
-            $bindress = @ldap_bind($ress);
-
-            if (!$bindress) {
-                throw new \Exception('Unable to connect Ldap');
             }
         }
 
@@ -148,22 +134,18 @@ class LdapConnection implements LdapConnectionInterface
 
     private function info($message)
     {
-        if (!$this->logger) {
-            return;
+        if ($this->logger) {
+            $this->logger
+                 ->info($message);
         }
-
-        $this->logger
-            ->info($message);
     }
 
     private function err($message)
     {
-        if (!$this->logger) {
-            return;
+        if ($this->logger) {
+            $this->logger
+                 ->err($message);
         }
-
-        $this->logger
-            ->err($message);
     }
 
     /**
@@ -179,10 +161,13 @@ class LdapConnection implements LdapConnectionInterface
         $metaChars = array('*', '(', ')', '\\', chr(0));
 
         $quotedMetaChars = array();
+
         foreach ($metaChars as $key => $value) {
             $quotedMetaChars[$key] = '\\'.str_pad(dechex(ord($value)), 2, '0');
         }
+
         $str = str_replace($metaChars, $quotedMetaChars, $str);
+
         return ($str);
     }
 }
