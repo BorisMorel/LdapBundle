@@ -20,6 +20,7 @@ security:
     - { path: ^/login,          roles: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/,               roles: IS_AUTHENTICATED_FULLY }
 
+  # This configuration is obsolete in Symfony 2.1
   factories:
     - "%kernel.root_dir%/../src/IMAG/LdapBundle/Resources/config/security_factories.xml"
 

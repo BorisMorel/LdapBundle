@@ -4,13 +4,13 @@ namespace IMAG\LdapBundle\Manager;
 
 use Monolog\Logger;
 
+use IMAG\LdapBundle\Exception\ConnectionException;
+
 class LdapConnection implements LdapConnectionInterface
 {
-    private 
-        $params = array(), 
-        $_ress,
-        $logger
-        ;
+    private $params = array();
+    private $_ress;
+    private $logger;
 
     public function __construct(array $params, Logger $logger)
     {
@@ -30,43 +30,38 @@ class LdapConnection implements LdapConnectionInterface
             throw new \Exception(sprintf('You must defined %s', print_r($diff, true)));
         }
 
-        $attrs = array();
-        
-        if (isset($params['attrs'])) {
-            $attrs = $params['attrs'];
-        }
-        
+        $attrs = isset($params['attrs']) ? $params['attrs'] : array();
+
         $this->info(
             sprintf('ldap_search base_dn %s, filter %s',
-                    print_r($params['base_dn'], true),
-                    print_r($params['filter'], true)
+                print_r($params['base_dn'], true),
+                print_r($params['filter'], true)
             ));
-        
-        $search = ldap_search($this->_ress, $params['base_dn'], $params['filter'], $attrs);
+
+        $search = @ldap_search(
+            $this->_ress,
+            $params['base_dn'],
+            $params['filter'],
+            $attrs
+        );
 
         if ($search) {
             $entries = ldap_get_entries($this->_ress, $search);
-            
-            if (is_array($entries)) {
-                return $entries;
-            } else {
-                return false;
-            }
-        } 
+
+            return is_array($entries) ? $entries : false;
+        }
+
+        return false;
     }
 
-    public function bind($user_dn, $password)
+    public function bind($user_dn, $password='')
     {
-        if (!$user_dn) {
-            throw new \Exception('You must bind with an ldap user_dn');
+        if (empty($user_dn) || ! is_string($user_dn)) {
+            throw new ConnectionException('LDAP user\'s DN (user_dn) must be provided (as a string).');
         }
 
-        if (!$password) {
-            throw new \Exception('Password can not be null to bind');
-        }
-
-        return (bool) 
-            @ldap_bind($this->_ress, $user_dn, $password);
+        // Accoding to the LDAP RFC 4510-4511, the password can be blank.
+        return @ldap_bind($this->_ress, $user_dn, $password);
     }
 
     public function getParameters()
@@ -106,8 +101,8 @@ class LdapConnection implements LdapConnectionInterface
 
     private function connect()
     {
-        $port = isset($this->params['client']['port']) 
-            ? $this->params['client']['port'] 
+        $port = isset($this->params['client']['port'])
+            ? $this->params['client']['port']
             : '389';
 
         $ress = @ldap_connect($this->params['client']['host'], $port);
@@ -115,51 +110,42 @@ class LdapConnection implements LdapConnectionInterface
         if (isset($this->params['client']['version']) && $this->params['client']['version'] !== null) {
             ldap_set_option($ress, LDAP_OPT_PROTOCOL_VERSION, $this->params['client']['version']);
         }
-        
+
         if (isset($this->params['client']['referrals_enabled']) && $this->params['client']['referrals_enabled'] !== null) {
             ldap_set_option($ress, LDAP_OPT_REFERRALS, $this->params['client']['referrals_enabled']);
         }
 
         if (isset($this->params['client']['username']) && $this->params['client']['version'] !== null) {
-            if(!isset($this->params['client']['password'])) {
+            if (!isset($this->params['client']['password'])) {
                 throw new \Exception('You must uncomment password key');
             }
+
             $bindress = @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
-        
+
             if (!$bindress) {
                 throw new \Exception('The credentials you have configured are not valid');
             }
-        } else {
-            $bindress = @ldap_bind($ress);
-        
-            if (!$bindress) {
-                throw new \Exception('Unable to connect Ldap');
-            }
-        }
-    
-        $this->_ress = $ress;
-    
-        return $this;
-    }
- 
-    private function info($message)
-    {
-        if (!$this->logger) {
-            return;
         }
 
-        $this->logger
-            ->info($message);
+        $this->_ress = $ress;
+
+        return $this;
+    }
+
+    private function info($message)
+    {
+        if ($this->logger) {
+            $this->logger
+                 ->info($message);
+        }
     }
 
     private function err($message)
     {
-        if (!$this->logger) {
-            return;
+        if ($this->logger) {
+            $this->logger
+                 ->err($message);
         }
-
-        $this->logger
-            ->err($message);
     }
 
     /**
@@ -175,10 +161,13 @@ class LdapConnection implements LdapConnectionInterface
         $metaChars = array('*', '(', ')', '\\', chr(0));
 
         $quotedMetaChars = array();
+
         foreach ($metaChars as $key => $value) {
             $quotedMetaChars[$key] = '\\'.str_pad(dechex(ord($value)), 2, '0');
         }
+
         $str = str_replace($metaChars, $quotedMetaChars, $str);
+
         return ($str);
     }
 }
