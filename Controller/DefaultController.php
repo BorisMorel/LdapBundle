@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of the Symfony framework.
  *
@@ -11,31 +10,37 @@
 
 namespace IMAG\LdapBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller,
-  Symfony\Component\Security\Core\SecurityContext;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+
+use Symfony\Component\Security\Core\SecurityContext;
 
 class DefaultController extends Controller
 {
-  public function loginAction()
-  {
-    if ($this->get('request')->attributes->has(SecurityContext::AUTHENTICATION_ERROR)) {
-      $error = $this->get('request')->attributes->get(SecurityContext::AUTHENTICATION_ERROR);
-    }else {
-      $error = $this->get('request')->getSession()->get(SecurityContext::AUTHENTICATION_ERROR);
+    public function loginAction()
+    {
+        $error = $this->getAuthenticationError();
+
+        return $this->render('IMAGLdapBundle:Default:login.html.twig', array(
+            'last_username' => $this->get('request')->getSession()->get(SecurityContext::LAST_USERNAME),
+            'error'         => $error,
+            'token'         => $this->generateToken(),
+        ));
     }
-        
-    return $this->render('IMAGLdapBundle:Default:login.html.twig', array(
-      'last_username' => $this->get('request')->getSession()->get(SecurityContext::LAST_USERNAME),
-      'error'         => $error,
-      'token'         => $this->generateToken(),
-    ));
-  }
 
-  private function generateToken()
-  {
-    $token = $this->get('form.csrf_provider')
-      ->generateCsrfToken('ldap_authenticate');
+    private function getAuthenticationError()
+    {
+        if ($this->get('request')->attributes->has(SecurityContext::AUTHENTICATION_ERROR)) {
+            return $this->get('request')->attributes->get(SecurityContext::AUTHENTICATION_ERROR);
+        }
 
-    return $token;
-  }
+        return $this->get('request')->getSession()->get(SecurityContext::AUTHENTICATION_ERROR);
+    }
+
+    private function generateToken()
+    {
+        $token = $this->get('form.csrf_provider')
+                      ->generateCsrfToken('ldap_authenticate');
+
+        return $token;
+    }
 }
