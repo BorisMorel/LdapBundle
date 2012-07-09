@@ -4,6 +4,8 @@ namespace IMAG\LdapBundle\Manager;
 
 use Monolog\Logger;
 
+use IMAG\LdapBundle\Exception\ConnectionException;
+
 class LdapConnection implements LdapConnectionInterface
 {
     private
@@ -60,18 +62,15 @@ class LdapConnection implements LdapConnectionInterface
         }
     }
 
-    public function bind($user_dn, $password)
+    public function bind($user_dn, $password='')
     {
-        if (!$user_dn) {
-            throw new \Exception('You must bind with an ldap user_dn');
+        if (empty($user_dn) && is_string($user_dn)) {
+            throw new ConnectionException('LDAP user\'s DN (user_dn) must be provided (as a string).');
         }
 
-        if (!$password) {
-            throw new \Exception('Password can not be null to bind');
-        }
+        // Accoding to the LDAP RFC 4510-4511, the password can be blank.
 
-        return (bool)
-            @ldap_bind($this->_ress, $user_dn, $password);
+        return ldap_bind($this->_ress, $user_dn, $password);
     }
 
     public function getParameters()
