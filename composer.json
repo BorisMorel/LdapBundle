@@ -1,5 +1,5 @@
 {
-    "name": "imag/ldapbundle",
+    "name": "imag/ldap-bundle",
     "description": "LDAP Bundle for Symfony 2",
     "homepage": "http://github.com/BorisMorel/LdapBundle",
     "version": "1.2",
