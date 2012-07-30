@@ -2,9 +2,11 @@
 
 namespace IMAG\LdapBundle\Manager;
 
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+
 class LdapManagerUser implements LdapManagerUserInterface
 {
-    private 
+    private
         $ldapConnection,
         $username,
         $password,
@@ -33,7 +35,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             ->bind()
             ;
     }
-    
+
     public function doPass()
     {
         $this
@@ -99,14 +101,14 @@ class LdapManagerUser implements LdapManagerUserInterface
             throw new \Exception('User is not defined, pls use setUsername');
         }
 
-        $filter = isset($this->params['user']['filter']) 
-            ? $this->params['user']['filter'] 
+        $filter = isset($this->params['user']['filter'])
+            ? $this->params['user']['filter']
             : '';
 
         $entries = $this->ldapConnection
             ->search(array(
                 'base_dn' => $this->params['user']['base_dn'],
-                'filter' => sprintf('(&%s(%s=%s))', 
+                'filter' => sprintf('(&%s(%s=%s))',
                                     $filter,
                                     $this->params['user']['name_attribute'],
                                     $this->ldapConnection->escape($this->username)
@@ -134,14 +136,14 @@ class LdapManagerUser implements LdapManagerUserInterface
 
         $tab = array();
 
-        $filter = isset($this->params['role']['filter']) 
+        $filter = isset($this->params['role']['filter'])
             ? $this->params['role']['filter']
             : '';
 
         $entries = $this->ldapConnection
             ->search(array(
                 'base_dn'  => $this->params['role']['base_dn'],
-                'filter'   => sprintf('(&%s(%s=%s))', 
+                'filter'   => sprintf('(&%s(%s=%s))',
                                       $filter,
                                       $this->params['role']['user_attribute'],
                                       $this->ldapConnection->escape($this->getUserId())
@@ -156,7 +158,7 @@ class LdapManagerUser implements LdapManagerUserInterface
                                      self::slugify($entries[$i][$this->params['role']['name_attribute']][0])
             ));
         }
-        
+
         $this->_ldapUser['roles'] = $tab;
 
         return $this;
@@ -164,12 +166,8 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     private function bind()
     {
-        if (!$this->password) {
-            throw new \Exception('Password is not defined, pls use setPassword');
-        }
-
-        return (bool) $this->ldapConnection
-            ->bind($this->_ldapUser['dn'], $this->password);
+        return $this->ldapConnection
+                    ->bind($this->_ldapUser['dn'], $this->password);
     }
 
     private static function slugify($role)
@@ -187,11 +185,11 @@ class LdapManagerUser implements LdapManagerUserInterface
         case 'dn':
             return $this->_ldapUser['dn'];
             break;
-            
+
         case 'username':
             return $this->username;
             break;
-            
+
         default:
             throw new \Exception(sprintf('The value can\'t be retrieve for this user_id : %s',$this->params['role']['user_id']));
         }

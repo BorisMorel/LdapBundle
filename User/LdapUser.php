@@ -3,15 +3,15 @@
 namespace IMAG\LdapBundle\User;
 
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\EquatableInterface;
 
-class LdapUser implements UserInterface, \Serializable
+class LdapUser implements UserInterface, EquatableInterface, \Serializable
 {
-    protected 
-        $username,
-        $email,
-        $roles,
-        $dn,
-        $attributes;
+    protected $username;
+    protected $email;
+    protected $roles;
+    protected $dn;
+    protected $attributes;
 
     public function getRoles()
     {
@@ -20,7 +20,6 @@ class LdapUser implements UserInterface, \Serializable
 
     public function getUserName()
     {
-
         return $this->username;
     }
 
@@ -54,14 +53,18 @@ class LdapUser implements UserInterface, \Serializable
     public function setAttributes(array $attributes)
     {
         $this->attributes = $attributes;
+
+        return $this;
+    }
+
+    public function getAttributes()
+    {
+        return $this->attributes;
     }
 
     public function getAttribute($name)
     {
-        if (isset($this->attributes[$name])) {
-            return $this->attributes[$name];
-        }
-        return null;
+        return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
     }
 
     public function setUsername($username)
@@ -90,25 +93,17 @@ class LdapUser implements UserInterface, \Serializable
         return null; //With ldap No credentials with stored ; Maybe forgotten the roles
     }
 
-    public function equals(UserInterface $user)
+    public function isEqualTo(UserInterface $user)
     {
-        if (!$user instanceOf LdapUser) {
+        if (!$user instanceof LdapUser
+            || $user->getUsername() !== $this->username
+            || $user->getEmail() !== $this->email
+            || count(array_diff($user->getRoles(), $this->roles)) > 0
+            || $user->getDn() !== $this->dn
+        ) {
             return false;
         }
 
-        if ($user->getUsername() !== $this->username) {
-            return false;
-        }
-        if ($user->getEmail() !== $this->email) {
-            return false;
-        }
-        if (count( array_diff( $user->getRoles(), $this->roles) ) > 0 ) {
-            return false;
-        }
-        if ($user->getDn() !== $this->dn) {
-            return false;
-        }
-      
         return true;
     }
 
