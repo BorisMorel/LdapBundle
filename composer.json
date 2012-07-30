@@ -3,6 +3,16 @@
     "description": "LDAP Bundle for Symfony 2",
     "homepage": "http://github.com/BorisMorel/LdapBundle",
     "version": "1.2",
+    "authors": [
+        {
+            "name": "Boris Morel",
+            "email": "boris.morel@imag.fr"
+        },
+    ],
+    "require": {
+        "php": ">=5.3.3"
+        "symfony/symfony": ">2.0"
+    },
     "source": {
         "url": "https://github.com/BorisMorel/LdapBundle.git",
         "type": "git",
