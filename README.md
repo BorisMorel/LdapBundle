@@ -18,35 +18,19 @@ You can try to contact me on freenode irc ; channel #symfony-fr ; pseudo : aways
 
 ### Get the Bundle
 
-#### Method a) Using the `deps` file
-
-Add the following lines to your  `deps` file and then run `php bin/vendors
-install`:
-
-```
-[LdapBundle]
-    git=https://github.com/BorisMorel/LdapBundle.git
-    target=bundles/IMAG/LdapBundle
-```
-
-#### Method b) Using submodules
-
-Run the following commands to bring in the needed libraries as submodules.
-
-``` bash
-$ git clone git://github.com/BorisMorel/LdapBundle.git vendor/bundles/IMAG/LdapBundle
-```
-
-### Configure the Autoloader
+### Composer
+Modify your composer.json on your project root
 
 ``` php
-<?php
-// app/autoload.php
+// {root}/composer.json
 
-$loader->registerNamespaces(array(
-     // ...
-    'IMAG' => __DIR__.'/../vendor/bundles',
-));
+{
+    [...],
+    "require": {
+        [...],
+        "imag/ldapbundle": "dev-master"
+    }
+}
 ```
 
 ### Enable the Bundle
@@ -93,10 +77,6 @@ security:
   access_control:
     - { path: ^/login,          roles: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/,               roles: IS_AUTHENTICATED_FULLY }
-
-  # obsolete in SF 2.1
-  factories:
-    - "%kernel.root_dir%/../vendor/bundles/IMAG/LdapBundle/Resources/config/security_factories.xml"
 
 imag_ldap:
   client:
