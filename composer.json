@@ -7,10 +7,10 @@
         {
             "name": "Boris Morel",
             "email": "boris.morel@imag.fr"
-        },
+        }
     ],
     "require": {
-        "php": ">=5.3.3"
+        "php": ">=5.3.3",
         "symfony/symfony": ">2.0"
     },
     "source": {
