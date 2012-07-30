@@ -43,7 +43,8 @@ class LdapListener extends AbstractAuthenticationListener
             $logger,
             $dispatcher
         );
-
+        
+        $this->providerKey = $providerKey;
         $this->csrfProvider = $csrfProvider;
     }
 
@@ -70,7 +71,7 @@ class LdapListener extends AbstractAuthenticationListener
 
         $request->getSession()->set(SecurityContextInterface::LAST_USERNAME, $username);
 
-        return $this->authenticationManager->authenticate(new LdapToken($username, $password));
+        return $this->authenticationManager->authenticate(new LdapToken($username, $password, $this->providerKey));
     }
 
 
