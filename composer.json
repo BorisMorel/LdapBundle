@@ -2,7 +2,7 @@
     "name": "imag/ldap-bundle",
     "description": "LDAP Bundle for Symfony 2",
     "homepage": "http://github.com/BorisMorel/LdapBundle",
-    "version": "1.3",
+    "version": "2.1.0",
     "authors": [
         {
             "name": "Boris Morel",
