@@ -28,7 +28,7 @@ Modify your composer.json on your project root
     [...],
     "require": {
         [...],
-        "imag/ldapbundle": "dev-master"
+        "imag/ldap-bundle": "dev-master"
     }
 }
 ```
