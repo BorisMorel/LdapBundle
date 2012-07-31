@@ -7,8 +7,8 @@
         {
             "name": "Boris Morel",
             "email": "boris.morel@imag.fr",
-            "homepage" : "https://github.com/BorisMorel",
-            "role": "Author"
+            "role": "Developer",
+            "homepage" : "https://github.com/BorisMorel"
         },
         {
             "name": "Juti Noppornpitak",
@@ -19,7 +19,7 @@
         {
             "name": "Shiroyuki",
             "role": "Fork Maintainer",
-            "homepage": "git://github.com/shiroyuki/LdapBundle.git"
+            "homepage": "https://github.com/shiroyuki"
         }
     ],
     "require": {
