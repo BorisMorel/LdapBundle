@@ -2,11 +2,24 @@
     "name": "imag/ldap-bundle",
     "description": "LDAP Bundle for Symfony 2",
     "homepage": "http://github.com/BorisMorel/LdapBundle",
-    "version": "1.2",
+    "version": "1.3",
     "authors": [
         {
             "name": "Boris Morel",
-            "email": "boris.morel@imag.fr"
+            "email": "boris.morel@imag.fr",
+            "homepage" : "https://github.com/BorisMorel",
+            "role": "Author"
+        },
+        {
+            "name": "Juti Noppornpitak",
+            "email": "jutin@nationalfibre.net",
+            "role": "Fork Maintainer",
+            "homepage": "https://github.com/instaclick"
+        },
+        {
+            "name": "Shiroyuki",
+            "role": "Fork Maintainer",
+            "homepage": "git://github.com/shiroyuki/LdapBundle.git"
         }
     ],
     "require": {
