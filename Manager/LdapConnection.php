@@ -48,6 +48,8 @@ class LdapConnection implements LdapConnectionInterface
         if ($search) {
             $entries = ldap_get_entries($this->_ress, $search);
 
+            @ldap_free_result($this->_ress);
+
             return is_array($entries) ? $entries : false;
         }
 
@@ -107,15 +109,19 @@ class LdapConnection implements LdapConnectionInterface
 
         $ress = @ldap_connect($this->params['client']['host'], $port);
 
-        if (isset($this->params['client']['version']) && $this->params['client']['version'] !== null) {
+        if (isset($this->params['client']['version'])) {
             ldap_set_option($ress, LDAP_OPT_PROTOCOL_VERSION, $this->params['client']['version']);
         }
 
-        if (isset($this->params['client']['referrals_enabled']) && $this->params['client']['referrals_enabled'] !== null) {
+        if (isset($this->params['client']['referrals_enabled'])) {
             ldap_set_option($ress, LDAP_OPT_REFERRALS, $this->params['client']['referrals_enabled']);
         }
 
-        if (isset($this->params['client']['username']) && $this->params['client']['version'] !== null) {
+        if (isset($this->params['client']['network_timeout'])) {
+            ldap_set_option($ress, LDAP_OPT_NETWORK_TIMEOUT, $this->params['client']['network_timeout']);
+        }
+
+        if (isset($this->params['client']['username'])) {
             if (!isset($this->params['client']['password'])) {
                 throw new \Exception('You must uncomment password key');
             }

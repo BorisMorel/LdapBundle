@@ -21,6 +21,7 @@ class Configuration implements ConfigurationInterface
               ->scalarNode('username')->end()
               ->scalarNode('password')->end()
               ->scalarNode('referrals_enabled')->end()
+              ->scalarNode('network_timeout')->end()
             ->end()
           ->end()
           ->arrayNode('user')
