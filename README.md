@@ -147,7 +147,7 @@ http://symfony.com/doc/2.0/book/security.html#logging-out
 ### Subscribe to PRE_BIND event
 
 Now you can perform you own logic before the user is authenticated on Ldap.
-If you want break the authentication just return a Exception.
+If you want to break the authentication just return an Exception.
 
 To subscribe:
 ``` xml
