@@ -157,6 +157,8 @@ To subscribe:
 Exemple:
 ``` php
 <?php
+use IMAG\LdapBundle\Event\LdapUserEvent,
+
 public function onPreBind(LdapUserEvent $event)
 {
     $user = $event->getUser();
