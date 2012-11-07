@@ -52,7 +52,7 @@ class LdapFactory extends AbstractFactory
     $container
       ->setDefinition($provider, new DefinitionDecorator('imag_ldap.security.authentication.provider'))
       ->replaceArgument(0, new Reference($userProviderId))
-      ->replaceArgument(2, $id)
+      ->replaceArgument(3, $id)
       ;
 
     return $provider;

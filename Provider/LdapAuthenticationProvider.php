@@ -10,17 +10,22 @@ use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 use IMAG\LdapBundle\Authentication\Token\LdapToken;
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface;
+use IMAG\LdapBundle\Event\LdapUserEvent;
+use IMAG\LdapBundle\Event\LdapEvents;
 
 class LdapAuthenticationProvider implements AuthenticationProviderInterface
 {
     private
         $userProvider,
         $ldapManager,
+        $dispatcher,
         $providerKey,
-        $hideUserNotFoundExceptions;
+        $hideUserNotFoundExceptions
+        ;
 
     /**
      * Constructor
@@ -36,13 +41,16 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
     public function __construct(
         UserProviderInterface $userProvider,
         LdapManagerUserInterface $ldapManager,
+        EventDispatcherInterface $dispatcher = null,
         $providerKey,
         $hideUserNotFoundExceptions = true
     )
     {
         $this->userProvider = $userProvider;
         $this->ldapManager = $ldapManager;
+        $this->dispatcher = $dispatcher;
         $this->providerKey = $providerKey;
+        $this->hideUserNotFoundExceptions = $hideUserNotFoundExceptions;
     }
 
     /**
@@ -60,13 +68,26 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
 
         try {
             $user = $this->userProvider
-                         ->loadUserByUsername($token->getUsername());
+                ->loadUserByUsername($token->getUsername());
         } catch (UsernameNotFoundException $userNotFoundException) {
             if (!$this->hideUserNotFoundExceptions) {
                 throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
             }
 
             throw $userNotFoundException;
+        }
+
+        if (null !== $this->dispatcher) {
+            $userEvent = new LdapUserEvent($user);
+            try {
+                $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
+            } catch(\Exception $expt) {
+                if (!$this->hideUserNotFoundExceptions) {
+                    throw new BadCredentialsException('Bad credentials', 0, $expt);
+                }
+
+                throw $expt;
+            }
         }
 
         if ($this->bind($user, $token)) {

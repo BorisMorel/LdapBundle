@@ -3,63 +3,65 @@
 <container xmlns="http://symfony.com/schema/dic/services"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
-    <parameters>
-        <parameter key="imag_ldap.security.user.provider.class">IMAG\LdapBundle\Provider\LdapUserProvider</parameter>
-        <parameter key="imag_ldap.ldap_connection.class">IMAG\LdapBundle\Manager\LdapConnection</parameter>
-        <parameter key="imag_ldap.ldap_manager.class">IMAG\LdapBundle\Manager\LdapManagerUser</parameter>
-        <parameter key="imag_ldap.ldap_connection.params" />
-        <parameter key="imag_ldap.security.authentication.provider.class">IMAG\LdapBundle\Provider\LdapAuthenticationProvider</parameter>
-        <parameter key="imag_ldap.security.authentication.listener.class">IMAG\LdapBundle\EventListener\LdapListener</parameter>
-        <parameter key="imag_ldap.security.authentication.form_entry_point.class">Symfony\Component\Security\Http\EntryPoint\FormAuthenticationEntryPoint</parameter>
-    </parameters>
+  <parameters>
+    <parameter key="imag_ldap.security.user.provider.class">IMAG\LdapBundle\Provider\LdapUserProvider</parameter>
+    <parameter key="imag_ldap.ldap_connection.class">IMAG\LdapBundle\Manager\LdapConnection</parameter>
+    <parameter key="imag_ldap.ldap_manager.class">IMAG\LdapBundle\Manager\LdapManagerUser</parameter>
+    <parameter key="imag_ldap.ldap_connection.params" />
+    <parameter key="imag_ldap.security.authentication.provider.class">IMAG\LdapBundle\Provider\LdapAuthenticationProvider</parameter>
+    <parameter key="imag_ldap.security.authentication.listener.class">IMAG\LdapBundle\EventListener\LdapListener</parameter>
+    <parameter key="imag_ldap.security.authentication.form_entry_point.class">Symfony\Component\Security\Http\EntryPoint\FormAuthenticationEntryPoint</parameter>
+  </parameters>
 
-    <services>
+  <services>
 
-        <service id="imag_ldap.security.authentication.form_entry_point"
-                         class="%imag_ldap.security.authentication.form_entry_point.class%"
-                         public="false" abstract="true">
-            <argument type="service" id="http_kernel" />
-            <argument type="service" id="security.http_utils" />
-        </service>
+    <service id="imag_ldap.security.authentication.form_entry_point"
+             class="%imag_ldap.security.authentication.form_entry_point.class%"
+             public="false" abstract="true">
+      <argument type="service" id="http_kernel" />
+      <argument type="service" id="security.http_utils" />
+    </service>
 
-        <service id="imag_ldap.security.user.provider" class="%imag_ldap.security.user.provider.class%">
-            <argument type="service" id="imag_ldap.ldap_manager" />
-        </service>
+    <service id="imag_ldap.security.user.provider" class="%imag_ldap.security.user.provider.class%">
+      <argument type="service" id="imag_ldap.ldap_manager" />
+    </service>
 
-        <service id="imag_ldap.ldap_connection" class="%imag_ldap.ldap_connection.class%" public="false">
-            <argument>%imag_ldap.ldap_connection.params%</argument>
-            <tag name="monolog.logger" channel="ldap_connection" />
-            <argument type="service" id="logger" />
-        </service>
+    <service id="imag_ldap.ldap_connection" class="%imag_ldap.ldap_connection.class%" public="false">
+      <argument>%imag_ldap.ldap_connection.params%</argument>
+      <tag name="monolog.logger" channel="ldap_connection" />
+      <argument type="service" id="logger" />
+    </service>
 
-        <service id="imag_ldap.ldap_manager" class="%imag_ldap.ldap_manager.class%">
-            <argument type="service" id="imag_ldap.ldap_connection" />
-        </service>
+    <service id="imag_ldap.ldap_manager" class="%imag_ldap.ldap_manager.class%">
+      <argument type="service" id="imag_ldap.ldap_connection" />
+    </service>
 
-        <service id="imag_ldap.security.authentication.provider"
-                         class="%imag_ldap.security.authentication.provider.class%">
-            <argument type="service" id="imag_ldap.security.user.provider" />
-            <argument type="service" id="imag_ldap.ldap_manager" />
-            <argument /> <!-- Provider-key -->
-        </service>
+    <service id="imag_ldap.security.authentication.provider"
+             class="%imag_ldap.security.authentication.provider.class%">
+      <argument type="service" id="imag_ldap.security.user.provider" />
+      <argument type="service" id="imag_ldap.ldap_manager" />
+      <argument type="service" id="event_dispatcher" on-invalid="null" />
+      <argument /> <!-- Provider-key -->
+      <argument /> <!-- hide exception -->
+    </service>
 
-        <service id="imag_ldap.security.authentication.listener"
-                         class="%imag_ldap.security.authentication.listener.class%" public="false">
-            <tag name="monolog.logger" channel="security" />
-            <argument type="service" id="security.context" />
-            <argument type="service" id="security.authentication.manager" />
-            <argument type="service" id="security.authentication.session_strategy" />
-            <argument type="service" id="security.http_utils" />
-            <argument />
-            <argument type="collection"></argument>
-            <argument type="service" id="ldap.authentication.success_handler" on-invalid="null" />
-            <argument type="service" id="ldap.authentication.failure_handler" on-invalid="null" />
-            <argument type="service" id="logger" on-invalid="null" />
-            <argument type="service" id="event_dispatcher" on-invalid="null" />
-            <argument type="service" id="form.csrf_provider" />
-        </service>
+    <service id="imag_ldap.security.authentication.listener"
+             class="%imag_ldap.security.authentication.listener.class%" public="false">
+      <tag name="monolog.logger" channel="security" />
+      <argument type="service" id="security.context" />
+      <argument type="service" id="security.authentication.manager" />
+      <argument type="service" id="security.authentication.session_strategy" />
+      <argument type="service" id="security.http_utils" />
+      <argument />
+      <argument type="collection"></argument>
+      <argument type="service" id="ldap.authentication.success_handler" on-invalid="null" />
+      <argument type="service" id="ldap.authentication.failure_handler" on-invalid="null" />
+      <argument type="service" id="logger" on-invalid="null" />
+      <argument type="service" id="event_dispatcher" on-invalid="null" />
+      <argument type="service" id="form.csrf_provider" />
+    </service>
 
-        <service id="ldap.authentication.success_handler" parent="security.authentication.success_handler"/>
-        <service id="ldap.authentication.failure_handler" parent="security.authentication.failure_handler"/>
-    </services>
+    <service id="ldap.authentication.success_handler" parent="security.authentication.success_handler"/>
+    <service id="ldap.authentication.failure_handler" parent="security.authentication.failure_handler"/>
+  </services>
 </container>
