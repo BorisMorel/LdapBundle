@@ -15,6 +15,7 @@ You can try to contact me on freenode irc ; channel #symfony-fr ; pseudo : aways
 6. Import LdapBundle security.yml
 7. Import LdapBundle routing
 8. Implement Logout
+9. Subscribe to PRE_BIND event
 
 ### Get the Bundle
 
@@ -142,3 +143,31 @@ Just create a link with logout target.
 **Note:**
 You can refer to the official Symfony documentation :
 http://symfony.com/doc/2.0/book/security.html#logging-out
+
+### Subscribe to PRE_BIND event
+
+Now you can perform you own logic before the user is authenticated on Ldap.
+If you want break the authentication just return a Exception.
+
+To subscribe:
+``` xml
+<tag name="kernel.event_listener" event="imag_ldap.security.authentication.pre_bind" method="onPreBind" />
+```
+
+Exemple:
+``` php
+<?php
+public function onPreBind(LdapUserEvent $event)
+{
+    $user = $event->getUser();
+    $config = $this->appContext->getConfig();
+
+    $ldapConf = $config['ldap'];
+
+    if (!in_array($user->getUsername(), $ldapConf['allowed'])) {
+        throw new \Exception('Not allowed ldap user');
+    }
+
+    $user->addRole('ROLE_LDAP');
+}
+```
