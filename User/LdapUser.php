@@ -88,6 +88,13 @@ class LdapUser implements UserInterface, EquatableInterface, \Serializable
         return $this;
     }
 
+    public function addRole($role)
+    {
+        $this->roles[] = $role;
+
+        return $this;
+    }
+
     public function eraseCredentials()
     {
         return null; //With ldap No credentials with stored ; Maybe forgotten the roles
