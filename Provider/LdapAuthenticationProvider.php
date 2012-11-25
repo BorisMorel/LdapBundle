@@ -67,35 +67,42 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             $user = $this->userProvider
                 ->loadUserByUsername($token->getUsername());
         } catch (UsernameNotFoundException $userNotFoundException) {
-            if (!$this->hideUserNotFoundExceptions) {
+            if ($this->hideUserNotFoundExceptions) {
                 throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
             }
 
             throw $userNotFoundException;
         }
 
-        if (null !== $this->dispatcher && $user instanceof LdapUser) {
-            $userEvent = new LdapUserEvent($user);
-            try {
-                $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
-            } catch(\Exception $expt) {
-                if (!$this->hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException('Bad credentials', 0, $expt);
-                }
-
-                throw $expt;
-            }
-        }
+        $this->dispatch(LdapEvents::PRE_BIND, $userEvent);
 
         if ($this->bind($user, $token)) {
             $ldapToken = new LdapToken($user, '', $this->providerKey, $user->getRoles());
             $ldapToken->setAuthenticated(true);
             $ldapToken->setAttributes($token->getAttributes());
 
+            $this->dispatch(LdapEvents::POST_BIND, $userEvent);
+
             return $ldapToken;
         }
 
         throw new AuthenticationException('The LDAP authentication failed.');
+    }
+
+    private function dispatch(LdapEvents $event, LdapUser $user)
+    {
+        if (null !== $this->dispatcher) {
+            $userEvent = new LdapUserEvent($user);
+            try {
+                $this->dispatcher->dispatch($event, $userEvent);
+            } catch(\Exception $expt) {
+                if ($this->hideUserNotFoundExceptions) {
+                    throw new BadCredentialsException('Bad credentials', 0, $expt);
+                }
+
+                throw $expt;
+            }
+        }
     }
 
     /**
