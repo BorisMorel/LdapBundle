@@ -73,15 +73,15 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
 
             throw $userNotFoundException;
         }
-
-        $this->dispatch(LdapEvents::PRE_BIND, $userEvent);
+        
+        $this->dispatch(LdapEvents::PRE_BIND, $user);
 
         if ($this->bind($user, $token)) {
             $ldapToken = new LdapToken($user, '', $this->providerKey, $user->getRoles());
             $ldapToken->setAuthenticated(true);
             $ldapToken->setAttributes($token->getAttributes());
 
-            $this->dispatch(LdapEvents::POST_BIND, $userEvent);
+            $this->dispatch(LdapEvents::POST_BIND, $user);
 
             return $ldapToken;
         }
@@ -89,7 +89,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         throw new AuthenticationException('The LDAP authentication failed.');
     }
 
-    private function dispatch(LdapEvents $event, LdapUser $user)
+    private function dispatch($event, LdapUser $user)
     {
         if (null !== $this->dispatcher) {
             $userEvent = new LdapUserEvent($user);
