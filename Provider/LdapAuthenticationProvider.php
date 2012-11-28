@@ -62,10 +62,6 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             throw new AuthenticationException('Unsupported token');
         }
 
-        if ($token->getProviderKey() !== $this->providerKey) {
-            throw new AuthenticationException('Incorrect provider key');
-        }
-
         try {
             $user = $this->userProvider
                 ->loadUserByUsername($token->getUsername());
@@ -127,8 +123,9 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      */
     public function supports(TokenInterface $token)
     {
-        return $token instanceof LdapToken
-            || $token instanceof UsernamePasswordToken;
+        return ( $token instanceof LdapToken
+                 || $token instanceof UsernamePasswordToken ) 
+            && $token->getProviderKey() === $this->providerKey;
     }
 
 }
