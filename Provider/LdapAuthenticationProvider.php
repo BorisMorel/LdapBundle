@@ -16,6 +16,7 @@ use IMAG\LdapBundle\Authentication\Token\LdapToken;
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface;
 use IMAG\LdapBundle\Event\LdapUserEvent;
 use IMAG\LdapBundle\Event\LdapEvents;
+use IMAG\LdapBundle\User\LdapUser;
 
 class LdapAuthenticationProvider implements AuthenticationProviderInterface
 {
@@ -24,7 +25,8 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         $ldapManager,
         $dispatcher,
         $providerKey,
-        $hideUserNotFoundExceptions
+        $hideUserNotFoundExceptions,
+        $anonSearchAllowed
         ;
 
     /**
@@ -43,7 +45,8 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         LdapManagerUserInterface $ldapManager,
         EventDispatcherInterface $dispatcher = null,
         $providerKey,
-        $hideUserNotFoundExceptions = true
+        $hideUserNotFoundExceptions = true,
+        $anonSearchAllowed = true
     )
     {
         $this->userProvider = $userProvider;
@@ -51,6 +54,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         $this->dispatcher = $dispatcher;
         $this->providerKey = $providerKey;
         $this->hideUserNotFoundExceptions = $hideUserNotFoundExceptions;
+        $this->anonSearchAllowed = $anonSearchAllowed;
     }
 
     /**
@@ -66,15 +70,19 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             throw new AuthenticationException('Incorrect provider key');
         }
 
-        try {
-            $user = $this->userProvider
-                ->loadUserByUsername($token->getUsername());
-        } catch (UsernameNotFoundException $userNotFoundException) {
-            if (!$this->hideUserNotFoundExceptions) {
-                throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
+        if ($this->anonSearchAllowed) {
+            try {
+                $user = $this->userProvider
+                    ->loadUserByUsername($token->getUsername());
+            } catch (UsernameNotFoundException $userNotFoundException) {
+                if (!$this->hideUserNotFoundExceptions) {
+                    throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
+                }
+                throw $userNotFoundException;
             }
-
-            throw $userNotFoundException;
+        } else {
+            $user = new LdapUser();
+            $user->setUsername($token->getUsername());
         }
 
         if (null !== $this->dispatcher) {
@@ -91,6 +99,9 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         if ($this->bind($user, $token)) {
+            if (!$this->anonSearchAllowed) {
+                $user = $this->userProvider->loadUserByUsername($token->getUsername());
+            }
             $ldapToken = new LdapToken($user, '', $this->providerKey, $user->getRoles());
             $ldapToken->setAuthenticated(true);
             $ldapToken->setAttributes($token->getAttributes());
@@ -111,11 +122,15 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function bind(UserInterface $user, TokenInterface $token)
     {
-        return (bool)
-            $this->ldapManager
+        $this->ldapManager
             ->setUsername($user->getUsername())
-            ->setPassword($token->getCredentials())
-            ->auth();
+            ->setPassword($token->getCredentials());
+
+        if ($this->anonSearchAllowed) {
+            return (bool)$this->ldapManager->auth();
+        } else {
+            return (bool)$this->ldapManager->authNoAnonSearch();
+        }
     }
 
     /**
