@@ -7,6 +7,7 @@ interface LdapManagerUserInterface
   function __construct(LdapConnectionInterface $conn);
   function exists($username);
   function auth();
+  function authNoAnonSearch();
   function doPass();
   function getDn();
   function getEmail();
