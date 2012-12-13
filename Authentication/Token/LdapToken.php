@@ -7,11 +7,11 @@ use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 class LdapToken extends AbstractToken
 {
 
-    public function __construct($username, $password, $providerKey, array $roles= array())
+    public function __construct($user, $password, $providerKey, array $roles= array())
     {
         parent::__construct($roles);
 
-        $this->setuser($username);
+        $this->setuser($user);
         $this->credentials = $password;
         $this->providerKey = $providerKey;
     }
