@@ -4,6 +4,8 @@ namespace IMAG\LdapBundle\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
+use Symfony\Component\Security\Core\User\UserInterface;
+
 use IMAG\LdapBundle\User\LdapUser;
 
 class LdapUserEvent extends Event
@@ -22,4 +24,10 @@ class LdapUserEvent extends Event
         return $this->user;
     }
 
+    public function setUser(UserInterface $user)
+    {
+        $this->user = $user;
+
+        return $this;
+    }
 }
