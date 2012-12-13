@@ -75,19 +75,23 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             throw $userNotFoundException;
         }
         
-        $this->dispatch(LdapEvents::PRE_BIND, $user);
+        try {
+            $this->dispatch(LdapEvents::PRE_BIND, $user);
+            $this->bind($user, $token);
+            $event = $this->dispatch(LdapEvents::POST_BIND, $user);
+        } catch (BadCredentialsException $e) {
+            if ($this->hideUserNotFoundExceptions) {
+                throw new BadCredentialsException('Bad credentials', 0, $e);
+            }
 
-        if ($this->bind($user, $token)) {
-            $ldapToken = new LdapToken($user, '', $this->providerKey, $user->getRoles());
-            $ldapToken->setAuthenticated(true);
-            $ldapToken->setAttributes($token->getAttributes());
-
-            $this->dispatch(LdapEvents::POST_BIND, $user);
-
-            return $ldapToken;
+            throw $e;
         }
+        
+        $ldapToken = new LdapToken($event->getUser(), '', $this->providerKey, $user->getRoles());
+        $ldapToken->setAuthenticated(true);
+        $ldapToken->setAttributes($token->getAttributes());
 
-        throw new AuthenticationException('The LDAP authentication failed.');
+        return $ldapToken;
     }
 
     private function dispatch($event, LdapUser $user)
@@ -96,12 +100,10 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             $userEvent = new LdapUserEvent($user);
             try {
                 $this->dispatcher->dispatch($event, $userEvent);
-            } catch(\Exception $expt) {
-                if ($this->hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException('Bad credentials', 0, $expt);
-                }
 
-                throw $expt;
+                return $userEvent;
+            } catch (\Exception $e) {
+                throw new BadCredentialsException($e->getMessage(), 0, $e);
             }
         }
     }
@@ -116,11 +118,16 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function bind(UserInterface $user, TokenInterface $token)
     {
-        return (bool)
-            $this->ldapManager
+        $res = $this->ldapManager
             ->setUsername($user->getUsername())
             ->setPassword($token->getCredentials())
             ->auth();
+
+        if (false === $res) {
+            throw new BadCredentialsException('Ldap bind failed');
+        }
+
+        return true;
     }
 
     /**
