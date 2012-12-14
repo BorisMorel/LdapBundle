@@ -93,9 +93,9 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         return $ldapToken;
     }
 
-    private function dispatch($event, LdapUser $user)
+    private function dispatch($event, $user)
     {
-        if (null !== $this->dispatcher) {
+        if (null !== $this->dispatcher && $user instanceof LdapUser) {
             $userEvent = new LdapUserEvent($user);
             try {
                 $this->dispatcher->dispatch($event, $userEvent);
