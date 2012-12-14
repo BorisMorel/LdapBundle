@@ -16,6 +16,7 @@ use IMAG\LdapBundle\Authentication\Token\LdapToken;
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface;
 use IMAG\LdapBundle\Event\LdapUserEvent;
 use IMAG\LdapBundle\Event\LdapEvents;
+use IMAG\LdapBundle\User\LdapUser;
 
 class LdapAuthenticationProvider implements AuthenticationProviderInterface
 {
@@ -73,7 +74,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             throw $userNotFoundException;
         }
 
-        if (null !== $this->dispatcher) {
+        if (null !== $this->dispatcher && $user instanceof LdapUser) {
             $userEvent = new LdapUserEvent($user);
             try {
                 $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
