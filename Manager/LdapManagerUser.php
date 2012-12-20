@@ -6,7 +6,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class LdapManagerUser implements LdapManagerUserInterface
 {
-    private
+    protected
         $ldapConnection,
         $username,
         $password,
