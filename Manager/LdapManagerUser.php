@@ -59,6 +59,11 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $attributes;
     }
 
+    public function getLdapUser()
+    {
+        return $this->_ldapUser;
+    }
+
     public function getUsername()
     {
         return $this->username;
