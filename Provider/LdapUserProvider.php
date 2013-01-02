@@ -8,7 +8,8 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException,
     Symfony\Component\Security\Core\User\UserProviderInterface;
 
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface,
-    IMAG\LdapBundle\User\LdapUser;
+    IMAG\LdapBundle\User\LdapUser,
+    IMAG\LdapBundle\Exception\EmailNotFoundException;
 
 /**
  * LDAP User Provider
@@ -61,6 +62,29 @@ class LdapUserProvider implements UserProviderInterface
             ->setAttributes($lm->getAttributes());
 
         return $ldapUser;
+    }
+    
+    public function loadUserByEmail($email)
+    {
+    	if (empty ($email)) {
+    		throw new EmailNotFoundException('The mail is not provided.');
+    	}
+    	
+    	if (!$this->ldapManager->emailExists($email)) {
+    		throw new EmailNotFoundException(sprintf('Mail "%s" not found', $email));
+    	}
+    	
+    	$lm = $this->ldapManager->setEmail($email)->doPass();
+    	
+    	$ldapUser = new LdapUser();
+    	$ldapUser
+    	->setUsername($lm->getUsername())
+    	->setEmail($lm->getEmail())
+    	->setRoles($lm->getRoles())
+    	->setDn($lm->getDn())
+    	->setAttributes($lm->getAttributes());
+    	
+    	return $ldapUser;    	
     }
 
     /**
