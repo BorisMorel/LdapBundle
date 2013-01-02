@@ -49,7 +49,9 @@ class LdapUserProvider implements UserProviderInterface
             throw new UsernameNotFoundException(sprintf('User "%s" not found', $username));
         }
 
-        $lm = $this->ldapManager
+        $lm = $this
+            ->ldapManager
+            ->setEmail(NULL)
             ->setUsername($username)
             ->doPass();
 
@@ -74,7 +76,11 @@ class LdapUserProvider implements UserProviderInterface
     		throw new EmailNotFoundException(sprintf('Mail "%s" not found', $email));
     	}
     	
-    	$lm = $this->ldapManager->setEmail($email)->doPass();
+    	$lm = $this
+            ->ldapManager
+            ->setUsername(NULL)
+            ->setEmail($email)
+            ->doPass();
     	
     	$ldapUser = new LdapUser();
     	$ldapUser
