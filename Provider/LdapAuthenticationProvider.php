@@ -37,8 +37,10 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      *
      * @param UserProviderInterface    $userProvider
      * @param LdapManagerUserInterface $ldapManager
+     * @param EventDispatcherInterface $dispatcher
      * @param string                   $providerKey
      * @param Boolean                  $hideUserNotFoundExceptions
+     * @param Boolean                  $anonSearchAllowed
      */
     public function __construct(
         UserProviderInterface $userProvider,
