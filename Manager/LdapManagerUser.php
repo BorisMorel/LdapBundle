@@ -23,6 +23,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     
     public function emailExists($email) {
     	return (bool) $this
+            ->setUsername(NULL)
     	    ->setEmail($email)
     	    ->addLdapUser()
     	    ;
@@ -32,6 +33,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     {
         return (bool) $this
             ->setUsername($username)
+            ->setEmail(NULL)
             ->addLdapUser()
             ;
     }
@@ -152,7 +154,12 @@ class LdapManagerUser implements LdapManagerUserInterface
         $this->_ldapUser = $entries[0];
         
         // Set the email (if present)
-        $this->email = isset($this->_ldapUser['mail'][0]) ? $this->_ldapUser['mail'][0] : '';
+        $this->email = isset($this->_ldapUser[$this->params['user']['email_attribute']][0]) ? $this->_ldapUser[$this->params['user']['email_attribute']][0] : '';
+
+        // Set the username (if not present)
+        if (!$this->username) {
+            $this->username = isset($this->_ldapUser[$this->params['user']['name_attribute']][0]) ? $this->_ldapUser[$this->params['user']['name_attribute']][0] : '';
+        }
 
         return $this;
     }

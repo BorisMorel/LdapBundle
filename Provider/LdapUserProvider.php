@@ -69,11 +69,11 @@ class LdapUserProvider implements UserProviderInterface
     public function loadUserByEmail($email)
     {
     	if (empty ($email)) {
-    		throw new EmailNotFoundException('The mail is not provided.');
+    	    throw new EmailNotFoundException('The mail is not provided.');
     	}
     	
     	if (!$this->ldapManager->emailExists($email)) {
-    		throw new EmailNotFoundException(sprintf('Mail "%s" not found', $email));
+    	    throw new EmailNotFoundException(sprintf('Mail "%s" not found', $email));
     	}
     	
     	$lm = $this
