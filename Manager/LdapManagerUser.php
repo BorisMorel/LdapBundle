@@ -10,7 +10,8 @@ class LdapManagerUser implements LdapManagerUserInterface
         $ldapConnection,
         $username,
         $password,
-        $_ldapUser
+        $params = array(),
+        $_ldapUser = null
         ;
 
     public function __construct(LdapConnectionInterface $conn)
@@ -40,7 +41,18 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function doPass()
     {
-        return $this->addLdapUser() && $this->addLdapRoles() ? $this : false;
+        try {
+            $this->addLdapUser();
+            $this->addLdapRoles();
+
+        } catch(\InvalidArgumentException $e) {
+            if (false === $this->params['client']['skip_roles']) {
+                throw $e;
+            }
+
+        }
+        
+        return $this;
     }
 
     public function getDn()
@@ -132,8 +144,14 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     private function addLdapRoles()
     {
-        if (!$this->_ldapUser) {
-            throw new \Exception('AddRoles() can be involved only when addUser() have return an user');
+        if (null === $this->_ldapUser) {
+            throw new \RuntimeException('AddRoles() can be involved only when addUser() have return an user');
+        }
+        
+        $this->_ldapUser['roles'] = array();
+
+        if (!isset($this->params['role'])) {
+            throw new \InvalidArgumentException("If you want skip the roles getting, please set skip_roles to true under client key");
         }
 
         $tab = array();
