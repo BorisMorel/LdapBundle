@@ -38,6 +38,7 @@ class Configuration implements ConfigurationInterface
               ->booleanNode('bind_username_before')->defaultFalse()->end()
               ->scalarNode('referrals_enabled')->end()
               ->scalarNode('network_timeout')->end()
+              ->booleanNode('skip_roles')->defaultFalse()->end()          
            ->end()
           ;
 
@@ -68,7 +69,6 @@ class Configuration implements ConfigurationInterface
       $node = $treeBuilder->root('role');
 
       $node
-          ->isRequired()
           ->children()
               ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
               ->scalarNode('filter')->end()
