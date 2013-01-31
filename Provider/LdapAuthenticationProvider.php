@@ -73,7 +73,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
                 $user = $this->userProvider
                     ->loadUserByUsername($token->getUsername());
             } catch (UsernameNotFoundException $userNotFoundException) {
-                if (!$this->hideUserNotFoundExceptions) {
+                if ($this->hideUserNotFoundExceptions) {
                     throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
                 }
                 throw $userNotFoundException;
@@ -90,7 +90,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
                 $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
 
             } catch(\Exception $expt) {
-                if (!$this->hideUserNotFoundExceptions) {
+                if ($this->hideUserNotFoundExceptions) {
                     throw new BadCredentialsException('Bad credentials', 0, $expt);
                 }
 
@@ -111,7 +111,11 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             return $ldapToken;
         }
 
-        throw new AuthenticationException('The LDAP authentication failed.');
+        if ($this->hideUserNotFoundExceptions) {
+            throw new BadCredentialsException('Bad credentials');
+        } else {
+            throw new AuthenticationException('The LDAP authentication failed.');
+        }
     }
 
     /**
@@ -146,7 +150,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         try {
             $user = $this->userProvider->refreshUser($user);
         } catch (UsernameNotFoundException $userNotFoundException) {
-            if (!$this->hideUserNotFoundExceptions) {
+            if ($this->hideUserNotFoundExceptions) {
                 throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
             }
 
