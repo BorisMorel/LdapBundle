@@ -25,7 +25,8 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         $ldapManager,
         $dispatcher,
         $providerKey,
-        $hideUserNotFoundExceptions
+        $hideUserNotFoundExceptions,
+        $anonSearchAllowed
         ;
 
     /**
@@ -36,15 +37,18 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      *
      * @param UserProviderInterface    $userProvider
      * @param LdapManagerUserInterface $ldapManager
+     * @param EventDispatcherInterface $dispatcher
      * @param string                   $providerKey
      * @param Boolean                  $hideUserNotFoundExceptions
+     * @param Boolean                  $anonSearchAllowed
      */
     public function __construct(
         UserProviderInterface $userProvider,
         LdapManagerUserInterface $ldapManager,
         EventDispatcherInterface $dispatcher = null,
         $providerKey,
-        $hideUserNotFoundExceptions = true
+        $hideUserNotFoundExceptions = true,
+        $anonSearchAllowed = true
     )
     {
         $this->userProvider = $userProvider;
@@ -52,6 +56,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         $this->dispatcher = $dispatcher;
         $this->providerKey = $providerKey;
         $this->hideUserNotFoundExceptions = $hideUserNotFoundExceptions;
+        $this->anonSearchAllowed = $anonSearchAllowed;
     }
 
     /**
@@ -63,15 +68,19 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             throw new AuthenticationException('Unsupported token');
         }
 
-        try {
-            $user = $this->userProvider
-                ->loadUserByUsername($token->getUsername());
-        } catch (UsernameNotFoundException $userNotFoundException) {
-            if (!$this->hideUserNotFoundExceptions) {
-                throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
+        if ($this->anonSearchAllowed) {
+            try {
+                $user = $this->userProvider
+                    ->loadUserByUsername($token->getUsername());
+            } catch (UsernameNotFoundException $userNotFoundException) {
+                if (!$this->hideUserNotFoundExceptions) {
+                    throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
+                }
+                throw $userNotFoundException;
             }
-
-            throw $userNotFoundException;
+        } else {
+            $user = new LdapUser();
+            $user->setUsername($token->getUsername());
         }
 
         if (null !== $this->dispatcher && $user instanceof LdapUser) {
@@ -88,6 +97,9 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         if ($this->bind($user, $token)) {
+            if (!$this->anonSearchAllowed) {
+                $user = $this->userProvider->loadUserByUsername($token->getUsername());
+            }
             $ldapToken = new LdapToken($user, '', $this->providerKey, $user->getRoles());
             $ldapToken->setAuthenticated(true);
             $ldapToken->setAttributes($token->getAttributes());
@@ -108,11 +120,15 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function bind(UserInterface $user, TokenInterface $token)
     {
-        return (bool)
-            $this->ldapManager
+        $this->ldapManager
             ->setUsername($user->getUsername())
-            ->setPassword($token->getCredentials())
-            ->auth();
+            ->setPassword($token->getCredentials());
+
+        if ($this->anonSearchAllowed) {
+            return (bool)$this->ldapManager->auth();
+        } else {
+            return (bool)$this->ldapManager->authNoAnonSearch();
+        }
     }
 
     /**

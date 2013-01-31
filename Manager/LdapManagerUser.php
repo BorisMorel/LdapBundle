@@ -33,6 +33,11 @@ class LdapManagerUser implements LdapManagerUserInterface
         return (bool) ($this->doPass() && $this->bind());
     }
 
+    public function authNoAnonSearch()
+    {
+        return (bool) ($this->bindUser() && $this->doPass());
+    }
+
     public function doPass()
     {
         return $this->addLdapUser() && $this->addLdapRoles() ? $this : false;
@@ -165,6 +170,12 @@ class LdapManagerUser implements LdapManagerUserInterface
     {
         return $this->ldapConnection
             ->bind($this->_ldapUser['dn'], $this->password);
+    }
+
+    private function bindUser()
+    {
+        return $this->ldapConnection
+            ->bind($this->username, $this->password);
     }
 
     private static function slugify($role)
