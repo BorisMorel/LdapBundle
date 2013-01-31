@@ -40,7 +40,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      * @param EventDispatcherInterface $dispatcher
      * @param string                   $providerKey
      * @param Boolean                  $hideUserNotFoundExceptions
-     * @param Boolean                  $anonSearchAllowed
+     * @param Boolean                  $bindUsernameBefore
      */
     public function __construct(
         UserProviderInterface $userProvider,
@@ -48,7 +48,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         EventDispatcherInterface $dispatcher = null,
         $providerKey,
         $hideUserNotFoundExceptions = true,
-        $anonSearchAllowed = true
+        $bindUsernameBefore = false
     )
     {
         $this->userProvider = $userProvider;
@@ -56,7 +56,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         $this->dispatcher = $dispatcher;
         $this->providerKey = $providerKey;
         $this->hideUserNotFoundExceptions = $hideUserNotFoundExceptions;
-        $this->anonSearchAllowed = $anonSearchAllowed;
+        $this->bindUsernameBefore = $bindUsernameBefore;
     }
 
     /**
@@ -68,7 +68,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             throw new AuthenticationException('Unsupported token');
         }
 
-        if (true === $this->anonSearchAllowed) {
+        if (false === $this->bindUsernameBefore) {
             try {
                 $user = $this->userProvider
                     ->loadUserByUsername($token->getUsername());
@@ -100,7 +100,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
 
         if ($this->bind($user, $token)) {
 
-            if (false === $this->anonSearchAllowed) {
+            if (true === $this->bindUsernameBefore) {
                 $user = $this->reloadUser($user);
             }
 
@@ -128,7 +128,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             ->setUsername($user->getUsername())
             ->setPassword($token->getCredentials());
 
-        if ($this->anonSearchAllowed) {
+        if (false === $this->bindUsernameBefore) {
             return (bool)$this->ldapManager->auth();
         } else {
             return (bool)$this->ldapManager->authNoAnonSearch();
