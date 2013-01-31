@@ -58,6 +58,8 @@ class Configuration implements ConfigurationInterface
               ->variableNode('attributes')->defaultValue(array())->end()
           ->end()
           ;
+
+      return $node;
   }
 
   private function addRoleNode()
@@ -80,5 +82,7 @@ class Configuration implements ConfigurationInterface
               ->end()
           ->end()
           ;
+
+      return $node;
   }
 }
