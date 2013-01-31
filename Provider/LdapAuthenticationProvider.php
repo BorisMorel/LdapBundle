@@ -68,7 +68,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             throw new AuthenticationException('Unsupported token');
         }
 
-        if ($this->anonSearchAllowed) {
+        if (true === $this->anonSearchAllowed) {
             try {
                 $user = $this->userProvider
                     ->loadUserByUsername($token->getUsername());
@@ -79,14 +79,16 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
                 throw $userNotFoundException;
             }
         } else {
-            $user = new LdapUser();
-            $user->setUsername($token->getUsername());
+            $user = $this->userProvider
+                ->userEqualUsername($token->getUsername())
+                ;
         }
 
         if (null !== $this->dispatcher && $user instanceof LdapUser) {
             $userEvent = new LdapUserEvent($user);
             try {
                 $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
+
             } catch(\Exception $expt) {
                 if (!$this->hideUserNotFoundExceptions) {
                     throw new BadCredentialsException('Bad credentials', 0, $expt);
@@ -97,9 +99,11 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         if ($this->bind($user, $token)) {
-            if (!$this->anonSearchAllowed) {
-                $user = $this->userProvider->loadUserByUsername($token->getUsername());
+
+            if (false === $this->anonSearchAllowed) {
+                $user = $this->reloadUser($user);
             }
+
             $ldapToken = new LdapToken($user, '', $this->providerKey, $user->getRoles());
             $ldapToken->setAuthenticated(true);
             $ldapToken->setAttributes($token->getAttributes());
@@ -129,6 +133,27 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         } else {
             return (bool)$this->ldapManager->authNoAnonSearch();
         }
+    }
+
+    /**
+     * Reload user with the username
+     *
+     * @param \IMAG\LdapBundle\User\LdapBundle $user
+     * @return \IMAG\LdapBundle\User\LdapBundle $user
+     */
+    private function reloadUser(LdapUser $user)
+    {
+        try {
+            $user = $this->userProvider->refreshUser($user);
+        } catch (UsernameNotFoundException $userNotFoundException) {
+            if (!$this->hideUserNotFoundExceptions) {
+                throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
+            }
+
+            throw $userNotFoundException;
+        }
+
+        return $user;
     }
 
     /**

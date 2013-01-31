@@ -64,6 +64,22 @@ class LdapUserProvider implements UserProviderInterface
     }
 
     /**
+     * Return an LdapUser without any test. Used when the anonym binding is forbidden
+     *
+     * @param string $username
+     * @return IMAG\LdapUser\User\LdapUser $ldapUser
+     */
+    public function userEqualUsername($username)
+    {
+        $ldapUser = new LdapUser();
+        $ldapUser
+            ->setUsername($username)
+            ;
+
+        return $ldapUser;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function refreshUser(UserInterface $user)
