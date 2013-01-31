@@ -13,27 +13,61 @@ class Configuration implements ConfigurationInterface
     $rootNode = $treeBuilder->root('imag_ldap');
     $rootNode
         ->children()
-          ->arrayNode('client')
-            ->children()
+          ->append($this->addClientNode())
+          ->append($this->addUserNode())
+          ->append($this->addRoleNode())
+        ->end()
+        ;
+
+    return $treeBuilder;      
+  }
+
+  private function addClientNode()
+  {
+      $treeBuilder = new TreeBuilder();
+      $node = $treeBuilder->root('client');
+
+      $node
+          ->isRequired()
+          ->children()
               ->scalarNode('host')->isRequired()->cannotBeEmpty()->end()
               ->scalarNode('port')->defaultValue(389)->end()
               ->scalarNode('version')->end()
               ->scalarNode('username')->end()
               ->scalarNode('password')->end()
+              ->scalarNode('bind_username_before')->defaultValue(false)->end()
               ->scalarNode('referrals_enabled')->end()
               ->scalarNode('network_timeout')->end()
-            ->end()
-          ->end()
-          ->arrayNode('user')
-            ->children()
+           ->end()
+          ;
+
+      return $node;
+  }
+
+  private function addUserNode()
+  {
+      $treeBuilder = new TreeBuilder();
+      $node = $treeBuilder->root('user');
+
+      $node
+          ->isRequired()
+          ->children()
               ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
               ->scalarNode('filter')->end()
               ->scalarNode('name_attribute')->defaultValue('uid')->end()
               ->variableNode('attributes')->defaultValue(array())->end()
-            ->end()
           ->end()
-          ->arrayNode('role')
-            ->children()
+          ;
+  }
+
+  private function addRoleNode()
+  {
+      $treeBuilder = new TreeBuilder();
+      $node = $treeBuilder->root('role');
+
+      $node
+          ->isRequired()
+          ->children()
               ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
               ->scalarNode('filter')->end()
               ->scalarNode('name_attribute')->defaultValue('cn')->end()
@@ -44,11 +78,7 @@ class Configuration implements ConfigurationInterface
                   ->thenInvalid('Only dn or username')
                 ->end()
               ->end()
-            ->end()
           ->end()
-        ->end()
-        ;
-
-    return $treeBuilder;      
+          ;
   }
 }
