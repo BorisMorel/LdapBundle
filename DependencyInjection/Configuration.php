@@ -35,7 +35,7 @@ class Configuration implements ConfigurationInterface
               ->scalarNode('version')->end()
               ->scalarNode('username')->end()
               ->scalarNode('password')->end()
-              ->scalarNode('bind_username_before')->defaultValue(false)->end()
+              ->booleanNode('bind_username_before')->defaultFalse()->end()
               ->scalarNode('referrals_enabled')->end()
               ->scalarNode('network_timeout')->end()
            ->end()
