@@ -43,7 +43,7 @@
       <argument type="service" id="event_dispatcher" on-invalid="null" />
       <argument /> <!-- Provider-key -->
       <argument /> <!-- hide exception -->
-      <argument /> <!-- Anon auth allowed -->
+      <argument /> <!-- Bind username before -->
     </service>
 
     <service id="imag_ldap.security.authentication.listener"
