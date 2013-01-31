@@ -86,6 +86,9 @@ imag_ldap:
 #    version: 3 # Optional
 #    username: foo # Optional
 #    password: bar # Optional
+#    network_timeout: 10 # Optional
+#    referrals_enabled: true # Optional
+#    bind_username_before: true # Optional
 
   user:
     base_dn: ou=people,dc=host,dc=foo
