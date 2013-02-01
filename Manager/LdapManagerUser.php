@@ -2,14 +2,16 @@
 
 namespace IMAG\LdapBundle\Manager;
 
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException,
+    Symfony\Component\Security\Core\Exception\UsernameNotFoundException
+    ;
+
 
 class LdapManagerUser implements LdapManagerUserInterface
 {
     private
         $ldapConnection,
-        $username,
-        $email,
+        $username = null,
         $password,
         $params = array(),
         $_ldapUser = null
@@ -22,21 +24,19 @@ class LdapManagerUser implements LdapManagerUserInterface
             ->getParameters();
     }
     
-    public function emailExists($email) {
-    	return (bool) $this
-            ->setUsername(NULL)
-    	    ->setEmail($email)
-    	    ->addLdapUser()
-    	    ;
-    }
-
     public function exists($username)
     {
-        return (bool) $this
-            ->setUsername($username)
-            ->setEmail(NULL)
-            ->addLdapUser()
-            ;
+        try {
+            $this
+                ->setUsername($username)
+                ->addLdapUser()
+                ;
+        } catch (AuthenticationException $e) {
+            return false;
+
+        }
+
+        return true;
     }
 
     public function auth()
@@ -72,7 +72,9 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function getEmail()
     {
-        return $this->email;
+        return isset($this->_ldapUser[$this->params['user']['email_attribute']][0]) 
+            ? $this->_ldapUser[$this->params['user']['email_attribute']][0] 
+            : '';
     }
 
     public function getAttributes()
@@ -83,6 +85,7 @@ class LdapManagerUser implements LdapManagerUserInterface
                 $attributes[$attrName] = $this->_ldapUser[$attrName][0];
             }
         }
+
         return $attributes;
     }
 
@@ -101,19 +104,13 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $this->_ldapUser['roles'];
     }
     
-    public function setEmail($email)
-    {
-    	$this->email = $email;
-    	
-    	return $this;
-    }
-
     public function setUsername($username)
     {
+        // TODO improved this ; Move detection of wrong username on a dedicated function and throw an Exception ...
         if ($username === "*") {
             throw new \InvalidArgumentException("Invalid username given.");
         }
-
+        
         $this->username = $username;
 
         return $this;
@@ -128,64 +125,90 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     private function addLdapUser()
     {
-        if (!$this->username && !$this->email) {
-            throw new \Exception('Email or user must be defined prior to calling addLdapUser()');
+        if (!$this->username) {
+            throw new \Exception('username must be defined prior to calling addLdapUser()');
         }
-        
-        if ($this->username) {
-        	// If the username is set, search using the username
-	        $filter = isset($this->params['user']['filter'])
-	            ? $this->params['user']['filter']
-	            : '';
 
-	        $entries = $this->ldapConnection
-	            ->search(array(
-	                'base_dn' => $this->params['user']['base_dn'],
-	                'filter' => sprintf('(&%s(%s=%s))',
-	                                    $filter,
-	                                    $this->params['user']['name_attribute'],
-	                                    $this->ldapConnection->escape($this->username)
-	                )
-	            ));
-        } else if ($this->email) {
-        	// Username was not set - check using email filter instead
-        	$filter = isset($this->params['user']['emailfilter'])
-        	? $this->params['user']['emailfilter']
-        	: '';
-        	
-        	$entries = $this->ldapConnection
-        	->search(array(
-        			'base_dn' => $this->params['user']['base_dn'],
-        			'filter' => sprintf('(&%s(%s=%s))',
-        					$filter,
-        					$this->params['user']['email_attribute'],
-        					$this->ldapConnection->escape($this->email)
-        			)
-        	));
+        $error = null;
+        $count= null;
+
+        foreach($this->params['user']['bind_by'] as $method) {
+            try {
+                $fct = 'getBy'.$method;
+                $entries = $this->{$fct}();
+
+            } catch (UsernameNotFoundException $e) {
+                $count++;
+                $error = new AuthenticationException($e->getMessage(), $e->getExtraInformation(), $e->getCode(), $error);
+                
+            }
         }
+
+        if ($count >= count($this->params['user']['bind_by'])) {
+            throw new AuthenticationException("username cannot be loaded by any methods", $error->getExtraInformation(), $error->getCode(), $error);
+        }
+
+        // Store the LDAP user for later use
+        $this->_ldapUser = $entries[0];
+        
+        return $this;
+
+    }
+
+    private function getByLogin()
+    {
+        $filter = isset($this->params['user']['filter'])
+            ? $this->params['user']['filter']
+            : '';
+        
+        $entries = $this->ldapConnection
+            ->search(array(
+                'base_dn' => $this->params['user']['base_dn'],
+                'filter' => sprintf('(&%s(%s=%s))',
+                                    $filter,
+                                    $this->params['user']['name_attribute'],
+                                    $this->ldapConnection->escape($this->username)
+                )
+            ));
 
         if ($entries['count'] > 1) {
             throw new \Exception("This search can only return a single user");
         }
 
         if ($entries['count'] == 0) {
-            return false;
+            throw new UsernameNotFoundException(sprintf('Username "%s" not found by login', $this->username));
         }
-
-        // Store the LDAP user for later use
-        $this->_ldapUser = $entries[0];
         
-        // Set the email (if present)
-        $this->email = isset($this->_ldapUser[$this->params['user']['email_attribute']][0]) ? $this->_ldapUser[$this->params['user']['email_attribute']][0] : '';
-
-        // Set the username (if not present)
-        if (!$this->username) {
-            $this->username = isset($this->_ldapUser[$this->params['user']['name_attribute']][0]) ? $this->_ldapUser[$this->params['user']['name_attribute']][0] : '';
-        }
-
-        return $this;
+        return $entries;
     }
 
+    private function getByEmail()
+    {
+        $filter = isset($this->params['user']['email_filter'])
+        	? $this->params['user']['email_filter']
+        	: '';
+        
+        $entries = $this->ldapConnection
+        	->search(array(
+                'base_dn' => $this->params['user']['base_dn'],
+                'filter' => sprintf('(&%s(%s=%s))',
+                                    $filter,
+                                    $this->params['user']['email_attribute'],
+                                    $this->ldapConnection->escape($this->username)
+                )
+        	));
+        
+        if ($entries['count'] > 1) {
+            throw new \Exception("This search can only return a single user");
+        }
+        
+        if ($entries['count'] == 0) {
+            throw new UsernameNotFoundException(sprintf('Username "%s" not found by email', $this->username));
+        }
+
+        return $entries;
+    }
+    
     private function addLdapRoles()
     {
         if (null === $this->_ldapUser) {
