@@ -132,7 +132,7 @@ class LdapManagerUser implements LdapManagerUserInterface
         $error = null;
         $count= null;
 
-        foreach($this->params['user']['bind_by'] as $method) {
+        foreach($this->params['user']['search_by'] as $method) {
             try {
                 $fct = 'getBy'.$method;
                 $entries = $this->{$fct}();
@@ -144,7 +144,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             }
         }
 
-        if ($count >= count($this->params['user']['bind_by'])) {
+        if ($count >= count($this->params['user']['search_by'])) {
             throw new AuthenticationException("username cannot be loaded by any methods", $error->getExtraInformation(), $error->getCode(), $error);
         }
 

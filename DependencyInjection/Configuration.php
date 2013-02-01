@@ -63,7 +63,7 @@ class Configuration implements ConfigurationInterface
                   ->prototype('scalar')
                   ->end()
               ->end()
-              ->arrayNode('bind_by')
+              ->arrayNode('search_by')
                   ->requiresAtLeastOneElement()
                   ->defaultValue(array('login'))
                   ->prototype('scalar')
