@@ -6,16 +6,24 @@ LdapBundle provides a Ldap authentication system without the `apache mod_ldap`. 
 
 You can try to contact me on freenode irc ; channel #symfony-fr ; pseudo : aways
 
+## News
+
+Now you can use the email and/or the uid to authenticate the user. Please refere to
+> bind_by: [login, email]
+
+**Note:**
+The username is the identifiant with which the user has been authenticated. If the user is authenticated with the email, the username is the email. If you want the Ldap username, you can set attributes key under user configuration and call LdapUser::getAttributes().
+> attributes: ['uid']
+
 ## Install
 
 1. Download LdapBundle
-2. Configure the Autoloader
-3. Enable the Bundle
-4. Configure LdapBundle security.yml
-6. Import LdapBundle security.yml
-7. Import LdapBundle routing
-8. Implement Logout
-9. Subscribe to PRE_BIND event
+2. Enable the Bundle
+3. Configure LdapBundle security.yml
+4. Import LdapBundle security.yml
+5. Import LdapBundle routing
+6. Implement Logout
+7. Subscribe to PRE_BIND event
 
 ### Get the Bundle
 
@@ -93,9 +101,12 @@ imag_ldap:
   user:
     base_dn: ou=people,dc=host,dc=foo
 #    filter: (&(foo=bar)(ObjectClass=Person)) #Optional
-#    emailfilter: (&(foo=bar)(ObjectClass=Person)) #Optional
+#    email_filter: (&(foo=bar)(ObjectClass=Person)) #Optional
     name_attribute: uid
     email_attribute: mail
+    bind_by: [ login and/or email ]
+#    attributes: [] # Optional
+
   role:
     base_dn: ou=group, dc=host, dc=foo
 #    filter: (ou=group) #Optional
@@ -110,6 +121,8 @@ imag_ldap:
 
 > If are not set, the optional parameters have default values.
 > You can disable this ; Just set parameter to NULL.
+
+
 
 ``` yaml
 imag_ldap:
