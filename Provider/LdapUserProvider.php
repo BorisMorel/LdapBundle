@@ -8,8 +8,8 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException,
     Symfony\Component\Security\Core\User\UserProviderInterface;
 
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface,
-    IMAG\LdapBundle\User\LdapUser,
-    IMAG\LdapBundle\Exception\EmailNotFoundException;
+    IMAG\LdapBundle\User\LdapUser
+    ;
 
 /**
  * LDAP User Provider
@@ -49,9 +49,7 @@ class LdapUserProvider implements UserProviderInterface
             throw new UsernameNotFoundException(sprintf('User "%s" not found', $username));
         }
 
-        $lm = $this
-            ->ldapManager
-            ->setEmail(NULL)
+        $lm = $this->ldapManager
             ->setUsername($username)
             ->doPass();
 
@@ -66,33 +64,6 @@ class LdapUserProvider implements UserProviderInterface
         return $ldapUser;
     }
     
-    public function loadUserByEmail($email)
-    {
-    	if (empty ($email)) {
-    	    throw new EmailNotFoundException('The mail is not provided.');
-    	}
-    	
-    	if (!$this->ldapManager->emailExists($email)) {
-    	    throw new EmailNotFoundException(sprintf('Mail "%s" not found', $email));
-    	}
-    	
-    	$lm = $this
-            ->ldapManager
-            ->setUsername(NULL)
-            ->setEmail($email)
-            ->doPass();
-    	
-    	$ldapUser = new LdapUser();
-    	$ldapUser
-    	->setUsername($lm->getUsername())
-    	->setEmail($lm->getEmail())
-    	->setRoles($lm->getRoles())
-    	->setDn($lm->getDn())
-    	->setAttributes($lm->getAttributes());
-    	
-    	return $ldapUser;    	
-    }
-
     /**
      * Return an LdapUser without any test. Used when the anonym binding is forbidden
      *
