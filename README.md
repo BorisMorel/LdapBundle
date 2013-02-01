@@ -9,7 +9,7 @@ You can try to contact me on freenode irc ; channel #symfony-fr ; pseudo : aways
 ## News
 
 Now you can use the email and/or the uid to authenticate the user. Please refere to
-> bind_by: [login, email]
+> search_by: [login, email]
 
 **Note:**
 The username is the identifiant with which the user has been authenticated. If the user is authenticated with the email, the username is the email. If you want the Ldap username, you can set attributes key under user configuration and call LdapUser::getAttributes().
@@ -104,7 +104,7 @@ imag_ldap:
 #    email_filter: (&(foo=bar)(ObjectClass=Person)) #Optional
     name_attribute: uid
     email_attribute: mail
-    bind_by: [ login and/or email ]
+    search_by: [ login and/or email ]
 #    attributes: [] # Optional
 
   role:
