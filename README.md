@@ -93,7 +93,9 @@ imag_ldap:
   user:
     base_dn: ou=people,dc=host,dc=foo
 #    filter: (&(foo=bar)(ObjectClass=Person)) #Optional
+#    emailfilter: (&(foo=bar)(ObjectClass=Person)) #Optional
     name_attribute: uid
+    email_attribute: mail
   role:
     base_dn: ou=group, dc=host, dc=foo
 #    filter: (ou=group) #Optional
