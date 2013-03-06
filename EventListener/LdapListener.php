@@ -7,6 +7,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpKernel\Log\LoggerInterface,
     Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface,
+    Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken,
     Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException,
     Symfony\Component\Security\Core\SecurityContextInterface,
     Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface,
@@ -39,13 +40,30 @@ class LdapListener extends AbstractAuthenticationListener
             $providerKey,
             $successHandler,
             $failureHandler,
-            $options,
+            array_merge(array(
+                'username_parameter' => '_username',
+                'password_parameter' => '_password',
+                'csrf_parameter'     => '_csrf_token',
+                'intention'          => 'ldap_authenticate',
+                'post_only'          => true,
+            ), $options),
             $logger,
             $dispatcher
         );
         
-        $this->providerKey = $providerKey;
         $this->csrfProvider = $csrfProvider;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    protected function requiresAuthentication(Request $request)
+    {
+        if ($this->options['post_only'] && !$request->isMethod('post')) {
+            return false;
+        }
+
+        return parent::requiresAuthentication($request);
     }
 
     public function attemptAuthentication(Request $request)
@@ -71,7 +89,7 @@ class LdapListener extends AbstractAuthenticationListener
 
         $request->getSession()->set(SecurityContextInterface::LAST_USERNAME, $username);
 
-        return $this->authenticationManager->authenticate(new LdapToken($username, $password, $this->providerKey));
+        return $this->authenticationManager->authenticate(new UsernamePasswordToken($username, $password, $this->providerKey));
     }
 
 
