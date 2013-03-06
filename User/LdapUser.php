@@ -7,11 +7,12 @@ use Symfony\Component\Security\Core\User\EquatableInterface;
 
 class LdapUser implements UserInterface, EquatableInterface, \Serializable
 {
-    protected $username;
-    protected $email;
-    protected $roles;
-    protected $dn;
-    protected $attributes;
+    protected $username,
+        $email,
+        $roles,
+        $dn,
+        $attributes
+        ;
 
     public function getRoles()
     {
