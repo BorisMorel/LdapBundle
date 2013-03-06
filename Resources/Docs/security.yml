@@ -1,0 +1,50 @@
+security:
+    firewalls:
+        restricted_area:
+            pattern:          ^/
+            anonymous:        ~
+            imag_ldap:
+                check_path: login_check
+                login_path: login
+                csrf_provider: form.csrf_provider
+                intention: authenticate
+                provider: ldap
+            logout:
+                path:           /logout
+                target:         /
+
+    providers:
+        ldap:
+            id: imag_ldap.security.user.provider
+                
+    encoders:
+        IMAG\LdapBundle\User\LdapUser: plaintext
+
+    access_control:
+        - { path: ^/login,          roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/,               roles: IS_AUTHENTICATED_FULLY }
+
+imag_ldap:
+  client:
+    host: your.host.foo
+    port: 389
+#    version: 3 # Optional
+#    username:
+#    password:
+#    network_timeout:
+#    referrals_enabled:
+#    bind_username_before:
+#    skip_roles:
+
+  user:
+    base_dn: ou=people, dc=host, dc=foo
+#    filter: (&(foo=bar)(ObjectClass=Person)) #Optional
+    name_attribute: uid
+#    attributes:
+
+  role:
+    base_dn: ou=group, dc=host, dc=foo
+#    filter: null #Optional
+    name_attribute: cn
+    user_attribute: member
+#    user_id: [ dn or username ] #Default dn

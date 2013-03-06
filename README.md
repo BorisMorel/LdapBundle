@@ -8,14 +8,13 @@ You can try to contact me on freenode irc ; channel #symfony-fr ; pseudo : aways
 
 ## Install
 
-1. Download LdapBundle
-2. Configure the Autoloader
+1. Download with composer
 3. Enable the Bundle
 4. Configure LdapBundle security.yml
-6. Import LdapBundle security.yml
 7. Import LdapBundle routing
 8. Implement Logout
-9. Subscribe to PRE_BIND event
+9. Use chain provider
+10. Subscribe to PRE_BIND event
 
 ### Get the Bundle
 
@@ -50,6 +49,9 @@ public function registerBundles()
 ```
 
 ### Configure security.yml
+
+**Note:**
+> An example of security.yml file is located on Ressource/Docs/
 
 ``` yaml
 # src/IMAG/LdapBundle/Resources/config/security.yml
@@ -117,15 +119,6 @@ imag_ldap:
    filter: NULL
 ```
 
-### Import security.yml
-
-``` yaml
-# app/config/config.yml
-
-imports:
-  - { resource: ../../src/IMAG/LdapBundle/Resources/config/security.yml }
-```
-
 ### Import routing
 
 ``` yaml
@@ -144,8 +137,42 @@ Just create a link with logout target.
 ```
 
 **Note:**
-You can refer to the official Symfony documentation :
-http://symfony.com/doc/2.0/book/security.html#logging-out
+> You can refer to the official Symfony documentation :
+> http://symfony.com/doc/2.0/book/security.html#logging-out
+
+### Chain provider ###
+
+You can chain the login form with other providers. Like, the database_provider, in_memory provider.
+
+``` yml
+# security.yml
+security:
+    firewalls:
+        secured_area:
+            pattern: ^/
+            anonymous: ~
+            imag_ldap:
+                provider: multiples
+            logout:
+                path: logout
+    providers:
+        multiples:
+            chain:
+                providers: [ldap, db]          
+        ldap:
+            id: imag_ldap.security.user.provider
+        db:
+            entity: { class: FQDN\User }
+```
+
+**Note: **
+> If you have set bind_username_before to true, you must chain the providers with ldap provider in the last position. 
+
+``` yml
+# security.yml
+
+providers: [db, ldap]          
+```
 
 ### Subscribe to PRE_BIND event
 
