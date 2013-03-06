@@ -39,7 +39,7 @@ class DefaultController extends Controller
     private function generateToken()
     {
         $token = $this->get('form.csrf_provider')
-                      ->generateCsrfToken('ldap_authenticate');
+                      ->generateCsrfToken('authenticate');
 
         return $token;
     }
