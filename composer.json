@@ -26,11 +26,6 @@
         "php": ">=5.3.3",
         "symfony/symfony": ">2.0"
     },
-    "source": {
-        "url": "https://github.com/BorisMorel/LdapBundle.git",
-        "type": "git",
-        "reference": "origin/master"
-    },
     "autoload": {
         "psr-0": { "IMAG\\LdapBundle": "" }
     },
