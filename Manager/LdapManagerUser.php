@@ -31,12 +31,11 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function auth()
     {
-        return (bool) ($this->doPass() && $this->bind());
-    }
+        if (null === $this->_ldapUser) {
+            return (bool)($this->bindByUsername() && $this->doPass());
+        }
 
-    public function authNoAnonSearch()
-    {
-        return (bool) ($this->bindUser() && $this->doPass());
+        return (bool)($this->doPass() && $this->bindByDn());
     }
 
     public function doPass()
@@ -112,7 +111,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     private function addLdapUser()
     {
         if (!$this->username) {
-            throw new \Exception('User is not defined, pls use setUsername');
+            throw new \InvalidArgumentException('User is not defined, pls use setUsername');
         }
 
         $filter = isset($this->params['user']['filter'])
@@ -130,7 +129,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             ));
 
         if ($entries['count'] > 1) {
-            throw new \Exception("This search can only return a single user");
+            throw new \RuntimeException("This search can only return a single user");
         }
 
         if ($entries['count'] == 0) {
@@ -184,13 +183,13 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $this;
     }
 
-    private function bind()
+    private function bindByDn()
     {
         return $this->ldapConnection
             ->bind($this->_ldapUser['dn'], $this->password);
     }
 
-    private function bindUser()
+    private function bindByUsername()
     {
         return $this->ldapConnection
             ->bind($this->username, $this->password);

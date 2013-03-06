@@ -25,8 +25,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         $ldapManager,
         $dispatcher,
         $providerKey,
-        $hideUserNotFoundExceptions,
-        $anonSearchAllowed
+        $hideUserNotFoundExceptions
         ;
 
     /**
@@ -40,23 +39,22 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      * @param EventDispatcherInterface $dispatcher
      * @param string                   $providerKey
      * @param Boolean                  $hideUserNotFoundExceptions
-     * @param Boolean                  $bindUsernameBefore
      */
     public function __construct(
         UserProviderInterface $userProvider,
+        AuthenticationProviderInterface $daoAuthenticationProvider,
         LdapManagerUserInterface $ldapManager,
         EventDispatcherInterface $dispatcher = null,
         $providerKey,
-        $hideUserNotFoundExceptions = true,
-        $bindUsernameBefore = false
+        $hideUserNotFoundExceptions = true
     )
     {
         $this->userProvider = $userProvider;
+        $this->daoAuthenticationProvider = $daoAuthenticationProvider;
         $this->ldapManager = $ldapManager;
         $this->dispatcher = $dispatcher;
         $this->providerKey = $providerKey;
         $this->hideUserNotFoundExceptions = $hideUserNotFoundExceptions;
-        $this->bindUsernameBefore = $bindUsernameBefore;
     }
 
     /**
@@ -67,54 +65,56 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         if (!$this->supports($token)) {
             throw new AuthenticationException('Unsupported token');
         }
-
-        if (false === $this->bindUsernameBefore) {
-            try {
-                $user = $this->userProvider
-                    ->loadUserByUsername($token->getUsername());
-            } catch (UsernameNotFoundException $userNotFoundException) {
-                if ($this->hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
-                }
-                throw $userNotFoundException;
-            }
-        } else {
+        
+        try {
             $user = $this->userProvider
-                ->userEqualUsername($token->getUsername())
-                ;
+                ->loadUserByUsername($token->getUsername());
+
+        } catch (UsernameNotFoundException $userNotFoundException) {
+            if ($this->hideUserNotFoundExceptions) {
+                throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
+            }
+            throw $userNotFoundException;
+
         }
+        
+        if ($user instanceof LdapUser) {
+            if (null !== $this->dispatcher) {
+                $userEvent = new LdapUserEvent($user);
+                try {
+                    $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
 
-        if (null !== $this->dispatcher && $user instanceof LdapUser) {
-            $userEvent = new LdapUserEvent($user);
-            try {
-                $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
+                } catch(\Exception $expt) {
+                    if ($this->hideUserNotFoundExceptions) {
+                        throw new BadCredentialsException('Bad credentials', 0, $expt);
+                    }
 
-            } catch(\Exception $expt) {
-                if ($this->hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException('Bad credentials', 0, $expt);
+                    throw $expt;
+                }
+            }
+
+            if ($this->bind($user, $token)) {
+
+                if (false === $user->getDn()) {
+                    $user = $this->reloadUser($user);
                 }
 
-                throw $expt;
+                $ldapToken = new LdapToken($user, $this->providerKey, $user->getRoles());
+                $ldapToken->setAuthenticated(true);
+                $ldapToken->setAttributes($token->getAttributes());
+
+                return $ldapToken;
+            }
+
+            if ($this->hideUserNotFoundExceptions) {
+                throw new BadCredentialsException('Bad credentials');
+            } else {
+                throw new AuthenticationException('The LDAP authentication failed.');
             }
         }
 
-        if ($this->bind($user, $token)) {
-
-            if (true === $this->bindUsernameBefore) {
-                $user = $this->reloadUser($user);
-            }
-
-            $ldapToken = new LdapToken($user, '', $this->providerKey, $user->getRoles());
-            $ldapToken->setAuthenticated(true);
-            $ldapToken->setAttributes($token->getAttributes());
-
-            return $ldapToken;
-        }
-
-        if ($this->hideUserNotFoundExceptions) {
-            throw new BadCredentialsException('Bad credentials');
-        } else {
-            throw new AuthenticationException('The LDAP authentication failed.');
+        if ($user instanceof UserInterface) {
+            return $this->daoAuthenticationProvider->authenticate($token);
         }
     }
 
@@ -126,17 +126,13 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      *
      * @return boolean
      */
-    private function bind(UserInterface $user, TokenInterface $token)
+    private function bind(LdapUser $user, TokenInterface $token)
     {
         $this->ldapManager
             ->setUsername($user->getUsername())
             ->setPassword($token->getCredentials());
 
-        if (false === $this->bindUsernameBefore) {
-            return (bool)$this->ldapManager->auth();
-        } else {
-            return (bool)$this->ldapManager->authNoAnonSearch();
-        }
+        return (bool)$this->ldapManager->auth();
     }
 
     /**
@@ -169,8 +165,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      */
     public function supports(TokenInterface $token)
     {
-        return ( $token instanceof LdapToken
-                 || $token instanceof UsernamePasswordToken ) 
+        return $token instanceof UsernamePasswordToken
             && $token->getProviderKey() === $this->providerKey;
     }
 

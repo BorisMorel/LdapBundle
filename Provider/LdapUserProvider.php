@@ -24,13 +24,20 @@ class LdapUserProvider implements UserProviderInterface
     private $ldapManager;
 
     /**
+     * @var string
+     */
+    private $bindUsernameBefore;
+
+    /**
      * Constructor
      *
      * @param \IMAG\LdapBundle\Manager\LdapManagerUserInterface $ldapManager
+     * @param string $bindUsernameBefore
      */
-    public function __construct(LdapManagerUserInterface $ldapManager)
+    public function __construct(LdapManagerUserInterface $ldapManager, $bindUsernameBefore = false)
     {
         $this->ldapManager = $ldapManager;
+        $this->bindUsernameBefore = $bindUsernameBefore;
     }
 
     /**
@@ -43,39 +50,12 @@ class LdapUserProvider implements UserProviderInterface
             throw new UsernameNotFoundException('The username is not provided.');
         }
 
-        // Throw the exception if the username is not found.
-        if(!$this->ldapManager->exists($username)) {
-            throw new UsernameNotFoundException(sprintf('User "%s" not found', $username));
+        if (true === $this->bindUsernameBefore) {
+            $ldapUser = $this->simpleUser($username);
+        } else {
+            $ldapUser = $this->anonymousSearch($username);
         }
-
-        $lm = $this->ldapManager
-            ->setUsername($username)
-            ->doPass();
-
-        $ldapUser = new LdapUser();
-        $ldapUser
-            ->setUsername($lm->getUsername())
-            ->setEmail($lm->getEmail())
-            ->setRoles($lm->getRoles())
-            ->setDn($lm->getDn())
-            ->setAttributes($lm->getAttributes());
-
-        return $ldapUser;
-    }
-
-    /**
-     * Return an LdapUser without any test. Used when the anonym binding is forbidden
-     *
-     * @param string $username
-     * @return IMAG\LdapUser\User\LdapUser $ldapUser
-     */
-    public function userEqualUsername($username)
-    {
-        $ldapUser = new LdapUser();
-        $ldapUser
-            ->setUsername($username)
-            ;
-
+        
         return $ldapUser;
     }
 
@@ -97,5 +77,37 @@ class LdapUserProvider implements UserProviderInterface
     public function supportsClass($class)
     {
         return $class === 'IMAG\LdapBundle\User\LdapUser';
+    }
+
+    private function simpleUser($username)
+    {
+        $ldapUser = new LdapUser();
+        $ldapUser->setUsername($username);
+
+        return $ldapUser;
+    }
+
+    private function anonymousSearch($username)
+    {
+        // Throw the exception if the username is not found.
+        if(!$this->ldapManager->exists($username)) {
+            throw new UsernameNotFoundException(sprintf('User "%s" not found', $username));
+        }
+
+        $lm = $this->ldapManager
+            ->setUsername($username)
+            ->doPass();
+
+        $ldapUser = new LdapUser();
+
+        $ldapUser
+            ->setUsername($lm->getUsername())
+            ->setEmail($lm->getEmail())
+            ->setRoles($lm->getRoles())
+            ->setDn($lm->getDn())
+            ->setAttributes($lm->getAttributes())
+            ;        
+
+        return $ldapUser;
     }
 }
