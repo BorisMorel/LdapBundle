@@ -35,12 +35,21 @@ class LdapToken extends AbstractToken
 
     public function serialize()
     {
-        return serialize(array($this->credentials, $this->providerKey, parent::serialize()));
+        return serialize(array(
+            $this->credentials,
+            $this->providerKey,
+            parent::serialize()
+        ));
     }
 
     public function unserialize($str)
     {
-        list($this->credentials, $this->providerKey, $parentStr) = unserialize($str);
+        list(
+            $this->credentials,
+            $this->providerKey,
+            $parentStr
+        ) = unserialize($str);
+        
         parent::unserialize($parentStr);
     }
     
