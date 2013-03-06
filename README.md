@@ -165,7 +165,7 @@ security:
             entity: { class: FQDN\User }
 ```
 
-**Note: **
+**Note:**
 > If you have set bind_username_before to true, you must chain the providers with ldap provider in the last position. 
 
 ``` yml
