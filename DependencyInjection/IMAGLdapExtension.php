@@ -19,9 +19,7 @@ class IMAGLdapExtension extends Extension
     $config = $this->processConfiguration($configuration, $configs);
 
     $container->setParameter('imag_ldap.ldap_connection.params', $config);
-    $container->getDefinition('imag_ldap.security.authentication.provider')
-        ->replaceArgument(5, $config['client']['bind_username_before'])
-        ;
+    $container->setParameter('imag_ldap.authentication.bind_username_before', $config['client']['bind_username_before']);
   }
 
   public function getAlias()
