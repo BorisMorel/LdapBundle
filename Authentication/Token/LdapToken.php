@@ -7,18 +7,22 @@ use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 class LdapToken extends AbstractToken
 {
 
-    public function __construct($username, $password, $providerKey, array $roles= array())
+    private $providerKey;
+        
+    public function __construct($username, $providerKey, array $roles= array())
     {
         parent::__construct($roles);
 
         $this->setuser($username);
-        $this->credentials = $password;
         $this->providerKey = $providerKey;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getCredentials()
     {
-        return $this->credentials;
+        return null;
     }
 
     public function getProviderKey()
@@ -26,17 +30,9 @@ class LdapToken extends AbstractToken
         return $this->providerKey;
     }
 
-    public function eraseCredentials()
-    {
-        parent::eraseCredentials();
-
-        $this->credentials = null;
-    }
-
     public function serialize()
     {
         return serialize(array(
-            $this->credentials,
             $this->providerKey,
             parent::serialize()
         ));
@@ -45,7 +41,6 @@ class LdapToken extends AbstractToken
     public function unserialize($str)
     {
         list(
-            $this->credentials,
             $this->providerKey,
             $parentStr
         ) = unserialize($str);
