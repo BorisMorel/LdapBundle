@@ -32,10 +32,10 @@ class LdapManagerUser implements LdapManagerUserInterface
     public function auth()
     {
         if (null === $this->_ldapUser) {
-            return (bool)($this->bindByUsername() && $this->doPass());
+            return ($this->bindByUsername() && $this->doPass());
         }
 
-        return (bool)($this->doPass() && $this->bindByDn());
+        return ($this->doPass() && $this->bindByDn());
     }
 
     public function doPass()
