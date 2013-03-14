@@ -62,7 +62,7 @@ class LdapConnection implements LdapConnectionInterface
             throw new ConnectionException('LDAP user\'s DN (user_dn) must be provided (as a string).');
         }
 
-        // Accoding to the LDAP RFC 4510-4511, the password can be blank.
+        // According to the LDAP RFC 4510-4511, the password can be blank.
         return @ldap_bind($this->_ress, $user_dn, $password);
     }
 

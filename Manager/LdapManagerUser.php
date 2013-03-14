@@ -111,7 +111,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     private function addLdapUser()
     {
         if (!$this->username) {
-            throw new \InvalidArgumentException('User is not defined, pls use setUsername');
+            throw new \InvalidArgumentException('User is not defined, please use setUsername');
         }
 
         $filter = isset($this->params['user']['filter'])
@@ -216,7 +216,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             break;
 
         default:
-            throw new \Exception(sprintf('The value can\'t be retrieve for this user_id : %s',$this->params['role']['user_id']));
+            throw new \Exception(sprintf('The value can\'t be retrieved for this user_id : %s',$this->params['role']['user_id']));
         }
     }
 }
