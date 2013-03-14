@@ -10,8 +10,8 @@ class LdapManagerUser implements LdapManagerUserInterface
         $ldapConnection,
         $username,
         $password,
-        $params = array(),
-        $_ldapUser = null
+        $params,
+        $_ldapUser
         ;
 
     public function __construct(LdapConnectionInterface $conn)

@@ -8,7 +8,7 @@ use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapConnection implements LdapConnectionInterface
 {
-    private $params = array();
+    private $params;
     private $_ress;
     private $logger;
 
