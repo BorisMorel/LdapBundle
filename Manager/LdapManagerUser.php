@@ -17,8 +17,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     public function __construct(LdapConnectionInterface $conn)
     {
         $this->ldapConnection = $conn;
-        $this->params = $this->ldapConnection
-            ->getParameters();
+        $this->params = $this->ldapConnection->getParameters();
     }
 
     public function exists($username)
@@ -43,14 +42,12 @@ class LdapManagerUser implements LdapManagerUserInterface
         try {
             $this->addLdapUser();
             $this->addLdapRoles();
-
         } catch (\InvalidArgumentException $e) {
             if (false === $this->params['client']['skip_roles']) {
                 throw $e;
             }
-
         }
-        
+
         return $this;
     }
 
@@ -72,6 +69,7 @@ class LdapManagerUser implements LdapManagerUserInterface
                 $attributes[$attrName] = $this->_ldapUser[$attrName][0];
             }
         }
+
         return $attributes;
     }
 

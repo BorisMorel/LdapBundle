@@ -141,16 +141,14 @@ class LdapConnection implements LdapConnectionInterface
     private function info($message)
     {
         if ($this->logger) {
-            $this->logger
-                 ->info($message);
+            $this->logger->info($message);
         }
     }
 
     private function err($message)
     {
         if ($this->logger) {
-            $this->logger
-                 ->err($message);
+            $this->logger->err($message);
         }
     }
 

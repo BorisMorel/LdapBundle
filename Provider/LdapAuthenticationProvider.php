@@ -65,25 +65,23 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         if (!$this->supports($token)) {
             throw new AuthenticationException('Unsupported token');
         }
-        
+
         try {
             $user = $this->userProvider
                 ->loadUserByUsername($token->getUsername());
-
         } catch (UsernameNotFoundException $userNotFoundException) {
             if ($this->hideUserNotFoundExceptions) {
                 throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
             }
-            throw $userNotFoundException;
 
+            throw $userNotFoundException;
         }
-        
+
         if ($user instanceof LdapUser) {
             if (null !== $this->dispatcher) {
                 $userEvent = new LdapUserEvent($user);
                 try {
                     $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
-
                 } catch (\Exception $expt) {
                     if ($this->hideUserNotFoundExceptions) {
                         throw new BadCredentialsException('Bad credentials', 0, $expt);
@@ -94,7 +92,6 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             }
 
             if ($this->bind($user, $token)) {
-
                 if (false === $user->getDn()) {
                     $user = $this->reloadUser($user);
                 }
@@ -168,5 +165,4 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         return $token instanceof UsernamePasswordToken
             && $token->getProviderKey() === $this->providerKey;
     }
-
 }
