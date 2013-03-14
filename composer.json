@@ -17,6 +17,12 @@
             "homepage": "https://github.com/instaclick"
         },
         {
+            "name": "John Kary",
+            "email": "john@johnkary.net",
+            "role": "Fork Maintainer",
+            "homepage": "https://github.com/johnkary"
+        },
+        {
             "name": "Shiroyuki",
             "role": "Fork Maintainer",
             "homepage": "https://github.com/shiroyuki"
