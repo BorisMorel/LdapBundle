@@ -8,8 +8,8 @@ use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapConnection implements LdapConnectionInterface
 {
-    private $params = array();
-    private $_ress;
+    private $params;
+    private $ress;
     private $logger;
 
     public function __construct(array $params, Logger $logger)
@@ -39,16 +39,16 @@ class LdapConnection implements LdapConnectionInterface
             ));
 
         $search = @ldap_search(
-            $this->_ress,
+            $this->ress,
             $params['base_dn'],
             $params['filter'],
             $attrs
         );
 
         if ($search) {
-            $entries = ldap_get_entries($this->_ress, $search);
+            $entries = ldap_get_entries($this->ress, $search);
 
-            @ldap_free_result($this->_ress);
+            @ldap_free_result($this->ress);
 
             return is_array($entries) ? $entries : false;
         }
@@ -59,11 +59,11 @@ class LdapConnection implements LdapConnectionInterface
     public function bind($user_dn, $password='')
     {
         if (empty($user_dn) || ! is_string($user_dn)) {
-            throw new ConnectionException('LDAP user\'s DN (user_dn) must be provided (as a string).');
+            throw new ConnectionException("LDAP user's DN (user_dn) must be provided (as a string).");
         }
 
-        // Accoding to the LDAP RFC 4510-4511, the password can be blank.
-        return @ldap_bind($this->_ress, $user_dn, $password);
+        // According to the LDAP RFC 4510-4511, the password can be blank.
+        return @ldap_bind($this->ress, $user_dn, $password);
     }
 
     public function getParameters()
@@ -133,7 +133,7 @@ class LdapConnection implements LdapConnectionInterface
             }
         }
 
-        $this->_ress = $ress;
+        $this->ress = $ress;
 
         return $this;
     }
@@ -141,16 +141,14 @@ class LdapConnection implements LdapConnectionInterface
     private function info($message)
     {
         if ($this->logger) {
-            $this->logger
-                 ->info($message);
+            $this->logger->info($message);
         }
     }
 
     private function err($message)
     {
         if ($this->logger) {
-            $this->logger
-                 ->err($message);
+            $this->logger->err($message);
         }
     }
 

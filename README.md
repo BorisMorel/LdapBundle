@@ -1,33 +1,30 @@
 # LdapBundle
 
-LdapBundle provides a Ldap authentication system without the `apache mod_ldap`. It uses `php-ldap` extension with a form to authenticate the users. LdapBundle also can be used for the authorization. It retrieves the  Ldap users' roles.
+LdapBundle provides LDAP authentication without using Apache's `mod_ldap`. The bundle instead relies on PHP's [LDAP extension](http://php.net/manual/en/book.ldap.php) along with a form to authenticate users. LdapBundle also can also be used for authorization by retrieving the user's roles defined in LDAP.
 
 ## Contact
 
-You can try to contact me on freenode irc ; channel #symfony-fr ; pseudo : aways
+Nick: aways
+IRC: irc.freenode.net - #symfony-fr
 
 ## Install
 
 1. Download with composer
-3. Enable the Bundle
-4. Configure LdapBundle security.yml
-7. Import LdapBundle routing
-8. Implement Logout
-9. Use chain provider
-10. Subscribe to PRE_BIND event
+2. Enable the Bundle
+3. Configure LdapBundle in security.yml
+4. Import LdapBundle routing
+5. Implement Logout
+6. Use chain provider
+7. Subscribe to PRE_BIND event
 
 ### Get the Bundle
 
 ### Composer
-Modify your composer.json on your project root
+Add LdapBundle in your project's `composer.json`
 
-``` php
-// {root}/composer.json
-
+```json
 {
-    [...],
     "require": {
-        [...],
         "imag/ldap-bundle": "dev-master"
     }
 }
@@ -42,8 +39,8 @@ Modify your composer.json on your project root
 public function registerBundles()
 {
     $bundles = array(
-    // ...
-    new IMAG\LdapBundle\IMAGLdapBundle(),
+        // ...
+        new IMAG\LdapBundle\IMAGLdapBundle(),
     );
 }
 ```
@@ -51,10 +48,10 @@ public function registerBundles()
 ### Configure security.yml
 
 **Note:**
-> An example of security.yml file is located on Ressource/Docs/
+> An example `security.yml` file is located within the bundle at `./Resources/Docs/security.yml`
 
 ``` yaml
-# src/IMAG/LdapBundle/Resources/config/security.yml
+# ./IMAG/LdapBundle/Resources/config/security.yml
 
 security:
   firewalls:
@@ -104,19 +101,20 @@ imag_ldap:
     user_id: [ dn or username ]
 ```
 
-**You need to configure the parameters under the imag_ldap section.**
+**You should configure the parameters under the `imag_ldap` section to match your environment.**
 
 **Note:**
 
-> If are not set, the optional parameters have default values.
-> You can disable this ; Just set parameter to NULL.
+> The optional parameters have default values if not set.
+> You can disable default values by setting a parameter to NULL.
 
 ``` yaml
+# app/config/security.yml
 imag_ldap:
   # ...
   role:
-   # ...
-   filter: NULL
+    # ...
+    filter: NULL
 ```
 
 ### Import routing
@@ -130,22 +128,22 @@ imag_ldap:
 
 ### Implement Logout
 
-Just create a link with logout target.
+Just create a link with a logout target.
 
 ``` html
-<a href="{{ path('logout') }}">logout</a>
+<a href="{{ path('logout') }}">Logout</a>
 ```
 
 **Note:**
 > You can refer to the official Symfony documentation :
-> http://symfony.com/doc/2.0/book/security.html#logging-out
+> http://symfony.com/doc/current/book/security.html#logging-out
 
 ### Chain provider ###
 
-You can chain the login form with other providers. Like, the database_provider, in_memory provider.
+You can also chain the login form with other providers, such as database_provider, in_memory provider, etc.
 
 ``` yml
-# security.yml
+# app/config/security.yml
 security:
     firewalls:
         secured_area:
@@ -166,40 +164,66 @@ security:
 ```
 
 **Note:**
-> If you have set bind_username_before to true, you must chain the providers with ldap provider in the last position. 
+> If you have set the config option `bind_username_before: true` you must chain the providers with the ldap provider in the last position.
 
 ``` yml
-# security.yml
+# app/config/security.yml
 
 providers: [db, ldap]          
 ```
 
 ### Subscribe to PRE_BIND event
 
-Now you can perform you own logic before the user is authenticated on Ldap.
-If you want to break the authentication just return an Exception.
+The PRE_BIND is fired before the user is authenticated via LDAP. Here you can write a listener to perform your own logic before the user is bound/authenticated to LDAP.
+For example, to add your own roles or do other authentication/authorization checks with your application.
 
-To subscribe:
+If you want to break the authentication process within your listener, throw an Exception.
+
+Example listener:
 ``` xml
-<tag name="kernel.event_listener" event="imag_ldap.security.authentication.pre_bind" method="onPreBind" />
+<service id="ldap.listener" class="Acme\HelloBundle\EventListener\LdapSecuritySubscriber">
+    <tag name="kernel.event_subscriber" />
+</service>
 ```
 
-Exemple:
-``` php
+Example:
+```php
 <?php
-use IMAG\LdapBundle\Event\LdapUserEvent,
 
-public function onPreBind(LdapUserEvent $event)
+namespace Acme\HelloBundle\EventListener;
+
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use IMAG\LdapBundle\Event\LdapUserEvent;
+
+/**
+ * Performs logic before the user is found to LDAP
+ */
+class LdapSecurityListener implements EventSubscriberInterface
 {
-    $user = $event->getUser();
-    $config = $this->appContext->getConfig();
-
-    $ldapConf = $config['ldap'];
-
-    if (!in_array($user->getUsername(), $ldapConf['allowed'])) {
-        throw new \Exception('Not allowed ldap user');
+    public static function getSubscribedEvents()
+    {
+        return array(
+            \IMAG\LdapBundle\Event\LdapEvents::PRE_BIND => 'onPreBind',
+        );
     }
 
-    $user->addRole('ROLE_LDAP');
+    /**
+     * Modifies the User before binding data from LDAP
+     *
+     * @param \IMAG\LdapBundle\Event\LdapUserEvent $event
+     */
+    public function onPreBind(LdapUserEvent $event)
+    {
+        $user = $event->getUser();
+        $config = $this->appContext->getConfig();
+
+        $ldapConf = $config['ldap'];
+
+        if (!in_array($user->getUsername(), $ldapConf['allowed'])) {
+            throw new \Exception(sprintf('LDAP user %s not allowed', $user->getUsername()));
+        }
+
+        $user->addRole('ROLE_LDAP');
+    }
 }
 ```

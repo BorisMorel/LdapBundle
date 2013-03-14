@@ -10,15 +10,14 @@ class LdapManagerUser implements LdapManagerUserInterface
         $ldapConnection,
         $username,
         $password,
-        $params = array(),
-        $_ldapUser = null
+        $params,
+        $ldapUser
         ;
 
     public function __construct(LdapConnectionInterface $conn)
     {
         $this->ldapConnection = $conn;
-        $this->params = $this->ldapConnection
-            ->getParameters();
+        $this->params = $this->ldapConnection->getParameters();
     }
 
     public function exists($username)
@@ -31,11 +30,11 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function auth()
     {
-        if (null === $this->_ldapUser) {
-            return (bool)($this->bindByUsername() && $this->doPass());
+        if (null === $this->ldapUser) {
+            return ($this->bindByUsername() && $this->doPass());
         }
 
-        return (bool)($this->doPass() && $this->bindByDn());
+        return ($this->doPass() && $this->bindByDn());
     }
 
     public function doPass()
@@ -43,41 +42,40 @@ class LdapManagerUser implements LdapManagerUserInterface
         try {
             $this->addLdapUser();
             $this->addLdapRoles();
-
-        } catch(\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException $e) {
             if (false === $this->params['client']['skip_roles']) {
                 throw $e;
             }
-
         }
-        
+
         return $this;
     }
 
     public function getDn()
     {
-        return $this->_ldapUser['dn'];
+        return $this->ldapUser['dn'];
     }
 
     public function getEmail()
     {
-        return isset($this->_ldapUser['mail'][0]) ? $this->_ldapUser['mail'][0] : '';
+        return isset($this->ldapUser['mail'][0]) ? $this->ldapUser['mail'][0] : '';
     }
 
     public function getAttributes()
     {
         $attributes = array();
         foreach ($this->params['user']['attributes'] as $attrName) {
-            if (isset($this->_ldapUser[$attrName][0])) {
-                $attributes[$attrName] = $this->_ldapUser[$attrName][0];
+            if (isset($this->ldapUser[$attrName][0])) {
+                $attributes[$attrName] = $this->ldapUser[$attrName][0];
             }
         }
+
         return $attributes;
     }
 
     public function getLdapUser()
     {
-        return $this->_ldapUser;
+        return $this->ldapUser;
     }
 
     public function getUsername()
@@ -87,7 +85,7 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function getRoles()
     {
-        return $this->_ldapUser['roles'];
+        return $this->ldapUser['roles'];
     }
 
     public function setUsername($username)
@@ -111,7 +109,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     private function addLdapUser()
     {
         if (!$this->username) {
-            throw new \InvalidArgumentException('User is not defined, pls use setUsername');
+            throw new \InvalidArgumentException('User is not defined, please use setUsername');
         }
 
         $filter = isset($this->params['user']['filter'])
@@ -136,21 +134,21 @@ class LdapManagerUser implements LdapManagerUserInterface
             return false;
         }
 
-        $this->_ldapUser = $entries[0];
+        $this->ldapUser = $entries[0];
 
         return $this;
     }
 
     private function addLdapRoles()
     {
-        if (null === $this->_ldapUser) {
-            throw new \RuntimeException('AddRoles() can be involved only when addUser() have return an user');
+        if (null === $this->ldapUser) {
+            throw new \RuntimeException('Cannot assign LDAP roles before authenticating user against LDAP');
         }
         
-        $this->_ldapUser['roles'] = array();
+        $this->ldapUser['roles'] = array();
 
         if (!isset($this->params['role'])) {
-            throw new \InvalidArgumentException("If you want skip the roles getting, please set skip_roles to true under client key");
+            throw new \InvalidArgumentException("If you want to skip getting the roles, set config option imag_ldap:client:skip_roles to true");
         }
 
         $tab = array();
@@ -178,7 +176,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             ));
         }
 
-        $this->_ldapUser['roles'] = $tab;
+        $this->ldapUser['roles'] = $tab;
 
         return $this;
     }
@@ -186,7 +184,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     private function bindByDn()
     {
         return $this->ldapConnection
-            ->bind($this->_ldapUser['dn'], $this->password);
+            ->bind($this->ldapUser['dn'], $this->password);
     }
 
     private function bindByUsername()
@@ -207,16 +205,16 @@ class LdapManagerUser implements LdapManagerUserInterface
     private function getUserId()
     {
         switch ($this->params['role']['user_id']) {
-        case 'dn':
-            return $this->_ldapUser['dn'];
-            break;
+            case 'dn':
+                return $this->ldapUser['dn'];
+                break;
 
-        case 'username':
-            return $this->username;
-            break;
+            case 'username':
+                return $this->username;
+                break;
 
-        default:
-            throw new \Exception(sprintf('The value can\'t be retrieve for this user_id : %s',$this->params['role']['user_id']));
+            default:
+                throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
         }
     }
 }

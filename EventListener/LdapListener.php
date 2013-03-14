@@ -53,7 +53,7 @@ class LdapListener extends AbstractAuthenticationListener
         
         $this->csrfProvider = $csrfProvider;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -91,6 +91,4 @@ class LdapListener extends AbstractAuthenticationListener
 
         return $this->authenticationManager->authenticate(new UsernamePasswordToken($username, $password, $this->providerKey));
     }
-
-
 }
