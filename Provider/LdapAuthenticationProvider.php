@@ -118,7 +118,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * Authenticate the user with LDAP bind.
      *
-     * @param UserInterface  $user
+     * @param \IMAG\LdapBundle\User\LdapUser  $user
      * @param TokenInterface $token
      *
      * @return boolean
@@ -135,8 +135,8 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * Reload user with the username
      *
-     * @param \IMAG\LdapBundle\User\LdapBundle $user
-     * @return \IMAG\LdapBundle\User\LdapBundle $user
+     * @param \IMAG\LdapBundle\User\LdapUser $user
+     * @return \IMAG\LdapBundle\User\LdapUser $user
      */
     private function reloadUser(LdapUser $user)
     {
