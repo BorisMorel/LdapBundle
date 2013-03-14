@@ -44,7 +44,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             $this->addLdapUser();
             $this->addLdapRoles();
 
-        } catch(\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException $e) {
             if (false === $this->params['client']['skip_roles']) {
                 throw $e;
             }
@@ -207,16 +207,16 @@ class LdapManagerUser implements LdapManagerUserInterface
     private function getUserId()
     {
         switch ($this->params['role']['user_id']) {
-        case 'dn':
-            return $this->_ldapUser['dn'];
-            break;
+            case 'dn':
+                return $this->_ldapUser['dn'];
+                break;
 
-        case 'username':
-            return $this->username;
-            break;
+            case 'username':
+                return $this->username;
+                break;
 
-        default:
-            throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
+            default:
+                throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
         }
     }
 }

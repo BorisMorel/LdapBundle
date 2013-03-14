@@ -13,9 +13,9 @@ class Configuration implements ConfigurationInterface
     $rootNode = $treeBuilder->root('imag_ldap');
     $rootNode
         ->children()
-          ->append($this->addClientNode())
-          ->append($this->addUserNode())
-          ->append($this->addRoleNode())
+            ->append($this->addClientNode())
+            ->append($this->addUserNode())
+            ->append($this->addRoleNode())
         ->end()
         ;
 

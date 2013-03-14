@@ -47,5 +47,4 @@ class LdapToken extends AbstractToken
         
         parent::unserialize($parentStr);
     }
-    
 }

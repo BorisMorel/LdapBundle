@@ -8,9 +8,7 @@ use IMAG\LdapBundle\User\LdapUser;
 
 class LdapUserEvent extends Event
 { 
-    private
-        $user
-        ;
+    private $user;
 
     public function __construct(LdapUser $user)
     {
@@ -21,5 +19,4 @@ class LdapUserEvent extends Event
     {
         return $this->user;
     }
-
 }

@@ -3,10 +3,10 @@
 namespace IMAG\LdapBundle\Factory;
 
 use Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\AbstractFactory,
-  Symfony\Component\DependencyInjection\ContainerBuilder,
-  Symfony\Component\Config\Definition\Builder\NodeDefinition,
-  Symfony\Component\DependencyInjection\DefinitionDecorator,
-  Symfony\Component\DependencyInjection\Reference;
+    Symfony\Component\DependencyInjection\ContainerBuilder,
+    Symfony\Component\Config\Definition\Builder\NodeDefinition,
+    Symfony\Component\DependencyInjection\DefinitionDecorator,
+    Symfony\Component\DependencyInjection\Reference;
 
 class LdapFactory extends AbstractFactory
 {
@@ -47,7 +47,6 @@ class LdapFactory extends AbstractFactory
 
     protected function createAuthProvider(ContainerBuilder $container, $id, $config, $userProviderId)
     {
-
         $dao = 'security.authentication.provider.dao.'.$id;
         $container
             ->setDefinition($dao, new DefinitionDecorator('security.authentication.provider.dao'))
@@ -65,7 +64,7 @@ class LdapFactory extends AbstractFactory
 
         return $provider;
     }
-  
+
     protected function createlistener($container, $id, $config, $userProvider)
     {
         $listenerId = parent::createListener($container, $id, $config, $userProvider);
@@ -76,7 +75,7 @@ class LdapFactory extends AbstractFactory
                 ->addArgument(new Reference($config['csrf_provider']))
                 ;
         }
-    
+
         return $listenerId;
     }
 
@@ -89,7 +88,7 @@ class LdapFactory extends AbstractFactory
             ->addArgument($config['login_path'])
             ->addArgument($config['use_forward'])
             ;
-      
+
         return $entryPointId;
     }
 }
