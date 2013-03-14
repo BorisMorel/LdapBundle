@@ -59,7 +59,7 @@ class LdapConnection implements LdapConnectionInterface
     public function bind($user_dn, $password='')
     {
         if (empty($user_dn) || ! is_string($user_dn)) {
-            throw new ConnectionException('LDAP user\'s DN (user_dn) must be provided (as a string).');
+            throw new ConnectionException("LDAP user's DN (user_dn) must be provided (as a string).");
         }
 
         // According to the LDAP RFC 4510-4511, the password can be blank.

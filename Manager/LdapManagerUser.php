@@ -216,7 +216,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             break;
 
         default:
-            throw new \Exception(sprintf('The value can\'t be retrieved for this user_id : %s',$this->params['role']['user_id']));
+            throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
         }
     }
 }
