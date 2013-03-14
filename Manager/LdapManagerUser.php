@@ -144,13 +144,13 @@ class LdapManagerUser implements LdapManagerUserInterface
     private function addLdapRoles()
     {
         if (null === $this->_ldapUser) {
-            throw new \RuntimeException('AddRoles() can be involved only when addUser() have return an user');
+            throw new \RuntimeException('Cannot assign LDAP roles before authenticating user against LDAP');
         }
         
         $this->_ldapUser['roles'] = array();
 
         if (!isset($this->params['role'])) {
-            throw new \InvalidArgumentException("If you want skip the roles getting, please set skip_roles to true under client key");
+            throw new \InvalidArgumentException("If you want to skip getting the roles, set config option imag_ldap:client:skip_roles to true");
         }
 
         $tab = array();
