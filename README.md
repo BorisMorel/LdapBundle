@@ -10,7 +10,7 @@ IRC: irc.freenode.net - #symfony-fr
 ## Install
 
 1. Download with composer
-3. Enable the Bundle
+2. Enable the Bundle
 3. Configure LdapBundle in security.yml
 4. Import LdapBundle routing
 5. Implement Logout
