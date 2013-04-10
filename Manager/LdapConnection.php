@@ -16,11 +16,12 @@ class LdapConnection implements LdapConnectionInterface
     {
         $this->params = $params;
         $this->logger = $logger;
-        $this->connect();
     }
 
     public function search(array $params)
     {
+        $this->connect();
+
         $ref = array(
             'base_dn' => '',
             'filter' => '',
@@ -61,6 +62,8 @@ class LdapConnection implements LdapConnectionInterface
         if (empty($user_dn) || ! is_string($user_dn)) {
             throw new ConnectionException("LDAP user's DN (user_dn) must be provided (as a string).");
         }
+
+        $this->connect();
 
         // According to the LDAP RFC 4510-4511, the password can be blank.
         return @ldap_bind($this->ress, $user_dn, $password);
@@ -103,6 +106,10 @@ class LdapConnection implements LdapConnectionInterface
 
     private function connect()
     {
+        if (null != $this->ress && false !== $this->ress) {
+            return $this;
+        }
+
         $port = isset($this->params['client']['port'])
             ? $this->params['client']['port']
             : '389';
