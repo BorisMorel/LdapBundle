@@ -134,4 +134,14 @@ class LdapUser implements UserInterface, EquatableInterface, \Serializable
             $this->dn,
         ) = unserialize($serialized);
     }
+
+    /**
+     * Return username when converting class to string
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getUserName();
+    }
 }
