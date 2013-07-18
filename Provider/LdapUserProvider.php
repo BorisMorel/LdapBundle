@@ -8,8 +8,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException,
     Symfony\Component\Security\Core\User\UserProviderInterface;
 
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface,
-    IMAG\LdapBundle\User\LdapUserInterface,
-    IMAG\LdapBundle\User\LdapUser;
+    IMAG\LdapBundle\User\LdapUserInterface;
 
 /**
  * LDAP User Provider
@@ -89,7 +88,7 @@ class LdapUserProvider implements UserProviderInterface
 
     private function simpleUser($username)
     {
-        $ldapUser = new LdapUser();
+        $ldapUser = new $this->userClass;
         $ldapUser->setUsername($username);
 
         return $ldapUser;
@@ -106,7 +105,7 @@ class LdapUserProvider implements UserProviderInterface
             ->setUsername($username)
             ->doPass();
 
-        $ldapUser = new LdapUser();
+        $ldapUser = new $this->userClass;
 
         $ldapUser
             ->setUsername($lm->getUsername())
