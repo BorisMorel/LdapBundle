@@ -30,15 +30,22 @@ class LdapUserProvider implements UserProviderInterface
     private $bindUsernameBefore;
 
     /**
+     * The class name of the User model
+     * @var string
+     */
+    private $userClass;
+
+    /**
      * Constructor
      *
      * @param \IMAG\LdapBundle\Manager\LdapManagerUserInterface $ldapManager
      * @param string $bindUsernameBefore
      */
-    public function __construct(LdapManagerUserInterface $ldapManager, $bindUsernameBefore = false)
+    public function __construct(LdapManagerUserInterface $ldapManager, $bindUsernameBefore = false, $userClass)
     {
         $this->ldapManager = $ldapManager;
         $this->bindUsernameBefore = $bindUsernameBefore;
+        $this->userClass = $userClass;
     }
 
     /**
