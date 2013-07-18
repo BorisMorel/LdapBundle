@@ -105,7 +105,7 @@ class LdapUser implements LdapUserInterface, UserInterface, EquatableInterface, 
 
     public function isEqualTo(UserInterface $user)
     {
-        if (!$user instanceof LdapUser
+        if (!$user instanceof LdapUserInterface
             || $user->getUsername() !== $this->username
             || $user->getEmail() !== $this->email
             || count(array_diff($user->getRoles(), $this->roles)) > 0

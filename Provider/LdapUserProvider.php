@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException,
     Symfony\Component\Security\Core\User\UserProviderInterface;
 
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface,
+    IMAG\LdapBundle\User\LdapUserInterface,
     IMAG\LdapBundle\User\LdapUser;
 
 /**
@@ -55,7 +56,7 @@ class LdapUserProvider implements UserProviderInterface
         } else {
             $ldapUser = $this->anonymousSearch($username);
         }
-        
+
         return $ldapUser;
     }
 
@@ -64,7 +65,7 @@ class LdapUserProvider implements UserProviderInterface
      */
     public function refreshUser(UserInterface $user)
     {
-        if (!$user instanceof LdapUser) {
+        if (!$user instanceof LdapUserInterface) {
             throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', get_class($user)));
         }
 
@@ -76,7 +77,7 @@ class LdapUserProvider implements UserProviderInterface
      */
     public function supportsClass($class)
     {
-        return $class === 'IMAG\LdapBundle\User\LdapUser';
+        return ($class instanceof LdapUserInterface);
     }
 
     private function simpleUser($username)
@@ -106,7 +107,7 @@ class LdapUserProvider implements UserProviderInterface
             ->setRoles($lm->getRoles())
             ->setDn($lm->getDn())
             ->setAttributes($lm->getAttributes())
-            ;        
+            ;
 
         return $ldapUser;
     }
