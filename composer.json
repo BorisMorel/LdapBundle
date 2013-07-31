@@ -33,6 +33,7 @@
     },
     "require": {
         "php": ">=5.3.3",
+        "ext-ldap": "*",
         "symfony/symfony": ">2.0"
     },
     "autoload": {
