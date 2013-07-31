@@ -8,7 +8,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException,
     Symfony\Component\Security\Core\User\UserProviderInterface;
 
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface,
-    IMAG\LdapBundle\User\LdapUser;
+    IMAG\LdapBundle\User\LdapUserInterface;
 
 /**
  * LDAP User Provider
@@ -29,15 +29,22 @@ class LdapUserProvider implements UserProviderInterface
     private $bindUsernameBefore;
 
     /**
+     * The class name of the User model
+     * @var string
+     */
+    private $userClass;
+
+    /**
      * Constructor
      *
      * @param \IMAG\LdapBundle\Manager\LdapManagerUserInterface $ldapManager
      * @param string $bindUsernameBefore
      */
-    public function __construct(LdapManagerUserInterface $ldapManager, $bindUsernameBefore = false)
+    public function __construct(LdapManagerUserInterface $ldapManager, $bindUsernameBefore = false, $userClass)
     {
         $this->ldapManager = $ldapManager;
         $this->bindUsernameBefore = $bindUsernameBefore;
+        $this->userClass = $userClass;
     }
 
     /**
@@ -55,7 +62,7 @@ class LdapUserProvider implements UserProviderInterface
         } else {
             $ldapUser = $this->anonymousSearch($username);
         }
-        
+
         return $ldapUser;
     }
 
@@ -64,7 +71,7 @@ class LdapUserProvider implements UserProviderInterface
      */
     public function refreshUser(UserInterface $user)
     {
-        if (!$user instanceof LdapUser) {
+        if (!$user instanceof LdapUserInterface) {
             throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', get_class($user)));
         }
 
@@ -76,12 +83,12 @@ class LdapUserProvider implements UserProviderInterface
      */
     public function supportsClass($class)
     {
-        return $class === 'IMAG\LdapBundle\User\LdapUser';
+        return ($class instanceof LdapUserInterface);
     }
 
     private function simpleUser($username)
     {
-        $ldapUser = new LdapUser();
+        $ldapUser = new $this->userClass;
         $ldapUser->setUsername($username);
 
         return $ldapUser;
@@ -98,7 +105,7 @@ class LdapUserProvider implements UserProviderInterface
             ->setUsername($username)
             ->doPass();
 
-        $ldapUser = new LdapUser();
+        $ldapUser = new $this->userClass;
 
         $ldapUser
             ->setUsername($lm->getUsername())
@@ -106,7 +113,7 @@ class LdapUserProvider implements UserProviderInterface
             ->setRoles($lm->getRoles())
             ->setDn($lm->getDn())
             ->setAttributes($lm->getAttributes())
-            ;        
+            ;
 
         return $ldapUser;
     }

@@ -16,7 +16,7 @@ security:
     providers:
         ldap:
             id: imag_ldap.security.user.provider
-                
+
     encoders:
         IMAG\LdapBundle\User\LdapUser: plaintext
 
@@ -48,3 +48,5 @@ imag_ldap:
     name_attribute: cn
     user_attribute: member
 #    user_id: [ dn or username ] #Default dn
+
+#  user_class: IMAG\LdapBundle\User\LdapUser

@@ -16,7 +16,7 @@ use IMAG\LdapBundle\Authentication\Token\LdapToken;
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface;
 use IMAG\LdapBundle\Event\LdapUserEvent;
 use IMAG\LdapBundle\Event\LdapEvents;
-use IMAG\LdapBundle\User\LdapUser;
+use IMAG\LdapBundle\User\LdapUserInterface;
 
 class LdapAuthenticationProvider implements AuthenticationProviderInterface
 {
@@ -77,7 +77,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             throw $userNotFoundException;
         }
 
-        if ($user instanceof LdapUser) {
+        if ($user instanceof LdapUserInterface) {
             if (null !== $this->dispatcher) {
                 $userEvent = new LdapUserEvent($user);
                 try {
@@ -118,12 +118,12 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * Authenticate the user with LDAP bind.
      *
-     * @param \IMAG\LdapBundle\User\LdapUser  $user
+     * @param \IMAG\LdapBundle\User\LdapUserInterface  $user
      * @param TokenInterface $token
      *
      * @return boolean
      */
-    private function bind(LdapUser $user, TokenInterface $token)
+    private function bind(LdapUserInterface $user, TokenInterface $token)
     {
         $this->ldapManager
             ->setUsername($user->getUsername())
@@ -135,10 +135,10 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * Reload user with the username
      *
-     * @param \IMAG\LdapBundle\User\LdapUser $user
-     * @return \IMAG\LdapBundle\User\LdapUser $user
+     * @param \IMAG\LdapBundle\User\LdapUserInterface $user
+     * @return \IMAG\LdapBundle\User\LdapUserInterface $user
      */
-    private function reloadUser(LdapUser $user)
+    private function reloadUser(LdapUserInterface $user)
     {
         try {
             $user = $this->userProvider->refreshUser($user);

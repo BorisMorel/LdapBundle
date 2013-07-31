@@ -16,10 +16,13 @@ class Configuration implements ConfigurationInterface
             ->append($this->addClientNode())
             ->append($this->addUserNode())
             ->append($this->addRoleNode())
+            ->scalarNode('user_class')
+              ->defaultValue("IMAG\LdapBundle\User\LdapUser")
+            ->end()
         ->end()
         ;
 
-    return $treeBuilder;      
+    return $treeBuilder;
   }
 
   private function addClientNode()
@@ -38,7 +41,7 @@ class Configuration implements ConfigurationInterface
               ->booleanNode('bind_username_before')->defaultFalse()->end()
               ->scalarNode('referrals_enabled')->end()
               ->scalarNode('network_timeout')->end()
-              ->booleanNode('skip_roles')->defaultFalse()->end()          
+              ->booleanNode('skip_roles')->defaultFalse()->end()
            ->end()
           ;
 
@@ -85,4 +88,5 @@ class Configuration implements ConfigurationInterface
 
       return $node;
   }
+
 }

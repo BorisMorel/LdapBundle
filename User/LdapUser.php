@@ -2,10 +2,9 @@
 
 namespace IMAG\LdapBundle\User;
 
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\EquatableInterface;
+use IMAG\LdapBundle\User\LdapUserInterface;
 
-class LdapUser implements UserInterface, EquatableInterface, \Serializable
+class LdapUser implements LdapUserInterface
 {
     protected $username,
         $email,
@@ -101,9 +100,9 @@ class LdapUser implements UserInterface, EquatableInterface, \Serializable
         return null; //With ldap No credentials with stored ; Maybe forgotten the roles
     }
 
-    public function isEqualTo(UserInterface $user)
+    public function isEqualTo(\Symfony\Component\Security\Core\User\UserInterface $user)
     {
-        if (!$user instanceof LdapUser
+        if (!$user instanceof LdapUserInterface
             || $user->getUsername() !== $this->username
             || $user->getEmail() !== $this->email
             || count(array_diff($user->getRoles(), $this->roles)) > 0
