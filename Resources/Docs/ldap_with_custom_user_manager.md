@@ -156,6 +156,13 @@ imag_ldap:
   user_class: Acme\DemoBundle\Entity\User
 ```
 
+The encoder in `security.yml` needs to be set as well:
+```yml
+security:
+    encoders:
+        Acme\DemoBundle\Entity\User: plaintext
+```
+
 ### Create custom user provider service
 
 Now all that's left is the creation of a custom `LdapUserProvider` service that
