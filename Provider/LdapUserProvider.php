@@ -83,6 +83,7 @@ class LdapUserProvider implements UserProviderInterface
      */
     public function supportsClass($class)
     {
+        $class = new $class();
         return ($class instanceof LdapUserInterface);
     }
 
