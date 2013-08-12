@@ -83,7 +83,7 @@ class LdapUserProvider implements UserProviderInterface
      */
     public function supportsClass($class)
     {
-        return ($class instanceof LdapUserInterface);
+        return is_subclass_of($class, '\IMAG\LdapBundle\User\LdapUserInterface');
     }
 
     private function simpleUser($username)
