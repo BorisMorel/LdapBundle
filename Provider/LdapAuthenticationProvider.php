@@ -2,6 +2,7 @@
 
 namespace IMAG\LdapBundle\Provider;
 
+use IMAG\LdapBundle\Event\LdapTokenEvent;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -99,6 +100,18 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
                 $ldapToken = new LdapToken($user, $this->providerKey, $user->getRoles());
                 $ldapToken->setAuthenticated(true);
                 $ldapToken->setAttributes($token->getAttributes());
+
+                $ldapTokenEvent = new LdapTokenEvent($ldapToken);
+
+                try {
+                    $this->dispatcher->dispatch(LdapEvents::POST_BIND, $ldapTokenEvent);
+                } catch (AuthenticationException $authenticationException) {
+                    if ($this->hideUserNotFoundExceptions) {
+                        throw new BadCredentialsException('Bad credentials', 0, $authenticationException);
+                    }
+
+                    throw $authenticationException;
+                }
 
                 return $ldapToken;
             }
