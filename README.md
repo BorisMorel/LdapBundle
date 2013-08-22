@@ -70,7 +70,7 @@ security:
   providers:
     ldap:
       id: imag_ldap.security.user.provider
-                
+
   encoders:
     IMAG\LdapBundle\User\LdapUser: plaintext
 
@@ -92,6 +92,8 @@ imag_ldap:
   user:
     base_dn: ou=people,dc=host,dc=foo
 #    filter: (&(foo=bar)(ObjectClass=Person)) #Optional
+#    name_regex_pattern: '#^[^\\]*\\(.*)$#' #Optional
+#    name_regex_replacement: '$1' #Optional
     name_attribute: uid
   role:
     base_dn: ou=group, dc=host, dc=foo
@@ -156,7 +158,7 @@ security:
     providers:
         multiples:
             chain:
-                providers: [ldap, db]          
+                providers: [ldap, db]
         ldap:
             id: imag_ldap.security.user.provider
         db:
@@ -169,7 +171,7 @@ security:
 ``` yml
 # app/config/security.yml
 
-providers: [db, ldap]          
+providers: [db, ldap]
 ```
 
 ### Subscribe to PRE_BIND event
