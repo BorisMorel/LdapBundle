@@ -13,6 +13,9 @@ interface LdapUserInterface extends UserInterface, EquatableInterface, \Serializ
     public function getDn();
     public function setDn($dn);
 
+    public function getCn();
+    public function setCn($cn);
+
     public function getAttributes();
     public function setAttributes(array $attributes);
     public function getAttribute($name);

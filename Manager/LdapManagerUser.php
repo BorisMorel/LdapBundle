@@ -56,6 +56,11 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $this->ldapUser['dn'];
     }
 
+    public function getCn()
+    {
+        return $this->ldapUser['cn'][0];
+    }
+
     public function getEmail()
     {
         return isset($this->ldapUser['mail'][0]) ? $this->ldapUser['mail'][0] : '';
@@ -144,7 +149,7 @@ class LdapManagerUser implements LdapManagerUserInterface
         if (null === $this->ldapUser) {
             throw new \RuntimeException('Cannot assign LDAP roles before authenticating user against LDAP');
         }
-        
+
         $this->ldapUser['roles'] = array();
 
         if (!isset($this->params['role'])) {
