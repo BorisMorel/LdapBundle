@@ -10,8 +10,44 @@ class LdapUser implements LdapUserInterface
         $email,
         $roles,
         $dn,
-        $attributes
+        $attributes,
+        $givenname,
+        $surname,
+        $displayname
         ;
+
+    public function getDisplayname()
+    {
+        return $this->displayname;
+    }
+
+    public function setDisplayname($displayname)
+    {
+        $this->displayname = $displayname;
+        return $this;
+    }
+
+    public function getGivenname()
+    {
+        return $this->givenname;
+    }
+
+    public function setGivenname($givenname)
+    {
+        $this->givenname = $givenname;
+        return $this;
+    }
+
+    public function getSurname()
+    {
+        return $this->surname;
+    }
+
+    public function setSurname($surname)
+    {
+        $this->surname = $surname;
+        return $this;
+    }
 
     public function getRoles()
     {

@@ -78,6 +78,33 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $this->ldapUser;
     }
 
+    public function getDisplayName()
+    {
+        if (isset($this->ldapUser['displayname'][0])) {
+            return $this->ldapUser['displayname'][0];
+        } else {
+            return false;
+        }
+    }
+
+    public function getGivenName()
+    {
+        if (isset($this->ldapUser['givenname'][0])) {
+            return $this->ldapUser['givenname'][0];
+        } else {
+            return false;
+        }
+    }
+
+    public function getSurname()
+    {
+        if (isset($this->ldapUser['sn'][0])) {
+            return $this->ldapUser['sn'][0];
+        } else {
+            return false;
+        }
+    }
+
     public function getUsername()
     {
         return $this->username;
