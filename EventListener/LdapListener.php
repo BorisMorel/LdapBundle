@@ -5,7 +5,7 @@ namespace IMAG\LdapBundle\EventListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface,
     Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderInterface,
     Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpKernel\Log\LoggerInterface,
+    Psr\Log\LoggerInterface,
     Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface,
     Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken,
     Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException,
