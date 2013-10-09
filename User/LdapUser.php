@@ -8,7 +8,7 @@ class LdapUser implements LdapUserInterface
         $username,
         $givenname,
         $surname,
-        $displayname
+        $displayname,
         $email,
         $dn,
         $cn,
