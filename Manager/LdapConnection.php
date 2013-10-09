@@ -51,7 +51,7 @@ class LdapConnection implements LdapConnectionInterface
         if ($search) {
             $entries = ldap_get_entries(self::$ress, $search);
 
-            @ldap_free_result(self::$ress);
+            @ldap_free_result($search);
 
             return is_array($entries) ? $entries : false;
         }
