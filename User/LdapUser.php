@@ -4,13 +4,50 @@ namespace IMAG\LdapBundle\User;
 
 class LdapUser implements LdapUserInterface
 {
-    protected $username,
+    protected 
+        $username,
+        $givenname,
+        $surname,
+        $displayname
         $email,
-        $roles = array(),
         $dn,
         $cn,
-        $attributes = array()
+        $roles = array(),
+        $attributes = array()        
         ;
+
+    public function getDisplayname()
+    {
+        return $this->displayname;
+    }
+
+    public function setDisplayname($displayname)
+    {
+        $this->displayname = $displayname;
+        return $this;
+    }
+
+    public function getGivenname()
+    {
+        return $this->givenname;
+    }
+
+    public function setGivenname($givenname)
+    {
+        $this->givenname = $givenname;
+        return $this;
+    }
+
+    public function getSurname()
+    {
+        return $this->surname;
+    }
+
+    public function setSurname($surname)
+    {
+        $this->surname = $surname;
+        return $this;
+    }
 
     public function getRoles()
     {
