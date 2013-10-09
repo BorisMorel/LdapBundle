@@ -8,9 +8,9 @@ class LdapUser implements LdapUserInterface
 {
     protected $username,
         $email,
-        $roles,
+        $roles = array(),
         $dn,
-        $attributes
+        $attributes = array()
         ;
 
     public function getRoles()
