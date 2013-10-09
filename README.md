@@ -198,7 +198,7 @@ use IMAG\LdapBundle\Event\LdapUserEvent;
 /**
  * Performs logic before the user is found to LDAP
  */
-class LdapSecurityListener implements EventSubscriberInterface
+class LdapSecuritySubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
     {
