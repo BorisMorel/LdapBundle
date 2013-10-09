@@ -82,7 +82,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
                 $userEvent = new LdapUserEvent($user);
                 try {
                     $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
-                } catch (\Exception $expt) {
+                } catch (AuthenticationException $expt) {
                     if ($this->hideUserNotFoundExceptions) {
                         throw new BadCredentialsException('Bad credentials', 0, $expt);
                     }
