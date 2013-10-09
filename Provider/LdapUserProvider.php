@@ -38,7 +38,8 @@ class LdapUserProvider implements UserProviderInterface
      * Constructor
      *
      * @param \IMAG\LdapBundle\Manager\LdapManagerUserInterface $ldapManager
-     * @param string $bindUsernameBefore
+     * @param bool|string                                       $bindUsernameBefore
+     * @param string                                            $userClass
      */
     public function __construct(LdapManagerUserInterface $ldapManager, $bindUsernameBefore = false, $userClass)
     {
@@ -112,6 +113,7 @@ class LdapUserProvider implements UserProviderInterface
             ->setEmail($lm->getEmail())
             ->setRoles($lm->getRoles())
             ->setDn($lm->getDn())
+            ->setCn($lm->getCn())
             ->setAttributes($lm->getAttributes())
             ;
 

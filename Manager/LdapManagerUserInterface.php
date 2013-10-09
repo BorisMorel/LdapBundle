@@ -9,6 +9,7 @@ interface LdapManagerUserInterface
   function auth();
   function doPass();
   function getDn();
+  function getCn();
   function getEmail();
   function getUsername();
   function getRoles();

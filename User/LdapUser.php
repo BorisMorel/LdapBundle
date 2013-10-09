@@ -2,14 +2,13 @@
 
 namespace IMAG\LdapBundle\User;
 
-use IMAG\LdapBundle\User\LdapUserInterface;
-
 class LdapUser implements LdapUserInterface
 {
     protected $username,
         $email,
         $roles = array(),
         $dn,
+        $cn,
         $attributes = array()
         ;
 
@@ -46,6 +45,18 @@ class LdapUser implements LdapUserInterface
     public function setDn($dn)
     {
         $this->dn = $dn;
+
+        return $this;
+    }
+
+    public function getCn()
+    {
+        return $this->cn;
+    }
+
+    public function setCn($cn)
+    {
+        $this->cn = $cn;
 
         return $this;
     }
