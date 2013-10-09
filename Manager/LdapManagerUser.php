@@ -116,13 +116,19 @@ class LdapManagerUser implements LdapManagerUserInterface
             ? $this->params['user']['filter']
             : '';
 
+        $username = $this->username;
+
+        if(isset($this->params['user']['name_regex_pattern']) && isset($this->params['user']['name_regex_replacement'])){
+            $username = preg_replace($this->params['user']['name_regex_pattern'], $this->params['user']['name_regex_replacement'], $username);
+        }
+
         $entries = $this->ldapConnection
             ->search(array(
                 'base_dn' => $this->params['user']['base_dn'],
                 'filter' => sprintf('(&%s(%s=%s))',
                                     $filter,
                                     $this->params['user']['name_attribute'],
-                                    $this->ldapConnection->escape($this->username)
+                                    $this->ldapConnection->escape($username)
                 )
             ));
 
@@ -144,7 +150,7 @@ class LdapManagerUser implements LdapManagerUserInterface
         if (null === $this->ldapUser) {
             throw new \RuntimeException('Cannot assign LDAP roles before authenticating user against LDAP');
         }
-        
+
         $this->ldapUser['roles'] = array();
 
         if (!isset($this->params['role'])) {

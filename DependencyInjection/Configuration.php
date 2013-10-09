@@ -60,6 +60,8 @@ class Configuration implements ConfigurationInterface
               ->scalarNode('filter')->end()
               ->scalarNode('name_attribute')->defaultValue('uid')->end()
               ->variableNode('attributes')->defaultValue(array())->end()
+              ->scalarNode('name_regex_pattern')->end()
+              ->scalarNode('name_regex_replacement')->end()
           ->end()
           ;
 
