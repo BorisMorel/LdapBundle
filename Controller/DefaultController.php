@@ -27,7 +27,7 @@ class DefaultController extends Controller
         ));
     }
 
-    private function getAuthenticationError()
+    protected function getAuthenticationError()
     {
         if ($this->get('request')->attributes->has(SecurityContext::AUTHENTICATION_ERROR)) {
             return $this->get('request')->attributes->get(SecurityContext::AUTHENTICATION_ERROR);
@@ -36,7 +36,7 @@ class DefaultController extends Controller
         return $this->get('request')->getSession()->get(SecurityContext::AUTHENTICATION_ERROR);
     }
 
-    private function generateToken()
+    protected function generateToken()
     {
         $token = $this->get('form.csrf_provider')
                       ->generateCsrfToken('authenticate');
