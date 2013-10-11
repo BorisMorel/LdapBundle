@@ -8,13 +8,14 @@ class LdapManagerUser implements LdapManagerUserInterface
 {
     private
         $ldapConnection,
+        $rolePrefix,
         $username,
         $password,
         $params,
         $ldapUser
         ;
 
-    public function __construct(LdapConnectionInterface $conn)
+    public function __construct(LdapConnectionInterface $conn, $rolePrefix)
     {
         $this->ldapConnection = $conn;
         $this->params = $this->ldapConnection->getParameters();
@@ -33,7 +34,7 @@ class LdapManagerUser implements LdapManagerUserInterface
         if (strlen($this->password) === 0) {
             return false;
         }
-        
+
         if (null === $this->ldapUser) {
             return ($this->bindByUsername() && $this->doPass());
         }
@@ -207,7 +208,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             ));
 
         for ($i = 0; $i < $entries['count']; $i++) {
-            array_push($tab, sprintf('ROLE_%s',
+            array_push($tab, sprintf($this->rolePrefix . '%s',
                                      self::slugify($entries[$i][$this->params['role']['name_attribute']][0])
             ));
         }

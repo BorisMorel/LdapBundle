@@ -4,7 +4,7 @@ namespace IMAG\LdapBundle\Manager;
 
 interface LdapManagerUserInterface
 {
-  function __construct(LdapConnectionInterface $conn);
+  function __construct(LdapConnectionInterface $conn, $rolePrefix);
   function exists($username);
   function auth();
   function doPass();
