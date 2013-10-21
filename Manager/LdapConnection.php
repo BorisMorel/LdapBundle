@@ -8,11 +8,12 @@ use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapConnection implements LdapConnectionInterface
 {
-    private static $ress;
-    private 
+    private
         $params,
         $logger
         ;
+
+    protected $ress;
 
     public function __construct(array $params, Logger $logger)
     {
@@ -42,14 +43,14 @@ class LdapConnection implements LdapConnectionInterface
             ));
 
         $search = @ldap_search(
-            self::$ress,
+            $this->ress,
             $params['base_dn'],
             $params['filter'],
             $attrs
         );
 
         if ($search) {
-            $entries = ldap_get_entries(self::$ress, $search);
+            $entries = ldap_get_entries($this->ress, $search);
 
             @ldap_free_result($search);
 
@@ -68,7 +69,7 @@ class LdapConnection implements LdapConnectionInterface
         $this->connect();
 
         // According to the LDAP RFC 4510-4511, the password can be blank.
-        return @ldap_bind(self::$ress, $user_dn, $password);
+        return @ldap_bind($this->ress, $user_dn, $password);
     }
 
     public function getParameters()
@@ -108,7 +109,7 @@ class LdapConnection implements LdapConnectionInterface
 
     private function connect()
     {
-        if (null !== self::$ress) {
+        if (null !== $this->ress) {
             return $this;
         }
 
@@ -142,7 +143,7 @@ class LdapConnection implements LdapConnectionInterface
             }
         }
 
-        self::$ress = $ress;
+        $this->ress = $ress;
 
         return $this;
     }
