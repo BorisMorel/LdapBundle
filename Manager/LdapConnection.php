@@ -35,6 +35,10 @@ class LdapConnection implements LdapConnectionInterface
         }
 
         $attrs = isset($params['attrs']) ? $params['attrs'] : array();
+        $params['attrsonly'] = isset($params['attrsonly']) ? $params['attrsonly'] : 0;
+        $params['sizelimit'] = isset($params['sizelimit']) ? $params['sizelimit'] : 0;
+        $params['timelimit'] = isset($params['timelimit']) ? $params['timelimit'] : 0;
+        $params['deref'] = isset($params['deref']) ? $params['deref'] : LDAP_DEREF_NEVER;
 
         $this->info(
             sprintf('ldap_search base_dn %s, filter %s',
@@ -46,7 +50,11 @@ class LdapConnection implements LdapConnectionInterface
             $this->ress,
             $params['base_dn'],
             $params['filter'],
-            $attrs
+            $attrs,
+            $params['attrsonly'],
+            $params['sizelimit'],
+            $params['timelimit'],
+            $params['deref']
         );
 
         if ($search) {
