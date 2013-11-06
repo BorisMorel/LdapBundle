@@ -7,7 +7,7 @@
     <parameter key="imag_ldap.security.user.provider.class">IMAG\LdapBundle\Provider\LdapUserProvider</parameter>
     <parameter key="imag_ldap.ldap_connection.class">IMAG\LdapBundle\Manager\LdapConnection</parameter>
     <parameter key="imag_ldap.ldap_manager.class">IMAG\LdapBundle\Manager\LdapManagerUser</parameter>
-    <parameter key="imag_ldap.ldap_manager.role_prefix">ROLE_</parameter>
+    <parameter key="imag_ldap.ldap_manager.role_prefix"></parameter>
     <parameter key="imag_ldap.security.authentication.provider.class">IMAG\LdapBundle\Provider\LdapAuthenticationProvider</parameter>
     <parameter key="imag_ldap.security.authentication.listener.class">IMAG\LdapBundle\EventListener\LdapListener</parameter>
     <parameter key="imag_ldap.security.authentication.form_entry_point.class">Symfony\Component\Security\Http\EntryPoint\FormAuthenticationEntryPoint</parameter>
