@@ -89,8 +89,8 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function getDisplayName()
     {
-        if (isset($this->ldapUser['displayname'][0])) {
-            return $this->ldapUser['displayname'][0];
+        if (isset($this->ldapUser['displayName'][0])) {
+            return $this->ldapUser['displayName'][0];
         } else {
             return false;
         }
@@ -98,8 +98,8 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function getGivenName()
     {
-        if (isset($this->ldapUser['givenname'][0])) {
-            return $this->ldapUser['givenname'][0];
+        if (isset($this->ldapUser['givenName'][0])) {
+            return $this->ldapUser['givenName'][0];
         } else {
             return false;
         }
