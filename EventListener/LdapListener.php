@@ -16,8 +16,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface,
     Symfony\Component\Security\Http\HttpUtils,
     Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
 
-use IMAG\LdapBundle\Authentication\Token\LdapToken;
-
 class LdapListener extends AbstractAuthenticationListener
 {
     public function __construct(SecurityContextInterface $securityContext,
@@ -50,7 +48,7 @@ class LdapListener extends AbstractAuthenticationListener
             $logger,
             $dispatcher
         );
-        
+
         $this->csrfProvider = $csrfProvider;
     }
 

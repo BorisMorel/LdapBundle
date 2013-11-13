@@ -12,7 +12,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-use IMAG\LdapBundle\Authentication\Token\LdapToken;
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface;
 use IMAG\LdapBundle\Event\LdapUserEvent;
 use IMAG\LdapBundle\Event\LdapEvents;
@@ -96,11 +95,10 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
                     $user = $this->reloadUser($user);
                 }
 
-                $ldapToken = new LdapToken($user, $this->providerKey, $user->getRoles());
-                $ldapToken->setAuthenticated(true);
-                $ldapToken->setAttributes($token->getAttributes());
+                $boundToken = new UsernamePasswordToken($user, '', $this->providerKey, $user->getRoles());
+                $boundToken->setAttributes($token->getAttributes());
 
-                return $ldapToken;
+                return $boundToken;
             }
 
             if ($this->hideUserNotFoundExceptions) {
