@@ -79,7 +79,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         if ($user instanceof LdapUserInterface) {
-            return $this->ldapAuthenticate($user);
+            return $this->ldapAuthenticate($user, $token);
         }
 
         if ($user instanceof UserInterface) {
@@ -91,10 +91,11 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      * Authentication logic to allow Ldap user
      *
      * @param \IMAG\LdapBundle\User\LdapUserInterface  $user
+     * @param TokenInterface $token
      *
      * @return \IMAG\LdapBundle\Authentication\Token\LdapToken $ldapToken
      */
-    private function ldapAuthenticate(LdapUserInterface $user)
+    private function ldapAuthenticate(LdapUserInterface $user, TokenInterface $token)
     {
         if (null !== $this->dispatcher) {
             $userEvent = new LdapUserEvent($user);
