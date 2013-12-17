@@ -79,48 +79,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         if ($user instanceof LdapUserInterface) {
-            if (null !== $this->dispatcher) {
-                $userEvent = new LdapUserEvent($user);
-                try {
-                    $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
-                } catch (AuthenticationException $expt) {
-                    if ($this->hideUserNotFoundExceptions) {
-                        throw new BadCredentialsException('Bad credentials', 0, $expt);
-                    }
-
-                    throw $expt;
-                }
-            }
-
-            if ($this->bind($user, $token)) {
-                if (false === $user->getDn()) {
-                    $user = $this->reloadUser($user);
-                }
-
-                $ldapToken = new LdapToken($user, $this->providerKey, $user->getRoles());
-                $ldapToken->setAuthenticated(true);
-                $ldapToken->setAttributes($token->getAttributes());
-
-                $ldapTokenEvent = new LdapTokenEvent($ldapToken);
-
-                try {
-                    $this->dispatcher->dispatch(LdapEvents::POST_BIND, $ldapTokenEvent);
-                } catch (AuthenticationException $authenticationException) {
-                    if ($this->hideUserNotFoundExceptions) {
-                        throw new BadCredentialsException('Bad credentials', 0, $authenticationException);
-                    }
-
-                    throw $authenticationException;
-                }
-
-                return $ldapToken;
-            }
-
-            if ($this->hideUserNotFoundExceptions) {
-                throw new BadCredentialsException('Bad credentials');
-            } else {
-                throw new AuthenticationException('The LDAP authentication failed.');
-            }
+            return $this->ldapAuthenticate($user);
         }
 
         if ($user instanceof UserInterface) {
@@ -128,6 +87,60 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         }
     }
 
+    /**
+     * Authentication logic to allow Ldap user
+     *
+     * @param \IMAG\LdapBundle\User\LdapUserInterface  $user
+     *
+     * @return \IMAG\LdapBundle\Authentication\Token\LdapToken $ldapToken
+     */
+    private function ldapAuthenticate(LdapUserInterface $user)
+    {
+        if (null !== $this->dispatcher) {
+            $userEvent = new LdapUserEvent($user);
+            try {
+                $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
+            } catch (AuthenticationException $expt) {
+                if ($this->hideUserNotFoundExceptions) {
+                    throw new BadCredentialsException('Bad credentials', 0, $expt);
+                }
+
+                throw $expt;
+            }
+        }
+
+        if ($this->bind($user, $token)) {
+            if (false === $user->getDn()) {
+                $user = $this->reloadUser($user);
+            }
+
+            $ldapToken = new LdapToken($user, $this->providerKey, $user->getRoles());
+            $ldapToken->setAuthenticated(true);
+            $ldapToken->setAttributes($token->getAttributes());
+
+            if (null !== $this->dispatcher) {
+                $ldapTokenEvent = new LdapTokenEvent($ldapToken);
+                try {
+                    $this->dispatcher->dispatch(LdapEvents::POST_BIND, $ldapTokenEvent);
+                } catch (AuthenticationException $authenticationException) {
+                    if ($this->hideUserNotFoundExceptions) {
+                        throw new BadCredentialsException('Bad credentials', 0, $authenticationException);
+                    }
+                    
+                    throw $authenticationException;
+                }
+            }
+
+            return $ldapToken;
+        }
+            
+        if ($this->hideUserNotFoundExceptions) {
+            throw new BadCredentialsException('Bad credentials');
+        } else {
+            throw new AuthenticationException('The LDAP authentication failed.');
+        }
+    }
+        
     /**
      * Authenticate the user with LDAP bind.
      *
