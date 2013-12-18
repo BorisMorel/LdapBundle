@@ -1,6 +1,6 @@
 # LdapBundle
 
-LdapBundle provides LDAP authentication without using Apache's `mod_ldap`. The bundle instead relies on PHP's [LDAP extension](http://php.net/manual/en/book.ldap.php) along with a form to authenticate users. LdapBundle also can also be used for authorization by retrieving the user's roles defined in LDAP.
+LdapBundle provides LDAP authentication without using Apache's `mod_ldap`. The bundle instead relies on PHP's [LDAP extension](http://php.net/manual/en/book.ldap.php) along with a form to authenticate users. LdapBundle can also be used for authorization by retrieving the user's roles defined in LDAP.
 
 ## Contact
 
