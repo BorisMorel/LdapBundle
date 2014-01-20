@@ -2,7 +2,6 @@
 
 namespace IMAG\LdapBundle\Provider;
 
-use IMAG\LdapBundle\Event\LdapTokenEvent;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -13,7 +12,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-use IMAG\LdapBundle\Authentication\Token\LdapToken;
 use IMAG\LdapBundle\Manager\LdapManagerUserInterface;
 use IMAG\LdapBundle\Event\LdapUserEvent;
 use IMAG\LdapBundle\Event\LdapEvents;
@@ -93,7 +91,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      * @param \IMAG\LdapBundle\User\LdapUserInterface  $user
      * @param TokenInterface $token
      *
-     * @return \IMAG\LdapBundle\Authentication\Token\LdapToken $ldapToken
+     * @return \Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken $token
      */
     private function ldapAuthenticate(LdapUserInterface $user, TokenInterface $token)
     {
@@ -115,14 +113,12 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
                 $user = $this->reloadUser($user);
             }
 
-            $ldapToken = new LdapToken($user, $this->providerKey, $user->getRoles());
-            $ldapToken->setAuthenticated(true);
-            $ldapToken->setAttributes($token->getAttributes());
-
             if (null !== $this->dispatcher) {
-                $ldapTokenEvent = new LdapTokenEvent($ldapToken);
+                $userEvent = new LdapUserEvent($user);
+
                 try {
-                    $this->dispatcher->dispatch(LdapEvents::POST_BIND, $ldapTokenEvent);
+                    $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
+                    
                 } catch (AuthenticationException $authenticationException) {
                     if ($this->hideUserNotFoundExceptions) {
                         throw new BadCredentialsException('Bad credentials', 0, $authenticationException);
@@ -131,8 +127,11 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
                     throw $authenticationException;
                 }
             }
+            
+            $token = new UsernamePasswordToken($userEvent->getUser(), null, $this->providerKey, $userEvent->getUser()->getRoles());         
+            $token->setAttributes($token->getAttributes());
 
-            return $ldapToken;
+            return $token
         }
             
         if ($this->hideUserNotFoundExceptions) {
