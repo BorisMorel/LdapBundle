@@ -131,7 +131,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             $token = new UsernamePasswordToken($userEvent->getUser(), null, $this->providerKey, $userEvent->getUser()->getRoles());         
             $token->setAttributes($token->getAttributes());
 
-            return $token
+            return $token;
         }
             
         if ($this->hideUserNotFoundExceptions) {
