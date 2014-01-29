@@ -46,6 +46,7 @@ class LdapManagerUser implements LdapManagerUserInterface
         try {
             $this->addLdapUser();
             $this->addLdapRoles();
+            $this->addNetgroups();
         } catch (\InvalidArgumentException $e) {
             if (false === $this->params['client']['skip_roles']) {
                 throw $e;
@@ -75,7 +76,9 @@ class LdapManagerUser implements LdapManagerUserInterface
         $attributes = array();
         foreach ($this->params['user']['attributes'] as $attrName) {
             if (isset($this->ldapUser[$attrName][0])) {
-                $attributes[$attrName] = $this->ldapUser[$attrName][0];
+                $ldapAttributes = $this->ldapUser[$attrName];
+                unset($ldapAttributes['count']);
+                $attributes[$attrName] = $ldapAttributes;
             }
         }
 
@@ -89,8 +92,8 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function getDisplayName()
     {
-        if (isset($this->ldapUser['displayname'][0])) {
-            return $this->ldapUser['displayname'][0];
+        if (isset($this->ldapUser['displayName'][0])) {
+            return $this->ldapUser['displayName'][0];
         } else {
             return false;
         }
@@ -98,8 +101,8 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function getGivenName()
     {
-        if (isset($this->ldapUser['givenname'][0])) {
-            return $this->ldapUser['givenname'][0];
+        if (isset($this->ldapUser['givenName'][0])) {
+            return $this->ldapUser['givenName'][0];
         } else {
             return false;
         }
@@ -213,6 +216,36 @@ class LdapManagerUser implements LdapManagerUserInterface
         }
 
         $this->ldapUser['roles'] = $tab;
+
+        return $this;
+    }
+
+    private function addNetgroups()
+    {
+        if (null === $this->ldapUser) {
+            throw new \RuntimeException('Cannot assign LDAP roles before authenticating user against LDAP');
+        }
+
+        $query = array(
+            'base_dn' => $this->params['netgroup']['base_dn'],
+            'filter' => sprintf('nisNetgroupTriple=\(-,%s,-\)', $this->ldapConnection->escape($this->getUserId())),
+            'attrs' => array('cn')
+        );
+
+        $entries = $this->ldapConnection->search($query);
+
+        $systems = array();
+        $other = array();
+        foreach($entries as $entry){
+            if(trim($entry['cn'][0])){
+                if(in_array(trim($entry['cn'][0]), $this->params['netgroup']['system_groups'])) {
+                    array_push($systems, $entry['cn'][0]);
+                } else {
+                    array_push($other, $entry['cn'][0]);
+                }
+            }
+        }
+        $this->ldapUser['netgroups'] = $systems;
 
         return $this;
     }
