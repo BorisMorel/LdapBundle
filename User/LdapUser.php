@@ -54,7 +54,7 @@ class LdapUser implements LdapUserInterface
         return $this->roles;
     }
 
-    public function getUserName()
+    public function getUsername()
     {
         return $this->username;
     }
