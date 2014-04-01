@@ -95,8 +95,8 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function ldapAuthenticate(LdapUserInterface $user, TokenInterface $token)
     {
+        $userEvent = new LdapUserEvent($user);
         if (null !== $this->dispatcher) {
-            $userEvent = new LdapUserEvent($user);
             try {
                 $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
             } catch (AuthenticationException $expt) {
@@ -114,33 +114,29 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             }
 
             if (null !== $this->dispatcher) {
-                $userEvent = new LdapUserEvent($user);
-
                 try {
                     $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
-                    
                 } catch (AuthenticationException $authenticationException) {
                     if ($this->hideUserNotFoundExceptions) {
                         throw new BadCredentialsException('Bad credentials', 0, $authenticationException);
                     }
-                    
                     throw $authenticationException;
                 }
             }
-            
-            $token = new UsernamePasswordToken($userEvent->getUser(), null, $this->providerKey, $userEvent->getUser()->getRoles());         
+
+            $token = new UsernamePasswordToken($userEvent->getUser(), null, $this->providerKey, $userEvent->getUser()->getRoles());
             $token->setAttributes($token->getAttributes());
 
             return $token;
         }
-            
+
         if ($this->hideUserNotFoundExceptions) {
             throw new BadCredentialsException('Bad credentials');
         } else {
             throw new AuthenticationException('The LDAP authentication failed.');
         }
     }
-        
+
     /**
      * Authenticate the user with LDAP bind.
      *
