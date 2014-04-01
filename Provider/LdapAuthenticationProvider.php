@@ -114,6 +114,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             }
 
             if (null !== $this->dispatcher) {
+                $userEvent = new LdapUserEvent($user);
                 try {
                     $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
                 } catch (AuthenticationException $authenticationException) {
