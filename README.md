@@ -16,6 +16,7 @@ IRC: irc.freenode.net - #symfony-fr
 5. Implement Logout
 6. Use chain provider
 7. Subscribe to PRE_BIND event
+8. Subscribe to POST_BIND event
 
 ### Get the Bundle
 
@@ -88,6 +89,7 @@ imag_ldap:
 #    network_timeout: 10 # Optional
 #    referrals_enabled: true # Optional
 #    bind_username_before: true # Optional
+#    skip_roles: false # Optional
 
   user:
     base_dn: ou=people,dc=host,dc=foo
@@ -99,6 +101,8 @@ imag_ldap:
     name_attribute: cn
     user_attribute: member
     user_id: [ dn or username ]
+    
+#  user_class: IMAG\LdapBundle\User\LdapUser # Optional
 ```
 
 **You should configure the parameters under the `imag_ldap` section to match your environment.**
@@ -223,7 +227,16 @@ class LdapSecuritySubscriber implements EventSubscriberInterface
             throw new \Exception(sprintf('LDAP user %s not allowed', $user->getUsername()));
         }
 
-        $user->addRole('ROLE_LDAP');
+		$user->addRole('ROLE_LDAP');
+        $event->setUser($user);
     }
 }
 ```
+### Subscribe to POST_BIND event
+
+The POST_BIND is fired after the user is authenticated via LDAP. You can use it in exactly the same manner as PRE_BIND.
+
+**Note:**
+
+> However each time a page is refresh, Symfony call the refreshUser method in the provider that is used and doesn't trigger these events (PRE_BIND and POST_BIND).
+> If you want to override user (for example like credentials, roles ...), you must create a new provider and override this method.```
