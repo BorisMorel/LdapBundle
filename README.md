@@ -238,5 +238,5 @@ The POST_BIND is fired after the user is authenticated via LDAP. You can use it 
 
 **Note:**
 
-> However each time a page is refresh, Symfony call the refreshUser method in the provider that is used and doesn't trigger these events (PRE_BIND and POST_BIND).
-> If you want to override user (for example like credentials, roles ...), you must create a new provider and override this method.```
+> However each time a page is refreshed, Symfony call the refreshUser method in the provider that is used and doesn't trigger these events (PRE_BIND and POST_BIND).
+> If you want to override user (for example like credentials, roles ...), you must create a new provider and override this method.
