@@ -13,7 +13,7 @@ class LdapUser implements LdapUserInterface
         $dn,
         $cn,
         $roles = array(),
-        $attributes = array()        
+        $attributes = array()
         ;
 
     public function getDisplayname()

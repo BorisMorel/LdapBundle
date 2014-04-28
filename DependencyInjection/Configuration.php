@@ -15,6 +15,7 @@ class Configuration implements ConfigurationInterface
         ->children()
             ->append($this->addClientNode())
             ->append($this->addUserNode())
+            ->append($this->addNetgroupNode())
             ->append($this->addRoleNode())
             ->scalarNode('user_class')
               ->defaultValue("IMAG\LdapBundle\User\LdapUser")
@@ -64,6 +65,22 @@ class Configuration implements ConfigurationInterface
           ;
 
       return $node;
+  }
+
+  private function addNetgroupNode()
+  {
+    $treeBuilder = new TreeBuilder();
+    $node = $treeBuilder->root('netgroup');
+
+    $node
+        ->children()
+            ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
+            ->scalarNode('filter')->end()
+            ->scalarNode('name_attribute')->defaultValue('cn')->end()
+            ->scalarNode('user_attribute')->defaultValue('nisNetgroupTriple')->end()
+        ->end();
+
+    return $node;
   }
 
   private function addRoleNode()
