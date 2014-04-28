@@ -75,7 +75,9 @@ class Configuration implements ConfigurationInterface
     $node
         ->children()
             ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
-            ->variableNode('system_groups')->defaultValue(array())->end()
+            ->scalarNode('filter')->end()
+            ->scalarNode('name_attribute')->defaultValue('cn')->end()
+            ->scalarNode('user_attribute')->defaultValue('nisNetgroupTriple')->end()
         ->end();
 
     return $node;

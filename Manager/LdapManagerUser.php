@@ -225,27 +225,31 @@ class LdapManagerUser implements LdapManagerUserInterface
         if (null === $this->ldapUser) {
             throw new \RuntimeException('Cannot assign LDAP roles before authenticating user against LDAP');
         }
+        
+        $filter = isset($this->params['netgroup']['filter'])
+            ? $this->params['netgroup']['filter']
+            : '';
 
         $query = array(
             'base_dn' => $this->params['netgroup']['base_dn'],
-            'filter' => sprintf('nisNetgroupTriple=\(-,%s,-\)', $this->ldapConnection->escape($this->getUserId())),
-            'attrs' => array('cn')
+            'filter' => sprintf('(&%s(%s=\(-,%s,-\)))',
+                            $filter,
+                            $this->params['netgroup']['user_attribute'],
+                            $this->ldapConnection->escape($this->getUserId())),
+            'attrs' => array(
+                $this->params['netgroup']['name_attribute']
+            )
         );
 
         $entries = $this->ldapConnection->search($query);
 
-        $systems = array();
-        $other = array();
+        $netgroups = array();
         foreach($entries as $entry){
-            if(trim($entry['cn'][0])){
-                if(in_array(trim($entry['cn'][0]), $this->params['netgroup']['system_groups'])) {
-                    array_push($systems, $entry['cn'][0]);
-                } else {
-                    array_push($other, $entry['cn'][0]);
-                }
+            if(trim($entry[$this->params['netgroup']['name_attribute']][0])){
+                array_push($netgroups, $entry[$this->params['netgroup']['name_attribute']][0]);
             }
         }
-        $this->ldapUser['netgroups'] = $systems;
+        $this->ldapUser['netgroups'] = $netgroups;
 
         return $this;
     }
