@@ -207,9 +207,11 @@ class LdapManagerUser implements LdapManagerUserInterface
             ));
 
         for ($i = 0; $i < $entries['count']; $i++) {
-            array_push($tab, sprintf('ROLE_%s',
-                                     self::slugify($entries[$i][$this->params['role']['name_attribute']][0])
-            ));
+            if (isset($entries[$i][$this->params['role']['name_attribute']][0])) {
+                array_push($tab, sprintf('ROLE_%s',
+                                         self::slugify($entries[$i][$this->params['role']['name_attribute']][0])
+                ));
+            }
         }
 
         $this->ldapUser['roles'] = $tab;
