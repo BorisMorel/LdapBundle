@@ -21,6 +21,32 @@ class LdapConnection implements LdapConnectionInterface
         $this->logger = $logger;
     }
 
+    /**
+     * @return int|null
+     *
+     * @see https://wiki.servicenow.com/index.php?title=LDAP_Error_Codes
+     */
+    public function getErrno()
+    {
+        if (!$this->ress) {
+            return null;
+        }
+
+        return ldap_errno($this->ress);
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getError()
+    {
+        if (!$this->ress) {
+            return null;
+        }
+
+        return ldap_error($this->ress);
+    }
+
     public function search(array $params)
     {
         $this->connect();
