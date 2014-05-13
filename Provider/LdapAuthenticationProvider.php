@@ -96,7 +96,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
     private function ldapAuthenticate(LdapUserInterface $user, TokenInterface $token)
     {
         if (null !== $this->dispatcher) {
-            $userEvent = new LdapUserEvent($user);
+	    $userEvent = new LdapUserEvent($user, $token);
             try {
                 $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
             } catch (AuthenticationException $expt) {
@@ -114,7 +114,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             }
 
             if (null !== $this->dispatcher) {
-                $userEvent = new LdapUserEvent($user);
+		$userEvent = new LdapUserEvent($user, $token);
 
                 try {
                     $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
