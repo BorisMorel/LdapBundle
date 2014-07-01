@@ -88,6 +88,7 @@ imag_ldap:
 #    network_timeout: 10 # Optional
 #    referrals_enabled: true # Optional
 #    bind_username_before: true # Optional
+#    skip_roles: true #
 
   user:
     base_dn: ou=people,dc=host,dc=foo

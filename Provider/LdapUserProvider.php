@@ -76,7 +76,11 @@ class LdapUserProvider implements UserProviderInterface
             throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', get_class($user)));
         }
 
-        return $this->loadUserByUsername($user->getUsername());
+        if (false === $this->bindUsernameBefore) {
+            return $this->loadUserByUsername($user->getUsername());
+        } else {
+            return $this->bindedSearch($user->getUsername());
+        }
     }
 
     /**
@@ -121,5 +125,10 @@ class LdapUserProvider implements UserProviderInterface
             ;
 
         return $ldapUser;
+    }
+
+    private function bindedSearch($username)
+    {
+        return $this->anonymousSearch($username);
     }
 }

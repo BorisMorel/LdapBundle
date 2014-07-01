@@ -109,7 +109,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         if ($this->bind($user, $token)) {
-            if (false === $user->getDn()) {
+            if (null === $user->getDn()) {
                 $user = $this->reloadUser($user);
             }
 
