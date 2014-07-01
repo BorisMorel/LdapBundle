@@ -149,13 +149,27 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      *
      * @return boolean
      */
-    private function bind(LdapUserInterface $user, TokenInterface $token)
-    {
-        $this->ldapManager
-            ->setUsername($user->getUsername())
-            ->setPassword($token->getCredentials());
-
-        return (bool)$this->ldapManager->auth();
+    private function bind(LdapUserInterface $user, TokenInterface $token)      
+    {                                                                          
+        $lm = $this->ldapManager;
+        $lm
+            ->setUsername($user->getUsername())                                
+            ->setPassword($token->getCredentials());                           
+                                                                               
+        if( !(bool)$lm->auth() ) return false;
+                                                                               
+        $user
+            ->setUsername($lm->getUsername())                                  
+            ->setEmail($lm->getEmail())                                        
+            ->setRoles($lm->getRoles())                                        
+            ->setDn($lm->getDn())                                              
+            ->setCn($lm->getCn())                                              
+            ->setAttributes($lm->getAttributes())                              
+            ->setGivenName($lm->getGivenName())                                
+            ->setSurname($lm->getSurname())                                    
+            ->setDisplayName($lm->getDisplayName())                            
+        ;                                                                      
+        return true;                                                           
     }
 
     /**
