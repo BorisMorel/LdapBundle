@@ -48,6 +48,7 @@ class LdapConnection implements LdapConnectionInterface
             $params['filter'],
             $attrs
         );
+        $this->checkLdapError();
 
         if ($search) {
             $entries = ldap_get_entries($this->ress, $search);
@@ -69,7 +70,10 @@ class LdapConnection implements LdapConnectionInterface
         $this->connect();
 
         // According to the LDAP RFC 4510-4511, the password can be blank.
-        return @ldap_bind($this->ress, $user_dn, $password);
+        @ldap_bind($this->ress, $user_dn, $password);
+        $this->checkLdapError();
+
+        return true;
     }
 
     public function getParameters()
@@ -136,11 +140,8 @@ class LdapConnection implements LdapConnectionInterface
                 throw new \Exception('You must uncomment password key');
             }
 
-            $bindress = @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
-
-            if (!$bindress) {
-                throw new \Exception('The credentials you have configured are not valid');
-            }
+            @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
+            $this->checkLdapError($ress);
         }
 
         $this->ress = $ress;
@@ -159,6 +160,24 @@ class LdapConnection implements LdapConnectionInterface
     {
         if ($this->logger) {
             $this->logger->err($message);
+        }
+    }
+
+    /**
+     * Checks if there were an error during last ldap call
+     *
+     * @param resource $resource Ldap connection to check; if not present then instance resource will be used
+     *
+     * @throws \IMAG\LdapBundle\Exception\ConnectionException
+     */
+    private function checkLdapError($resource = null)
+    {
+        $resource = $resource ?: $this->ress;
+        if ($resource && 0 != ldap_errno($resource)) {
+            $code = ldap_errno($resource);
+            $message = ldap_error($resource);
+            $this->err('LDAP returned an error with code ' . $code . ' : ' . $message);
+            throw new ConnectionException($message, $code);
         }
     }
 

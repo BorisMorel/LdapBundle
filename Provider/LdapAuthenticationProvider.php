@@ -2,6 +2,7 @@
 
 namespace IMAG\LdapBundle\Provider;
 
+use IMAG\LdapBundle\Exception\ConnectionException;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -66,18 +67,22 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         try {
-            $user = $this->userProvider
-                ->loadUserByUsername($token->getUsername());
-        } catch (UsernameNotFoundException $userNotFoundException) {
-            if ($this->hideUserNotFoundExceptions) {
-                throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
+            try {
+                $user = $this->userProvider
+                    ->loadUserByUsername($token->getUsername());
+            } catch (UsernameNotFoundException $userNotFoundException) {
+                if ($this->hideUserNotFoundExceptions) {
+                    throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
+                }
+
+                throw $userNotFoundException;
             }
 
-            throw $userNotFoundException;
-        }
-
-        if ($user instanceof LdapUserInterface) {
-            return $this->ldapAuthenticate($user, $token);
+            if ($user instanceof LdapUserInterface) {
+                return $this->ldapAuthenticate($user, $token);
+            }
+        } catch (ConnectionException $connectionException) {
+           throw new AuthenticationException('LDAP server returned an error', 0, $connectionException);
         }
 
         if ($user instanceof UserInterface) {
