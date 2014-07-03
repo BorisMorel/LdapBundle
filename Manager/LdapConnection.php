@@ -61,8 +61,16 @@ class LdapConnection implements LdapConnectionInterface
         return false;
     }
 
-    public function bind($user_dn, $password='')
+    /**
+     * @return true
+     * @throws \IMAG\LdapBundle\Exceptions\ConnectionException | Connection error
+     */
+    public function bind($user_dn, $password='', $ress = null)
     {
+        if (null === $ress) {
+            $ress = $this->ress;
+        }
+
         if (empty($user_dn) || ! is_string($user_dn)) {
             throw new ConnectionException("LDAP user's DN (user_dn) must be provided (as a string).");
         }
@@ -70,7 +78,7 @@ class LdapConnection implements LdapConnectionInterface
         $this->connect();
 
         // According to the LDAP RFC 4510-4511, the password can be blank.
-        @ldap_bind($this->ress, $user_dn, $password);
+        @ldap_bind($ress, $user_dn, $password);
         $this->checkLdapError();
 
         return true;
@@ -139,9 +147,8 @@ class LdapConnection implements LdapConnectionInterface
             if (!isset($this->params['client']['password'])) {
                 throw new \Exception('You must uncomment password key');
             }
-
-            @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
-            $this->checkLdapError($ress);
+            
+            $this->bind($this->params['client']['username'], $this->params['client']['password'], $ress);
         }
 
         $this->ress = $ress;

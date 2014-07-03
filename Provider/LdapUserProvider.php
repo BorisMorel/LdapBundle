@@ -101,10 +101,7 @@ class LdapUserProvider implements UserProviderInterface
 
     private function anonymousSearch($username)
     {
-        // Throw the exception if the username is not found.
-        if(!$this->ldapManager->exists($username)) {
-            throw new UsernameNotFoundException(sprintf('User "%s" not found', $username));
-        }
+        $this->ldapManager->exists($username);
 
         $lm = $this->ldapManager
             ->setUsername($username)

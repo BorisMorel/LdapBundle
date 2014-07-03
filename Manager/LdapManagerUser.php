@@ -3,6 +3,8 @@
 namespace IMAG\LdapBundle\Manager;
 
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapManagerUser implements LdapManagerUserInterface
 {
@@ -20,37 +22,44 @@ class LdapManagerUser implements LdapManagerUserInterface
         $this->params = $this->ldapConnection->getParameters();
     }
 
+    /**
+     * @throws inherit
+     */
     public function exists($username)
     {
-        return (bool) $this
+        $this
             ->setUsername($username)
             ->addLdapUser()
             ;
     }
 
+    /**
+     * return true
+     */
     public function auth()
     {
         if (strlen($this->password) === 0) {
-            return false;
+            throw new ConnectionException('Password can\'t be empty');
         }
         
         if (null === $this->ldapUser) {
-            return ($this->bindByUsername() && $this->doPass());
-        }
-
-        return ($this->doPass() && $this->bindByDn());
+            $this->bindByUsername();
+            $this->doPass();
+        } else {
+            $this->doPass();
+            $this->bindByDn();
+        }        
     }
 
+    /**
+     * @throws inherit
+     */
     public function doPass()
     {
-        try {
-            $this->addLdapUser();
-            $this->addLdapRoles();
-        } catch (\InvalidArgumentException $e) {
-            if (false === $this->params['client']['skip_roles']) {
-                throw $e;
-            }
-        }
+        $this
+            ->addLdapUser()
+            ->addLdapRoles()
+            ;
 
         return $this;
     }
@@ -142,6 +151,12 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $this;
     }
 
+    /**
+     * @return mixed $this
+     * @throws \Symfony\Component\Security\Core\Exception\UsernameNotFoundException | Username not found
+     * @throws \RuntimeException | Inconsistent Fails
+     * @throws \IMAG\LdapBundle\Exception\ConnectionException | Connection error
+     */
     private function addLdapUser()
     {
         if (!$this->username) {
@@ -167,7 +182,7 @@ class LdapManagerUser implements LdapManagerUserInterface
         }
 
         if ($entries['count'] == 0) {
-            return false;
+            throw new UsernameNotFoundException(sprintf('Username "%s" doesn\'t exists', $this->username));
         }
 
         $this->ldapUser = $entries[0];
@@ -175,6 +190,12 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $this;
     }
 
+    /**
+     * @return mixed $this
+     * @throws \RuntimeException | Inconsistent Fails
+     * @throws \InvalidArgumentException | Configuration exception
+     * @throws \IMAG\LdapBundle\Exception\ConnectionException | Connection error
+     */
     private function addLdapRoles()
     {
         if (null === $this->ldapUser) {
@@ -183,7 +204,7 @@ class LdapManagerUser implements LdapManagerUserInterface
 
         $this->ldapUser['roles'] = array();
 
-        if (!isset($this->params['role'])) {
+        if (!isset($this->params['role']) && false ===  $this->params['client']['skip_roles']) {
             throw new \InvalidArgumentException("If you want to skip getting the roles, set config option imag_ldap:client:skip_roles to true");
         }
 
@@ -241,16 +262,16 @@ class LdapManagerUser implements LdapManagerUserInterface
     private function getUserId()
     {
         switch ($this->params['role']['user_id']) {
-            case 'dn':
-                return $this->ldapUser['dn'];
-                break;
+        case 'dn':
+            return $this->ldapUser['dn'];
+            break;
 
-            case 'username':
-                return $this->username;
-                break;
+        case 'username':
+            return $this->username;
+            break;
 
-            default:
-                throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
+        default:
+            throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
         }
     }
 }

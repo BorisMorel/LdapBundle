@@ -67,24 +67,23 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         try {
-            try {
-                $user = $this->userProvider
-                    ->loadUserByUsername($token->getUsername());
-            } catch (UsernameNotFoundException $userNotFoundException) {
-                if ($this->hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException('Bad credentials', 0, $userNotFoundException);
-                }
-
-                throw $userNotFoundException;
-            }
+            $user = $this->userProvider
+                ->loadUserByUsername($token->getUsername());
 
             if ($user instanceof LdapUserInterface) {
                 return $this->ldapAuthenticate($user, $token);
             }
-        } catch (ConnectionException $connectionException) {
-           throw new AuthenticationException('LDAP server returned an error', 0, $connectionException);
-        }
+            
+        } catch (\Exception $e) {
+            if ($e instanceof ConnectionException || $e instanceof UsernameNotFoundException) {
+                if ($this->hideUserNotFoundExceptions) {
+                    throw new BadCredentialsException('Bad credentials', 0, $e);
+                }
+            }
 
+            throw $e;
+        }
+        
         if ($user instanceof UserInterface) {
             return $this->daoAuthenticationProvider->authenticate($token);
         }
@@ -102,15 +101,8 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
     {
         if (null !== $this->dispatcher) {
             $userEvent = new LdapUserEvent($user);
-            try {
-                $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
-            } catch (AuthenticationException $expt) {
-                if ($this->hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException('Bad credentials', 0, $expt);
-                }
-
-                throw $expt;
-            }
+            
+            $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
         }
 
         if ($this->bind($user, $token)) {
@@ -121,28 +113,13 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             if (null !== $this->dispatcher) {
                 $userEvent = new LdapUserEvent($user);
 
-                try {
-                    $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
-                    
-                } catch (AuthenticationException $authenticationException) {
-                    if ($this->hideUserNotFoundExceptions) {
-                        throw new BadCredentialsException('Bad credentials', 0, $authenticationException);
-                    }
-                    
-                    throw $authenticationException;
-                }
+                $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
             }
             
             $token = new UsernamePasswordToken($userEvent->getUser(), null, $this->providerKey, $userEvent->getUser()->getRoles());         
             $token->setAttributes($token->getAttributes());
 
             return $token;
-        }
-            
-        if ($this->hideUserNotFoundExceptions) {
-            throw new BadCredentialsException('Bad credentials');
-        } else {
-            throw new AuthenticationException('The LDAP authentication failed.');
         }
     }
         
@@ -152,15 +129,17 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      * @param \IMAG\LdapBundle\User\LdapUserInterface  $user
      * @param TokenInterface $token
      *
-     * @return boolean
+     * @return true
      */
     private function bind(LdapUserInterface $user, TokenInterface $token)
     {
         $this->ldapManager
             ->setUsername($user->getUsername())
             ->setPassword($token->getCredentials());
+        
+        $this->ldapManager->auth();
 
-        return (bool)$this->ldapManager->auth();
+        return true;
     }
 
     /**
