@@ -22,13 +22,16 @@ class LdapConnection implements LdapConnectionInterface
     }
 
     /**
-     * @return int|null
+     * @param resource|null $resource
+     *
+     * @return null|string
      *
      * @see https://wiki.servicenow.com/index.php?title=LDAP_Error_Codes
      */
-    public function getErrno()
+    public function getErrno($resource = null)
     {
-        if (!$this->ress) {
+        $resource = $resource ?: $this->ress;
+        if (!$resource) {
             return null;
         }
 
@@ -36,11 +39,14 @@ class LdapConnection implements LdapConnectionInterface
     }
 
     /**
+     * @param resource|null $resource
+     *
      * @return null|string
      */
-    public function getError()
+    public function getError($resource = null)
     {
-        if (!$this->ress) {
+        $resource = $resource ?: $this->ress;
+        if (!$resource) {
             return null;
         }
 
