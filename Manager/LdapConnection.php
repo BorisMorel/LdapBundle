@@ -148,8 +148,9 @@ class LdapConnection implements LdapConnectionInterface
             if (!isset($this->params['client']['password'])) {
                 throw new \Exception('You must uncomment password key');
             }
-            
-            $this->bind($this->params['client']['username'], $this->params['client']['password'], $ress);
+
+            @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
+            $this->checkLdapError($ress);
         }
 
         $this->ress = $ress;
@@ -176,10 +177,10 @@ class LdapConnection implements LdapConnectionInterface
      *
      * @throws \IMAG\LdapBundle\Exception\ConnectionException
      */
-    private function checkLdapError()
+    private function checkLdapError($ress = null)
     {
-        if( 0 != $code = $this->getErrno()) {
-            $message = $this->getError();
+        if( 0 != $code = $this->getErrno($ress)) {
+            $message = $this->getError($ress);
             $this->err('LDAP returned an error with code ' . $code . ' : ' . $message);
             throw new ConnectionException($message, $code);
         }
