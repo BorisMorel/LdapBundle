@@ -112,28 +112,28 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
             }
         }
 
-        if ($this->bind($user, $token)) {
-            if (null === $user->getDn()) {
-                $user = $this->reloadUser($user);
-            }
+        $this->bind($user, $token);
 
-            if (null !== $this->dispatcher) {
-                $userEvent = new LdapUserEvent($user);
-                try {
-                    $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
-                } catch (AuthenticationException $authenticationException) {
-                    if ($this->hideUserNotFoundExceptions) {
-                        throw new BadCredentialsException('Bad credentials', 0, $authenticationException);
-                    }
-                    throw $authenticationException;
-                }
-            }
-
-            $token = new UsernamePasswordToken($userEvent->getUser(), null, $this->providerKey, $userEvent->getUser()->getRoles());
-            $token->setAttributes($token->getAttributes());
-
-            return $token;
+        if (null === $user->getDn()) {
+            $user = $this->reloadUser($user);
         }
+        
+        if (null !== $this->dispatcher) {
+            $userEvent = new LdapUserEvent($user);
+            try {
+                $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
+            } catch (AuthenticationException $authenticationException) {
+                if ($this->hideUserNotFoundExceptions) {
+                    throw new BadCredentialsException('Bad credentials', 0, $authenticationException);
+                }
+                throw $authenticationException;
+            }
+        }
+        
+        $token = new UsernamePasswordToken($userEvent->getUser(), null, $this->providerKey, $userEvent->getUser()->getRoles());
+        $token->setAttributes($token->getAttributes());
+        
+        return $token;
     }
 
     /**
