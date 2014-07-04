@@ -99,10 +99,17 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function ldapAuthenticate(LdapUserInterface $user, TokenInterface $token)
     {
+        $userEvent = new LdapUserEvent($user);
         if (null !== $this->dispatcher) {
-            $userEvent = new LdapUserEvent($user);
-            
-            $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
+            try {
+                $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
+            } catch (AuthenticationException $expt) {
+                if ($this->hideUserNotFoundExceptions) {
+                    throw new BadCredentialsException('Bad credentials', 0, $expt);
+                }
+
+                throw $expt;
+            }
         }
 
         if ($this->bind($user, $token)) {
@@ -112,17 +119,23 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
 
             if (null !== $this->dispatcher) {
                 $userEvent = new LdapUserEvent($user);
-
-                $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
+                try {
+                    $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
+                } catch (AuthenticationException $authenticationException) {
+                    if ($this->hideUserNotFoundExceptions) {
+                        throw new BadCredentialsException('Bad credentials', 0, $authenticationException);
+                    }
+                    throw $authenticationException;
+                }
             }
-            
-            $token = new UsernamePasswordToken($userEvent->getUser(), null, $this->providerKey, $userEvent->getUser()->getRoles());         
+
+            $token = new UsernamePasswordToken($userEvent->getUser(), null, $this->providerKey, $userEvent->getUser()->getRoles());
             $token->setAttributes($token->getAttributes());
 
             return $token;
         }
     }
-        
+
     /**
      * Authenticate the user with LDAP bind.
      *
