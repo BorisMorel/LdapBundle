@@ -11,6 +11,11 @@ interface LdapManagerUserInterface
   function getDn();
   function getCn();
   function getEmail();
+  function getAttributes();
+  function getLdapUser();
+  function getDisplayName();
+  function getGivenName();
+  function getSurname();
   function getUsername();
   function getRoles();
   function setUsername($username);
