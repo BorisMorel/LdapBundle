@@ -35,7 +35,7 @@ class LdapConnection implements LdapConnectionInterface
             return null;
         }
 
-        return ldap_errno($this->ress);
+        return ldap_errno($resource);
     }
 
     /**
@@ -50,7 +50,7 @@ class LdapConnection implements LdapConnectionInterface
             return null;
         }
 
-        return ldap_error($this->ress);
+        return ldap_error($resource);
     }
 
     public function search(array $params)
