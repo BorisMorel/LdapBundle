@@ -204,6 +204,12 @@ class LdapManagerUser implements LdapManagerUserInterface
 
         $this->ldapUser['roles'] = array();
 
+        if (true === $this->params['client']['skip_roles']) {
+            $this->ldapUser['roles'] = array('ROLE_USER_DEFAULT');
+
+            return;
+        }
+
         if (!isset($this->params['role']) && false ===  $this->params['client']['skip_roles']) {
             throw new \InvalidArgumentException("If you want to skip getting the roles, set config option imag_ldap:client:skip_roles to true");
         }
