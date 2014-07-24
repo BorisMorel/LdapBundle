@@ -207,22 +207,33 @@ class LdapUserProvider implements UserProviderInterface
     protected $userManager;
 
     /**
-     * @var \Symfony\Component\Validator\Validator
-     */
-    protected $validator;
+    * @var string
+    */
+    private $bindUsernameBefore;
+
+    /**
+    * The class name of the User model
+    * @var string
+    */
+    private $userClass;
 
     /**
      * Constructor
      *
      * @param LdapManagerUserInterface $ldapManager
      * @param UserManagerInterface     $userManager
-     * @param Validator                $validator
+     * @param bool|string              $bindUsernameBefore
+     * @param string                   $userClass
      */
-    public function __construct(LdapManagerUserInterface $ldapManager, UserManagerInterface $userManager, $validator)
+    public function __construct(LdapManagerUserInterface $ldapManager, 
+                                UserManagerInterface $userManager,
+                                $bindUsernameBefore = false,
+                                $userClass)
     {
         $this->ldapManager = $ldapManager;
+        $this->bindUsernameBefore = $bindUsernameBefore;
         $this->userManager = $userManager;
-        $this->validator = $validator;
+        $this->userClass = $userClass;
     }
 
     /**
@@ -238,10 +249,50 @@ class LdapUserProvider implements UserProviderInterface
         // check if the user is already know to us
         $user = $this->userManager->findUserBy(array("username" => $username));
 
-        // Throw an exception if the username is not found.
-        if(empty($user) && !$this->ldapManager->exists($username)) {
-            throw new UsernameNotFoundException(sprintf('User "%s" not found', $username));
+        if (true === $this->bindUsernameBefore) {
+            $ldapUser = $this->simpleUser($username, $user);
+        } else {
+            $ldapUser = $this->anonymousSearch($username, $user);
         }
+
+        return $ldapUser;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function refreshUser(UserInterface $user)
+    {
+        if (!$user instanceof LdapUserInterface) {
+            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', get_class($user)));
+        }
+
+        if (false === $this->bindUsernameBefore) {
+            return $this->loadUserByUsername($user->getUsername());
+        } else {
+            return $this->bindedSearch($user->getUsername());
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function supportsClass($class)
+    {
+        return $this->userManager->supportsClass($class);
+    }
+
+    private function simpleUser($username, $user)
+    {
+        $ldapUser = new $this->userClass;
+        $ldapUser->setUsername($username);
+
+        return $ldapUser;
+    }
+
+    private function anonymousSearch($username, $user)
+    {
+        $this->ldapManager->exists($username);
 
         $lm = $this->ldapManager
             ->setUsername($username)
@@ -262,24 +313,9 @@ class LdapUserProvider implements UserProviderInterface
         return $user;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function refreshUser(UserInterface $user)
+    private function bindedSearch($username)
     {
-        if (!$user instanceof LdapUserInterface) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', get_class($user)));
-        }
-
-        return $this->loadUserByUsername($user->getUsername());
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function supportsClass($class)
-    {
-        return $this->userManager->supportsClass($class);
+        return $this->anonymousSearch($username);
     }
 }
 ```
@@ -287,15 +323,12 @@ class LdapUserProvider implements UserProviderInterface
 ### Register the service
 
 Symfony needs to be told to use the created service by overriding the default
-provider in `services.xml`. Other services needed (like the `FOSUserManager`)
+provider in `services.yml`. Other services needed (like the `FOSUserManager`)
 or the user class to be used are passed to the constructor:
-```xml
-<service id="imag_ldap.security.user.provider" class="Acme\DemoBundle\Security\User\Provider\LdapUserProvider">
-  <argument type="service" id="imag_ldap.ldap_manager" />
-  <argument type="service" id="fos_user.user_manager" />
-  <argument type="service" id="validator" />
-  <argument>%imag_ldap.model.user_class%</argument>
-</service>
+```yml
+    imag_ldap.security.user.provider:
+        class: Acme\DemoBundle\Security\User\Provider\LdapUserProvider
+        arguments: [@imag_ldap.ldap_manager, @fos_user.user_manager, %imag_ldap.authentication.bind_username_before%, %imag_ldap.model.user_class%]
 ```
 
 After flushing the cache a user is populated from the database via the user
