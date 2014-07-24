@@ -64,6 +64,18 @@ class User extends BaseUser implements LdapUserInterface
 
         return $this;
     }
+    
+    public function getCn()
+    {
+        return $this->username;
+    }
+
+    public function setCn($cn)
+    {
+        $this->username = $cn;
+
+        return $this;
+    }
 
     public function getAttributes()
     {
