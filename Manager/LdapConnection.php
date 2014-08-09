@@ -39,8 +39,8 @@ class LdapConnection implements LdapConnectionInterface
 
         $this->info(
             sprintf('ldap_search base_dn %s, filter %s',
-                    print_r($params['base_dn'], true),
-                    print_r($params['filter'], true)
+                print_r(utf8_encode($params['base_dn']), true),
+                print_r(utf8_encode($params['filter']), true)
             ));
 
         $search = @ldap_search(
