@@ -277,7 +277,7 @@ class LdapManagerUser implements LdapManagerUserInterface
                 break;
 
             case 'groupId':
-                return $this->ldapuser['gidnumber'][0];
+                return $this->ldapUser['gidnumber'][0];
                 break;
 
             default:
