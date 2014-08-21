@@ -100,7 +100,7 @@ imag_ldap:
 #    filter: (ou=group) #Optional
     name_attribute: cn
     user_attribute: member
-    user_id: [ dn or username ]
+    user_id_or_group_id: [ dn or username or groupId \(for Open Directory)]
     
 #  user_class: IMAG\LdapBundle\User\LdapUser # Optional
 ```
