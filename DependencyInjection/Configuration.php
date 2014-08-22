@@ -77,12 +77,13 @@ class Configuration implements ConfigurationInterface
               ->scalarNode('filter')->end()
               ->scalarNode('name_attribute')->defaultValue('cn')->end()
               ->scalarNode('user_attribute')->defaultValue('member')->end()
-              ->scalarNode('user_id_or_group_id')->defaultValue('dn')
+              ->scalarNode('user_id')->defaultValue('dn')
                 ->validate()
-                  ->ifNotInArray(array('dn', 'username', 'groupId'))
-                  ->thenInvalid('Only dn, username, or groupId')
+                  ->ifNotInArray(array('dn', 'username'))
+                  ->thenInvalid('Only dn or username')
                 ->end()
               ->end()
+              ->scalarNode('open_directory')->defaultValue('false')->end()
           ->end()
           ;
 
