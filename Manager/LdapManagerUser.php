@@ -216,7 +216,7 @@ class LdapManagerUser implements LdapManagerUserInterface
 
         $tab = array();
 
-        $userIdOrGroupID = !(this->params['role']['open_directory'])
+        $userIdOrGroupID = !($this->params['role']['open_directory'])
             ? $this->getUser()
             : $this->ldapUser['gidnumber'][0];
 
