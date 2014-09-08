@@ -82,11 +82,13 @@ class LdapManagerUser implements LdapManagerUserInterface
     public function getAttributes()
     {
         $attributes = array();
-        foreach ($this->params['user']['attributes'] as $attrName) {
-            if (isset($this->ldapUser[$attrName][0])) {
-                $attributes[$attrName] = $this->ldapUser[$attrName][0];
+		foreach($this->params['users'] as $param) {
+            foreach ($param['attributes'] as $attrName) {
+                if (isset($this->ldapUser[$attrName][0])) {
+                    $attributes[$attrName] = $this->ldapUser[$attrName][0];
+                }
             }
-        }
+		}
 
         return $attributes;
     }
@@ -253,9 +255,6 @@ class LdapManagerUser implements LdapManagerUserInterface
         }
 
         $this->ldapUser['roles'] = $tab;
-        
-        var_dump($this->ldapUser['roles']);
-        die();
 
         return $this;
     }
