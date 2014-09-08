@@ -101,7 +101,14 @@ imag_ldap:
     name_attribute: cn
     user_attribute: member
     user_id: [ dn or username ]
-    
+# Search on several OU for users
+#  users:
+#    - { base_dn: 'ou=people,dc=host,dc=foo', filter: (objectClass=Person), name_attribute: uid }
+#    - { base_dn: 'ou=external people,dc=host,dc=foo', filter: (objectClass=Person), name_attribute: uid }
+# Search on several OU for roles
+#  roles:
+#    - { base_dn: 'ou=group, dc=host, dc=foo', filter: (objectClass=group), name_attribute: cn, user_attribute: member, user_id: dn }
+#    - { base_dn: 'ou=other group, dc=host, dc=foo', filter: (objectClass=group), name_attribute: cn, user_attribute: member, user_id: dn }
 #  user_class: IMAG\LdapBundle\User\LdapUser # Optional
 ```
 
