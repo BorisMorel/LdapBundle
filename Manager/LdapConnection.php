@@ -8,10 +8,8 @@ use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapConnection implements LdapConnectionInterface
 {
-    private
-        $params,
-        $logger
-        ;
+    private $params;
+    private $logger;
 
     protected $ress;
 
@@ -38,10 +36,12 @@ class LdapConnection implements LdapConnectionInterface
         $attrs = isset($params['attrs']) ? $params['attrs'] : array();
 
         $this->info(
-            sprintf('ldap_search base_dn %s, filter %s',
-                    print_r($params['base_dn'], true),
-                    print_r($params['filter'], true)
-            ));
+            sprintf(
+                'ldap_search base_dn %s, filter %s',
+                print_r($params['base_dn'], true),
+                print_r($params['filter'], true)
+            )
+        );
 
         $search = @ldap_search(
             $this->ress,
@@ -66,17 +66,19 @@ class LdapConnection implements LdapConnectionInterface
      * @return true
      * @throws \IMAG\LdapBundle\Exceptions\ConnectionException | Connection error
      */
-    public function bind($user_dn, $password='', $ress = null)
+    public function bind($user_dn, $password = '', $ress = null)
     {
         if (null === $ress) {
+            if ($this->ress === null) {
+                $this->connect();
+            }
+
             $ress = $this->ress;
         }
 
         if (empty($user_dn) || ! is_string($user_dn)) {
             throw new ConnectionException("LDAP user's DN (user_dn) must be provided (as a string).");
         }
-
-        $this->connect();
 
         // According to the LDAP RFC 4510-4511, the password can be blank.
         @ldap_bind($ress, $user_dn, $password);
@@ -122,10 +124,6 @@ class LdapConnection implements LdapConnectionInterface
 
     private function connect()
     {
-        if (null !== $this->ress) {
-            return $this;
-        }
-
         $port = isset($this->params['client']['port'])
             ? $this->params['client']['port']
             : '389';
@@ -179,7 +177,7 @@ class LdapConnection implements LdapConnectionInterface
      */
     private function checkLdapError($ress = null)
     {
-        if( 0 != $code = $this->getErrno($ress)) {
+        if (0 != $code = $this->getErrno($ress)) {
             $message = $this->getError($ress);
             $this->err('LDAP returned an error with code ' . $code . ' : ' . $message);
             throw new ConnectionException($message, $code);
