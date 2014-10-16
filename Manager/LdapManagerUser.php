@@ -258,9 +258,9 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     private static function slugify($role)
     {
-        $role = preg_replace('/\W+/', '_', $role);
+        $role = preg_replace('/\W+/u', '_', $role);
         $role = trim($role, '_');
-        $role = strtoupper($role);
+        $role = mb_strtoupper($role, 'UTF-8');
 
         return $role;
     }
