@@ -52,7 +52,18 @@ class LdapConnection implements LdapConnectionInterface
         $this->checkLdapError();
 
         if ($search) {
-            $entries = ldap_get_entries($this->ress, $search);
+            $entry = ldap_first_entry($this->ress, $search);
+            $entries = array();
+
+            while($entry) {
+                $attributes = ldap_get_attributes($this->ress, $entry);
+                $attributes['dn'] = ldap_get_dn($this->ress, $entry);
+                array_push($entries, $attributes);
+
+                $entry = ldap_next_entry($this->ress, $entry);
+            }
+
+            $entries['count'] = count($entries);
 
             @ldap_free_result($search);
 
