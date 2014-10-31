@@ -14,14 +14,15 @@ class Configuration implements ConfigurationInterface
     $rootNode
         ->children()
             ->append($this->addClientNode())
-            ->append($this->addUserNode())
-            ->append($this->addRoleNode())
             ->scalarNode('user_class')
               ->defaultValue("IMAG\LdapBundle\User\LdapUser")
             ->end()
         ->end()
         ;
-
+    
+    $this->addUserNode($rootNode);
+    $this->addRoleNode($rootNode);
+    
     return $treeBuilder;
   }
 
@@ -48,45 +49,48 @@ class Configuration implements ConfigurationInterface
       return $node;
   }
 
-  private function addUserNode()
+  private function addUserNode(\Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition $rootNode)
   {
-      $treeBuilder = new TreeBuilder();
-      $node = $treeBuilder->root('user');
-
-      $node
-          ->isRequired()
+      $rootNode
+          ->fixXmlConfig('user', 'users')
           ->children()
-              ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
-              ->scalarNode('filter')->end()
-              ->scalarNode('name_attribute')->defaultValue('uid')->end()
-              ->variableNode('attributes')->defaultValue(array())->end()
+              ->arrayNode('users')
+                  ->isRequired()
+                  ->prototype('array')
+                      ->children()
+                      ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
+                      ->scalarNode('filter')->end()
+                      ->scalarNode('name_attribute')->defaultValue('uid')->end()
+                      ->variableNode('attributes')->defaultValue(array())->end()
+                  ->end()
+                ->end()
           ->end()
           ;
-
-      return $node;
   }
 
-  private function addRoleNode()
+  private function addRoleNode(\Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition $rootNode)
   {
-      $treeBuilder = new TreeBuilder();
-      $node = $treeBuilder->root('role');
-
-      $node
+      $rootNode
+          ->fixXmlConfig('role', 'roles')
           ->children()
-              ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
-              ->scalarNode('filter')->end()
-              ->scalarNode('name_attribute')->defaultValue('cn')->end()
-              ->scalarNode('user_attribute')->defaultValue('member')->end()
-              ->scalarNode('user_id')->defaultValue('dn')
-                ->validate()
-                  ->ifNotInArray(array('dn', 'username'))
-                  ->thenInvalid('Only dn or username')
+              ->arrayNode('roles')
+                  ->isRequired()
+                  ->prototype('array')
+                      ->children()
+                      ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
+                      ->scalarNode('filter')->end()
+                      ->scalarNode('name_attribute')->defaultValue('cn')->end()
+                      ->scalarNode('user_attribute')->defaultValue('member')->end()
+                      ->scalarNode('user_id')->defaultValue('dn')
+                        ->validate()
+                          ->ifNotInArray(array('dn', 'username'))
+                          ->thenInvalid('Only dn or username')
+                        ->end()
+                      ->end()
+                  ->end()
                 ->end()
-              ->end()
           ->end()
           ;
-
-      return $node;
   }
 
 }

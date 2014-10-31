@@ -82,11 +82,13 @@ class LdapManagerUser implements LdapManagerUserInterface
     public function getAttributes()
     {
         $attributes = array();
-        foreach ($this->params['user']['attributes'] as $attrName) {
-            if (isset($this->ldapUser[$attrName][0])) {
-                $attributes[$attrName] = $this->ldapUser[$attrName][0];
+		foreach($this->params['users'] as $param) {
+            foreach ($param['attributes'] as $attrName) {
+                if (isset($this->ldapUser[$attrName][0])) {
+                    $attributes[$attrName] = $this->ldapUser[$attrName][0];
+                }
             }
-        }
+		}
 
         return $attributes;
     }
@@ -162,30 +164,40 @@ class LdapManagerUser implements LdapManagerUserInterface
         if (!$this->username) {
             throw new \InvalidArgumentException('User is not defined, please use setUsername');
         }
+        
+        $user = null;
+        $count = 0;
+        foreach($this->params['users'] as $param)
+        {
+            $filter = isset($param['filter'])
+                ? $param['filter']
+                : '';
 
-        $filter = isset($this->params['user']['filter'])
-            ? $this->params['user']['filter']
-            : '';
+            $entries = $this->ldapConnection
+                ->search(array(
+                    'base_dn' => $param['base_dn'],
+                    'filter' => sprintf('(&%s(%s=%s))',
+                                        $filter,
+                                        $param['name_attribute'],
+                                        $this->ldapConnection->escape($this->username)
+                    )
+                ));
+            
+            $count += $entries['count'];
+            
+            if($entries['count'] === 1)
+                $user = $entries[0];
+        }
 
-        $entries = $this->ldapConnection
-            ->search(array(
-                'base_dn' => $this->params['user']['base_dn'],
-                'filter' => sprintf('(&%s(%s=%s))',
-                                    $filter,
-                                    $this->params['user']['name_attribute'],
-                                    $this->ldapConnection->escape($this->username)
-                )
-            ));
-
-        if ($entries['count'] > 1) {
+        if ($count > 1) {
             throw new \RuntimeException("This search can only return a single user");
         }
 
-        if ($entries['count'] == 0) {
+        if ($count === 0) {
             throw new UsernameNotFoundException(sprintf('Username "%s" doesn\'t exists', $this->username));
         }
 
-        $this->ldapUser = $entries[0];
+        $this->ldapUser = $user;
 
         return $this;
     }
@@ -201,7 +213,7 @@ class LdapManagerUser implements LdapManagerUserInterface
         if (null === $this->ldapUser) {
             throw new \RuntimeException('Cannot assign LDAP roles before authenticating user against LDAP');
         }
-
+        
         $this->ldapUser['roles'] = array();
 
         if (true === $this->params['client']['skip_roles']) {
@@ -210,33 +222,36 @@ class LdapManagerUser implements LdapManagerUserInterface
             return;
         }
 
-        if (!isset($this->params['role']) && false ===  $this->params['client']['skip_roles']) {
+        if (!isset($this->params['roles']) && false ===  $this->params['client']['skip_roles']) {
             throw new \InvalidArgumentException("If you want to skip getting the roles, set config option imag_ldap:client:skip_roles to true");
         }
 
         $tab = array();
+        foreach($this->params['roles'] as $param)
+        {
 
-        $filter = isset($this->params['role']['filter'])
-            ? $this->params['role']['filter']
-            : '';
+            $filter = isset($param['filter'])
+                ? $param['filter']
+                : '';
 
-        $entries = $this->ldapConnection
-            ->search(array(
-                'base_dn'  => $this->params['role']['base_dn'],
-                'filter'   => sprintf('(&%s(%s=%s))',
-                                      $filter,
-                                      $this->params['role']['user_attribute'],
-                                      $this->ldapConnection->escape($this->getUserId())
-                ),
-                'attrs'    => array(
-                    $this->params['role']['name_attribute']
-                )
-            ));
+            $entries = $this->ldapConnection
+                ->search(array(
+                    'base_dn'  => $param['base_dn'],
+                    'filter'   => sprintf('(&%s(%s=%s))',
+                                          $filter,
+                                          $param['user_attribute'],
+                                          $this->ldapConnection->escape($this->getUserId($param))
+                    ),
+                    'attrs'    => array(
+                        $param['name_attribute']
+                    )
+                ));
 
-        for ($i = 0; $i < $entries['count']; $i++) {
-            array_push($tab, sprintf('ROLE_%s',
-                                     self::slugify($entries[$i][$this->params['role']['name_attribute']][0])
-            ));
+            for ($i = 0; $i < $entries['count']; $i++) {
+                array_push($tab, sprintf('ROLE_%s',
+                                         self::slugify($entries[$i][$param['name_attribute']][0])
+                ));
+            }
         }
 
         $this->ldapUser['roles'] = $tab;
@@ -265,9 +280,9 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $role;
     }
 
-    private function getUserId()
+    private function getUserId(array $param)
     {
-        switch ($this->params['role']['user_id']) {
+        switch ($param['user_id']) {
         case 'dn':
             return $this->ldapUser['dn'];
             break;
@@ -277,7 +292,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             break;
 
         default:
-            throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
+            throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s", $param['user_id']));
         }
     }
 }
