@@ -64,7 +64,7 @@ class LdapConnection implements LdapConnectionInterface
 
     /**
      * @return true
-     * @throws \IMAG\LdapBundle\Exceptions\ConnectionException | Connection error
+     * @throws \IMAG\LdapBundle\Exception\ConnectionException | Connection error
      */
     public function bind($user_dn, $password = '', $ress = null)
     {
