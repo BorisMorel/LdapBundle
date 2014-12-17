@@ -35,6 +35,7 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      * to prevent a possible brute-force attack.
      *
      * @param UserProviderInterface    $userProvider
+     * @param AuthenticationProviderInterface $daoAuthenticationProvider
      * @param LdapManagerUserInterface $ldapManager
      * @param EventDispatcherInterface $dispatcher
      * @param string                   $providerKey
