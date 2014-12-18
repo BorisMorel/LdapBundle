@@ -17,7 +17,7 @@ class LdapConnection implements LdapConnectionInterface
      * Holds a list of resources per username (username=>resource) to allow for reusing binded connections.
      * @var array
      */
-    protected $resources = [];
+    protected $resources = array();
 
     public function __construct(array $params, Logger $logger)
     {
