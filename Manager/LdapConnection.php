@@ -13,6 +13,12 @@ class LdapConnection implements LdapConnectionInterface
 
     protected $ress;
 
+    /**
+     * Holds a list of resources per username (username=>resource) to allow for reusing binded connections.
+     * @var array
+     */
+    protected $resources = [];
+
     public function __construct(array $params, Logger $logger)
     {
         $this->params = $params;
@@ -64,7 +70,7 @@ class LdapConnection implements LdapConnectionInterface
 
     /**
      * @return true
-     * @throws \IMAG\LdapBundle\Exceptions\ConnectionException | Connection error
+     * @throws \IMAG\LdapBundle\Exception\ConnectionException | Connection error
      */
     public function bind($user_dn, $password = '', $ress = null)
     {
@@ -128,6 +134,16 @@ class LdapConnection implements LdapConnectionInterface
             ? $this->params['client']['port']
             : '389';
 
+        // check if there is a binded connection for this username, if there is, set $this->ress and return without
+        // doing it again.
+        $username = $this->params['client']['username'];
+        if (isset($this->params['client']['username'])) {
+            if (isset($this->resources[$username])) {
+                $this->ress = $this->resources[$username];
+                return $this;
+            }
+        }
+
         $ress = @ldap_connect($this->params['client']['host'], $port);
 
         if (isset($this->params['client']['version'])) {
@@ -151,6 +167,8 @@ class LdapConnection implements LdapConnectionInterface
             $this->checkLdapError($ress);
         }
 
+        // store resource per username to be reused later.
+        $this->resources[$username] = $ress;
         $this->ress = $ress;
 
         return $this;
