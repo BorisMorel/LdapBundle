@@ -27,7 +27,7 @@ class IMAGLdapBundle extends Bundle
     public function boot()
     {
         if (!function_exists('ldap_connect')) {
-            throw new \Exception("module php-ldap isn't install");
+            throw new \Exception("module php-ldap isn't installed");
         }
     }
 
