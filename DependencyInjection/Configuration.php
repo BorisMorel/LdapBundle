@@ -41,7 +41,6 @@ class Configuration implements ConfigurationInterface
               ->booleanNode('bind_username_before')->defaultFalse()->end()
               ->scalarNode('referrals_enabled')->end()
               ->scalarNode('network_timeout')->end()
-              ->booleanNode('restart')->defaultFalse()->end()
               ->booleanNode('skip_roles')->defaultFalse()->end()
            ->end()
           ;

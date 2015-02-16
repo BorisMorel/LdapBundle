@@ -8,8 +8,11 @@ use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapConnection implements LdapConnectionInterface
 {
-    private $params;
-    private $logger;
+    private
+        $params,
+        $logger,
+        $lastuse
+        ;
 
     protected $ress;
 
@@ -18,7 +21,6 @@ class LdapConnection implements LdapConnectionInterface
         $this->params = $params;
         $this->logger = $logger;
     }
-
 
     public function search(array $params)
     {
@@ -36,12 +38,10 @@ class LdapConnection implements LdapConnectionInterface
         $attrs = isset($params['attrs']) ? $params['attrs'] : array();
 
         $this->info(
-            sprintf(
-                'ldap_search base_dn %s, filter %s',
+            sprintf('ldap_search base_dn %s, filter %s',
                 print_r($params['base_dn'], true),
                 print_r($params['filter'], true)
-            )
-        );
+            ));
 
         $search = @ldap_search(
             $this->ress,
@@ -49,8 +49,12 @@ class LdapConnection implements LdapConnectionInterface
             $params['filter'],
             $attrs
         );
-        $this->checkLdapError();
-
+        if (false === $search) {
+            $this->logger->error("LDAP ERROR : ".ldap_errno($this->ress).' '.ldap_error($this->ress));
+        } else {
+            $this->lastuse = new \DateTime();
+            $this->lastuse->add(new \DateInterval('PT5M'));
+        }
         if ($search) {
             $entries = ldap_get_entries($this->ress, $search);
 
@@ -62,29 +66,19 @@ class LdapConnection implements LdapConnectionInterface
         return false;
     }
 
-    /**
-     * @return true
-     * @throws \IMAG\LdapBundle\Exceptions\ConnectionException | Connection error
-     */
-    public function bind($user_dn, $password = '', $ress = null)
+    public function bind($user_dn, $password='')
     {
-        if (null === $ress) {
-            if ($this->ress === null) {
-                $this->connect();
-            }
-
-            $ress = $this->ress;
-        }
-
         if (empty($user_dn) || ! is_string($user_dn)) {
             throw new ConnectionException("LDAP user's DN (user_dn) must be provided (as a string).");
         }
 
-        // According to the LDAP RFC 4510-4511, the password can be blank.
-        @ldap_bind($ress, $user_dn, $password);
-        $this->checkLdapError();
+        $this->connect();
+        
+        $this->lastuse = new \DateTime();
+        $this->lastuse->add(new \DateInterval('PT5M'));
 
-        return true;
+        // According to the LDAP RFC 4510-4511, the password can be blank.
+        return @ldap_bind($this->ress, $user_dn, $password);
     }
 
     public function getParameters()
@@ -124,18 +118,21 @@ class LdapConnection implements LdapConnectionInterface
 
     private function connect()
     {
+        $now = new \DateTime();
+        
+        if (null !== $this->ress and null !== $this->lastuse
+            and $this->lastuse > $now) {
+            return $this;
+        }
+
         $port = isset($this->params['client']['port'])
             ? $this->params['client']['port']
             : '389';
 
         $ress = @ldap_connect($this->params['client']['host'], $port);
-
+        
         if (isset($this->params['client']['version'])) {
             ldap_set_option($ress, LDAP_OPT_PROTOCOL_VERSION, $this->params['client']['version']);
-        }
-
-        if (isset($this->params['client']['restart'])) {
-            ldap_set_option($ress, LDAP_OPT_RESTART, $this->params['client']['restart']);
         }
 
         if (isset($this->params['client']['referrals_enabled'])) {
@@ -151,12 +148,16 @@ class LdapConnection implements LdapConnectionInterface
                 throw new \Exception('You must uncomment password key');
             }
 
-            @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
-            $this->checkLdapError($ress);
+            $bindress = @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
+
+            if (!$bindress) {
+                throw new \Exception('The credentials you have configured are not valid');
+            }
         }
 
         $this->ress = $ress;
-
+        $this->lastuse = new \DateTime();
+        $this->lastuse->add(new \DateInterval('PT5M'));
         return $this;
     }
 
@@ -172,53 +173,6 @@ class LdapConnection implements LdapConnectionInterface
         if ($this->logger) {
             $this->logger->err($message);
         }
-    }
-
-    /**
-     * Checks if there were an error during last ldap call
-     *
-     * @throws \IMAG\LdapBundle\Exception\ConnectionException
-     */
-    private function checkLdapError($ress = null)
-    {
-        if (0 != $code = $this->getErrno($ress)) {
-            $message = $this->getError($ress);
-            $this->err('LDAP returned an error with code ' . $code . ' : ' . $message);
-            throw new ConnectionException($message, $code);
-        }
-    }
-
-
-    /**
-     * @param resource|null $resource
-     *
-     * @return null|string
-     *
-     * @see https://wiki.servicenow.com/index.php?title=LDAP_Error_Codes
-     */
-    public function getErrno($resource = null)
-    {
-        $resource = $resource ?: $this->ress;
-        if (!$resource) {
-            return null;
-        }
-
-        return ldap_errno($resource);
-    }
-
-    /**
-     * @param resource|null $resource
-     *
-     * @return null|string
-     */
-    public function getError($resource = null)
-    {
-        $resource = $resource ?: $this->ress;
-        if (!$resource) {
-            return null;
-        }
-
-        return ldap_error($resource);
     }
 
     /**

@@ -1,5 +1,5 @@
 {
-    "name": "imag/ldap-bundle",
+    "name": "jbnahan/ldap-bundle",
     "description": "LDAP Bundle for Symfony 2",
     "homepage": "http://github.com/BorisMorel/LdapBundle",
     "license": "CeCILL",
@@ -26,6 +26,11 @@
             "name": "Shiroyuki",
             "role": "Fork Maintainer",
             "homepage": "https://github.com/shiroyuki"
+        },
+        {
+            "name": "MacintoshPlus",
+            "role": "Fork Maintainer",
+            "homepage": "https://github.com/macintoshplus"
         }
     ],
     "support": {
