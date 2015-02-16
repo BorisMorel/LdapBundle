@@ -8,8 +8,7 @@ use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapConnection implements LdapConnectionInterface
 {
-    private
-        $params,
+    private $params,
         $logger,
         $lastuse
         ;
@@ -18,6 +17,9 @@ class LdapConnection implements LdapConnectionInterface
 
     public function __construct(array $params, Logger $logger)
     {
+        if (!array_key_exists('reconnect_delay', $params)) {
+            $params['reconnect_delay'] = '5';
+        }
         $this->params = $params;
         $this->logger = $logger;
     }
@@ -49,20 +51,18 @@ class LdapConnection implements LdapConnectionInterface
             $params['filter'],
             $attrs
         );
-        if (false === $search) {
-            $this->logger->error("LDAP ERROR : ".ldap_errno($this->ress).' '.ldap_error($this->ress));
-        } else {
+
+        if (false !== $search) {
             $this->lastuse = new \DateTime();
-            $this->lastuse->add(new \DateInterval('PT5M'));
-        }
-        if ($search) {
+            $this->lastuse->add(new \DateInterval('PT'.$params['reconnect_delay'].'M'));
+
             $entries = ldap_get_entries($this->ress, $search);
 
             @ldap_free_result($search);
 
             return is_array($entries) ? $entries : false;
         }
-
+        $this->logger->error("LDAP ERROR : ".ldap_errno($this->ress).' '.ldap_error($this->ress));
         return false;
     }
 
@@ -73,9 +73,9 @@ class LdapConnection implements LdapConnectionInterface
         }
 
         $this->connect();
-        
+
         $this->lastuse = new \DateTime();
-        $this->lastuse->add(new \DateInterval('PT5M'));
+        $this->lastuse->add(new \DateInterval('PT'.$params['reconnect_delay'].'M'));
 
         // According to the LDAP RFC 4510-4511, the password can be blank.
         return @ldap_bind($this->ress, $user_dn, $password);
@@ -119,7 +119,7 @@ class LdapConnection implements LdapConnectionInterface
     private function connect()
     {
         $now = new \DateTime();
-        
+
         if (null !== $this->ress and null !== $this->lastuse
             and $this->lastuse > $now) {
             return $this;
@@ -130,7 +130,7 @@ class LdapConnection implements LdapConnectionInterface
             : '389';
 
         $ress = @ldap_connect($this->params['client']['host'], $port);
-        
+
         if (isset($this->params['client']['version'])) {
             ldap_set_option($ress, LDAP_OPT_PROTOCOL_VERSION, $this->params['client']['version']);
         }
@@ -157,7 +157,7 @@ class LdapConnection implements LdapConnectionInterface
 
         $this->ress = $ress;
         $this->lastuse = new \DateTime();
-        $this->lastuse->add(new \DateInterval('PT5M'));
+        $this->lastuse->add(new \DateInterval('PT'.$params['reconnect_delay'].'M'));
         return $this;
     }
 

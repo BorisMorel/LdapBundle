@@ -2,8 +2,8 @@
 
 namespace IMAG\LdapBundle\DependencyInjection;
 
-use Symfony\Component\Config\Definition\ConfigurationInterface,
-  Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 class Configuration implements ConfigurationInterface
 {
@@ -41,6 +41,7 @@ class Configuration implements ConfigurationInterface
               ->booleanNode('bind_username_before')->defaultFalse()->end()
               ->scalarNode('referrals_enabled')->end()
               ->scalarNode('network_timeout')->end()
+              ->scalarNode('reconnect_delay')->defaultValue('5')->end()
               ->booleanNode('skip_roles')->defaultFalse()->end()
            ->end()
           ;
@@ -88,5 +89,4 @@ class Configuration implements ConfigurationInterface
 
       return $node;
   }
-
 }
