@@ -1,7 +1,7 @@
 {
     "name": "jbnahan/ldap-bundle",
     "description": "LDAP Bundle for Symfony 2",
-    "homepage": "http://github.com/BorisMorel/LdapBundle",
+    "homepage": "http://github.com/macintoshplus/LdapBundle",
     "license": "CeCILL",
     "authors": [
         {
@@ -36,6 +36,9 @@
     "support": {
         "irc": "irc://irc.freenode.org/sf-grenoble"
     },
+    "conflict": {
+        "imag/ldap-bundle": "*"
+    },
     "require": {
         "php": ">=5.3.3",
         "ext-ldap": "*",
@@ -45,5 +48,5 @@
         "psr-0": { "IMAG\\LdapBundle": "" }
     },
 
-    "target-dir": "IMAG/LdapBundle"
+    "target-dir": "JbNahan/LdapBundle"
 }
