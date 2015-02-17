@@ -176,6 +176,53 @@ class LdapConnection implements LdapConnectionInterface
     }
 
     /**
+     * Checks if there were an error during last ldap call
+     *
+     * @throws \IMAG\LdapBundle\Exception\ConnectionException
+     */
+    private function checkLdapError($ress = null)
+    {
+        if (0 != $code = $this->getErrno($ress)) {
+            $message = $this->getError($ress);
+            $this->err('LDAP returned an error with code ' . $code . ' : ' . $message);
+            throw new ConnectionException($message, $code);
+        }
+    }
+
+
+    /**
+     * @param resource|null $resource
+     *
+     * @return null|string
+     *
+     * @see https://wiki.servicenow.com/index.php?title=LDAP_Error_Codes
+     */
+    public function getErrno($resource = null)
+    {
+        $resource = $resource ?: $this->ress;
+        if (!$resource) {
+            return null;
+        }
+
+        return ldap_errno($resource);
+    }
+
+    /**
+     * @param resource|null $resource
+     *
+     * @return null|string
+     */
+    public function getError($resource = null)
+    {
+        $resource = $resource ?: $this->ress;
+        if (!$resource) {
+            return null;
+        }
+
+        return ldap_error($resource);
+    }
+
+    /**
      * Escape string for use in LDAP search filter.
      *
      * @link http://www.php.net/manual/de/function.ldap-search.php#90158
