@@ -1,7 +1,7 @@
 {
-    "name": "imag/ldap-bundle",
+    "name": "jbnahan/ldap-bundle",
     "description": "LDAP Bundle for Symfony 2",
-    "homepage": "http://github.com/BorisMorel/LdapBundle",
+    "homepage": "http://github.com/macintoshplus/LdapBundle",
     "license": "CeCILL",
     "authors": [
         {
@@ -26,10 +26,21 @@
             "name": "Shiroyuki",
             "role": "Fork Maintainer",
             "homepage": "https://github.com/shiroyuki"
+        },
+        {
+            "name": "MacintoshPlus",
+            "role": "Fork Maintainer",
+            "homepage": "https://github.com/macintoshplus"
         }
     ],
     "support": {
         "irc": "irc://irc.freenode.org/sf-grenoble"
+    },
+    "conflict": {
+        "imag/ldap-bundle": "*"
+    },
+    "replace": {
+        "imag/ldap-bundle": "*"
     },
     "require": {
         "php": ">=5.3.3",

@@ -90,6 +90,7 @@ imag_ldap:
 #    referrals_enabled: true # Optional
 #    bind_username_before: true # Optional
 #    skip_roles: false # Optional
+#    reconnect_delay: 5 # Optional. Delay in minute. 5 by default.
 
   user:
     base_dn: ou=people,dc=host,dc=foo

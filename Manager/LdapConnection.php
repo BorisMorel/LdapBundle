@@ -8,17 +8,21 @@ use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapConnection implements LdapConnectionInterface
 {
-    private $params;
-    private $logger;
+    private $params,
+        $logger,
+        $lastuse
+        ;
 
     protected $ress;
 
     public function __construct(array $params, Logger $logger)
     {
+        if (!array_key_exists('reconnect_delay', $params)) {
+            $params['reconnect_delay'] = '5';
+        }
         $this->params = $params;
         $this->logger = $logger;
     }
-
 
     public function search(array $params)
     {
@@ -36,12 +40,10 @@ class LdapConnection implements LdapConnectionInterface
         $attrs = isset($params['attrs']) ? $params['attrs'] : array();
 
         $this->info(
-            sprintf(
-                'ldap_search base_dn %s, filter %s',
+            sprintf('ldap_search base_dn %s, filter %s',
                 print_r($params['base_dn'], true),
                 print_r($params['filter'], true)
-            )
-        );
+            ));
 
         $search = @ldap_search(
             $this->ress,
@@ -49,42 +51,34 @@ class LdapConnection implements LdapConnectionInterface
             $params['filter'],
             $attrs
         );
-        $this->checkLdapError();
 
-        if ($search) {
+        if (false !== $search) {
+            $this->lastuse = new \DateTime();
+            $this->lastuse->add(new \DateInterval('PT'.$this->params['reconnect_delay'].'M'));
+
             $entries = ldap_get_entries($this->ress, $search);
 
             @ldap_free_result($search);
 
             return is_array($entries) ? $entries : false;
         }
-
+        $this->logger->error("LDAP ERROR : ".ldap_errno($this->ress).' '.ldap_error($this->ress));
         return false;
     }
 
-    /**
-     * @return true
-     * @throws \IMAG\LdapBundle\Exceptions\ConnectionException | Connection error
-     */
-    public function bind($user_dn, $password = '', $ress = null)
+    public function bind($user_dn, $password='')
     {
-        if (null === $ress) {
-            if ($this->ress === null) {
-                $this->connect();
-            }
-
-            $ress = $this->ress;
-        }
-
         if (empty($user_dn) || ! is_string($user_dn)) {
             throw new ConnectionException("LDAP user's DN (user_dn) must be provided (as a string).");
         }
 
-        // According to the LDAP RFC 4510-4511, the password can be blank.
-        @ldap_bind($ress, $user_dn, $password);
-        $this->checkLdapError();
+        $this->connect();
 
-        return true;
+        $this->lastuse = new \DateTime();
+        $this->lastuse->add(new \DateInterval('PT'.$this->params['reconnect_delay'].'M'));
+
+        // According to the LDAP RFC 4510-4511, the password can be blank.
+        return @ldap_bind($this->ress, $user_dn, $password);
     }
 
     public function getParameters()
@@ -124,6 +118,13 @@ class LdapConnection implements LdapConnectionInterface
 
     private function connect()
     {
+        $now = new \DateTime();
+
+        if (null !== $this->ress and null !== $this->lastuse
+            and $this->lastuse > $now) {
+            return $this;
+        }
+
         $port = isset($this->params['client']['port'])
             ? $this->params['client']['port']
             : '389';
@@ -147,12 +148,16 @@ class LdapConnection implements LdapConnectionInterface
                 throw new \Exception('You must uncomment password key');
             }
 
-            @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
-            $this->checkLdapError($ress);
+            $bindress = @ldap_bind($ress, $this->params['client']['username'], $this->params['client']['password']);
+
+            if (!$bindress) {
+                throw new \Exception('The credentials you have configured are not valid');
+            }
         }
 
         $this->ress = $ress;
-
+        $this->lastuse = new \DateTime();
+        $this->lastuse->add(new \DateInterval('PT'.$this->params['reconnect_delay'].'M'));
         return $this;
     }
 
