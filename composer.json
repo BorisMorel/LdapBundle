@@ -48,5 +48,5 @@
         "psr-0": { "IMAG\\LdapBundle": "" }
     },
 
-    "target-dir": "JbNahan/LdapBundle"
+    "target-dir": "jbnahan/LdapBundle"
 }
