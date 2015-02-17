@@ -39,6 +39,9 @@
     "conflict": {
         "imag/ldap-bundle": "*"
     },
+    "replace": {
+        "imag/ldap-bundle": "*"
+    },
     "require": {
         "php": ">=5.3.3",
         "ext-ldap": "*",
