@@ -54,7 +54,7 @@ class LdapConnection implements LdapConnectionInterface
 
         if (false !== $search) {
             $this->lastuse = new \DateTime();
-            $this->lastuse->add(new \DateInterval('PT'.$params['reconnect_delay'].'M'));
+            $this->lastuse->add(new \DateInterval('PT'.$this->params['reconnect_delay'].'M'));
 
             $entries = ldap_get_entries($this->ress, $search);
 
@@ -75,7 +75,7 @@ class LdapConnection implements LdapConnectionInterface
         $this->connect();
 
         $this->lastuse = new \DateTime();
-        $this->lastuse->add(new \DateInterval('PT'.$params['reconnect_delay'].'M'));
+        $this->lastuse->add(new \DateInterval('PT'.$this->params['reconnect_delay'].'M'));
 
         // According to the LDAP RFC 4510-4511, the password can be blank.
         return @ldap_bind($this->ress, $user_dn, $password);
@@ -157,7 +157,7 @@ class LdapConnection implements LdapConnectionInterface
 
         $this->ress = $ress;
         $this->lastuse = new \DateTime();
-        $this->lastuse->add(new \DateInterval('PT'.$params['reconnect_delay'].'M'));
+        $this->lastuse->add(new \DateInterval('PT'.$this->params['reconnect_delay'].'M'));
         return $this;
     }
 
