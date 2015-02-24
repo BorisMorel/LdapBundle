@@ -35,6 +35,7 @@ class Configuration implements ConfigurationInterface
           ->children()
               ->scalarNode('host')->isRequired()->cannotBeEmpty()->end()
               ->scalarNode('port')->defaultValue(389)->end()
+              ->scalarNode('tls')->defaultValue(false)->end()
               ->scalarNode('version')->end()
               ->scalarNode('username')->end()
               ->scalarNode('password')->end()

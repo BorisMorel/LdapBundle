@@ -83,6 +83,11 @@ class LdapConnection implements LdapConnectionInterface
         // According to the LDAP RFC 4510-4511, the password can be blank.
         @ldap_bind($ress, $user_dn, $password);
         $this->checkLdapError();
+        if($this->isTLSEnabled()) {
+            if(!@ldap_start_tls($ress)) {
+                $this->checkLdapError();
+            }
+        }
 
         return true;
     }
@@ -100,6 +105,11 @@ class LdapConnection implements LdapConnectionInterface
     public function getPort()
     {
         return $this->params['client']['port'];
+    }
+
+    public function isTLSEnabled()
+    {
+        return $this->params['client']['tls'];
     }
 
     public function getBaseDn($index)

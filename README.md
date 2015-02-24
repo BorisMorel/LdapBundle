@@ -83,6 +83,7 @@ imag_ldap:
   client:
     host: your.host.foo
     port: 389
+#    tls: false # Optional
 #    version: 3 # Optional
 #    username: foo # Optional
 #    password: bar # Optional
