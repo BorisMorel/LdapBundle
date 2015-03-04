@@ -63,8 +63,12 @@ class LdapConnection implements LdapConnectionInterface
     }
 
     /**
+     * @param string $user_dn
+     * @param string $password
+     * @param connection $ress
      * @return true
-     * @throws \IMAG\LdapBundle\Exceptions\ConnectionException | Connection error
+     * @throws ConnectionException
+     * @throws \Exception
      */
     public function bind($user_dn, $password = '', $ress = null)
     {
@@ -83,11 +87,6 @@ class LdapConnection implements LdapConnectionInterface
         // According to the LDAP RFC 4510-4511, the password can be blank.
         @ldap_bind($ress, $user_dn, $password);
         $this->checkLdapError();
-        if($this->isTLSEnabled()) {
-            if(!@ldap_start_tls($ress)) {
-                $this->checkLdapError();
-            }
-        }
 
         return true;
     }
@@ -150,6 +149,11 @@ class LdapConnection implements LdapConnectionInterface
 
         if (isset($this->params['client']['network_timeout'])) {
             ldap_set_option($ress, LDAP_OPT_NETWORK_TIMEOUT, $this->params['client']['network_timeout']);
+        }
+
+        if($this->isTLSEnabled()) {
+            @ldap_start_tls($ress);
+            $this->checkLdapError();
         }
 
         if (isset($this->params['client']['username'])) {

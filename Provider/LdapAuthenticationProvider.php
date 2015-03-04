@@ -2,7 +2,6 @@
 
 namespace IMAG\LdapBundle\Provider;
 
-use IMAG\LdapBundle\Exception\ConnectionException;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -67,20 +66,16 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         try {
-            $user = $this->userProvider
-                ->loadUserByUsername($token->getUsername());
+            $user = $this->userProvider->loadUserByUsername($token->getUsername());
 
             if ($user instanceof LdapUserInterface) {
                 return $this->ldapAuthenticate($user, $token);
             }
             
-        } catch (\Exception $e) {
-            if ($e instanceof ConnectionException || $e instanceof UsernameNotFoundException) {
-                if ($this->hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException('Bad credentials', 0, $e);
-                }
+        } catch (UsernameNotFoundException $e) {
+            if ($this->hideUserNotFoundExceptions) {
+                throw new BadCredentialsException('Bad credentials', 0, $e);
             }
-
             throw $e;
         }
         
@@ -92,10 +87,13 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * Authentication logic to allow Ldap user
      *
-     * @param \IMAG\LdapBundle\User\LdapUserInterface  $user
+     * @param \IMAG\LdapBundle\User\LdapUserInterface $user
      * @param TokenInterface $token
-     *
-     * @return \Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken $token
+     * @return UsernamePasswordToken $token
+     * @throws AuthenticationException
+     * @throws BadCredentialsException
+     * @throws UsernameNotFoundException
+     * @throws \Exception
      */
     private function ldapAuthenticate(LdapUserInterface $user, TokenInterface $token)
     {
@@ -159,7 +157,10 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      * Reload user with the username
      *
      * @param \IMAG\LdapBundle\User\LdapUserInterface $user
-     * @return \IMAG\LdapBundle\User\LdapUserInterface $user
+     * @return LdapUserInterface $user
+     * @throws BadCredentialsException
+     * @throws UsernameNotFoundException
+     * @throws \Exception
      */
     private function reloadUser(LdapUserInterface $user)
     {
