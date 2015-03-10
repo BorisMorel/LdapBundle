@@ -2,6 +2,7 @@
 
 namespace IMAG\LdapBundle\Provider;
 
+use IMAG\LdapBundle\Exception\ConnectionException;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -72,6 +73,11 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
                 return $this->ldapAuthenticate($user, $token);
             }
             
+        } catch (ConnectionException $ce) {
+            if ($ce->getCode() == 49) {
+                throw new BadCredentialsException('Bad credentials', 0, $ce);
+            }
+            throw $ce;
         } catch (UsernameNotFoundException $e) {
             if ($this->hideUserNotFoundExceptions) {
                 throw new BadCredentialsException('Bad credentials', 0, $e);
