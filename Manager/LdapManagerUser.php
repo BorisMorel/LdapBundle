@@ -4,6 +4,7 @@ namespace IMAG\LdapBundle\Manager;
 
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapManagerUser implements LdapManagerUserInterface
@@ -39,9 +40,9 @@ class LdapManagerUser implements LdapManagerUserInterface
     public function auth()
     {
         if (strlen($this->password) === 0) {
-            throw new ConnectionException('Password can\'t be empty');
+            throw new BadCredentialsException('Password can\'t be empty');
         }
-        
+
         if (null === $this->ldapUser) {
             $this->bindByUsername();
             $this->doPass();

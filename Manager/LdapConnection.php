@@ -49,7 +49,7 @@ class LdapConnection implements LdapConnectionInterface
             $params['filter'],
             $attrs
         );
-        $this->checkLdapError();
+        $this->checkLdapError($this->ress);
 
         if ($search) {
             $entries = ldap_get_entries($this->ress, $search);
@@ -86,7 +86,7 @@ class LdapConnection implements LdapConnectionInterface
 
         // According to the LDAP RFC 4510-4511, the password can be blank.
         @ldap_bind($ress, $user_dn, $password);
-        $this->checkLdapError();
+        $this->checkLdapError($ress);
 
         return true;
     }
@@ -153,7 +153,7 @@ class LdapConnection implements LdapConnectionInterface
 
         if($this->isTLSEnabled()) {
             @ldap_start_tls($ress);
-            $this->checkLdapError();
+            $this->checkLdapError($ress);
         }
 
         if (isset($this->params['client']['username'])) {
