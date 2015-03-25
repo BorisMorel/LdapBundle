@@ -3,7 +3,8 @@
 namespace IMAG\LdapBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\ConfigurationInterface,
-  Symfony\Component\Config\Definition\Builder\TreeBuilder;
+  Symfony\Component\Config\Definition\Builder\TreeBuilder,
+  Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 
 class Configuration implements ConfigurationInterface
 {
@@ -13,25 +14,28 @@ class Configuration implements ConfigurationInterface
     $rootNode = $treeBuilder->root('imag_ldap');
     $rootNode
         ->children()
-            ->append($this->addClientNode())
-            ->append($this->addUserNode())
-            ->append($this->addRoleNode())
             ->scalarNode('user_class')
               ->defaultValue("IMAG\LdapBundle\User\LdapUser")
             ->end()
         ->end()
         ;
 
+    $this->addClientNode($rootNode);
+    $this->addUserNode($rootNode);
+    $this->addGroupsNode($rootNode);
+    $this->addRolesNode($rootNode);
     return $treeBuilder;
   }
 
-  private function addClientNode()
+  private function addClientNode(ArrayNodeDefinition $rootNode)
   {
-      $treeBuilder = new TreeBuilder();
-      $node = $treeBuilder->root('client');
+      $clientNode = $rootNode
+          ->children()
+              ->arrayNode('client')
+                  ->isRequired()
+          ;
 
-      $node
-          ->isRequired()
+      $clientNode
           ->children()
               ->scalarNode('host')->isRequired()->cannotBeEmpty()->end()
               ->scalarNode('port')->defaultValue(389)->end()
@@ -41,37 +45,37 @@ class Configuration implements ConfigurationInterface
               ->booleanNode('bind_username_before')->defaultFalse()->end()
               ->scalarNode('referrals_enabled')->end()
               ->scalarNode('network_timeout')->end()
+              ->booleanNode('skip_groups')->defaultFalse()->end()
               ->booleanNode('skip_roles')->defaultFalse()->end()
-           ->end()
+              ->booleanNode('groups_as_roles')->defaultFalse()->end()
           ;
-
-      return $node;
   }
 
-  private function addUserNode()
+  private function addUserNode(ArrayNodeDefinition $rootNode)
   {
-      $treeBuilder = new TreeBuilder();
-      $node = $treeBuilder->root('user');
+      $userNode = $rootNode
+          ->children()
+              ->arrayNode('user')
+                  ->isRequired()
+          ;
 
-      $node
-          ->isRequired()
+      $userNode
           ->children()
               ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
               ->scalarNode('filter')->end()
               ->scalarNode('name_attribute')->defaultValue('uid')->end()
               ->variableNode('attributes')->defaultValue(array())->end()
-          ->end()
           ;
-
-      return $node;
   }
 
-  private function addRoleNode()
+  private function addGroupsNode(ArrayNodeDefinition $rootNode)
   {
-      $treeBuilder = new TreeBuilder();
-      $node = $treeBuilder->root('role');
+      $groupsNode = $rootNode
+          ->children()
+              ->arrayNode('groups')
+          ;
 
-      $node
+      $groupsNode
           ->children()
               ->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
               ->scalarNode('filter')->end()
@@ -83,10 +87,30 @@ class Configuration implements ConfigurationInterface
                   ->thenInvalid('Only dn or username')
                 ->end()
               ->end()
-          ->end()
+          ;
+  }
+
+  private function addRolesNode(ArrayNodeDefinition $rootNode)
+  {
+      $rolesNode = $rootNode
+          ->children()
+              ->arrayNode('roles')
+                  ->useAttributeAsKey('role')
+                  ->prototype('array')
+                      ->performNoDeepMerging()
           ;
 
-      return $node;
+      $rolesNode
+          ->children()
+              ->arrayNode('users')
+                  ->beforeNormalization()->ifString()->then(function ($v) { return array($v); })->end()
+                  ->prototype('scalar')->end()
+              ->end()
+              ->arrayNode('groups')
+                  ->beforeNormalization()->ifString()->then(function ($v) { return array($v); })->end()
+                  ->prototype('scalar')->end()
+              ->end()
+          ;
   }
 
 }

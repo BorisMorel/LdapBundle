@@ -12,6 +12,7 @@ class LdapUser implements LdapUserInterface
         $email,
         $dn,
         $cn,
+        $groups = array(),
         $roles = array(),
         $attributes = array()        
         ;
@@ -47,6 +48,11 @@ class LdapUser implements LdapUserInterface
     {
         $this->surname = $surname;
         return $this;
+    }
+
+    public function getGroups()
+    {
+        return $this->groups;
     }
 
     public function getRoles()
@@ -125,6 +131,20 @@ class LdapUser implements LdapUserInterface
     public function setEmail($email)
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function setGroups(array $groups)
+    {
+        $this->groups = $groups;
+
+        return $this;
+    }
+
+    public function addGroup($group)
+    {
+        $this->groups[] = $group;
 
         return $this;
     }

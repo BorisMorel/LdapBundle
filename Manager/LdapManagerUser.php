@@ -58,6 +58,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     {
         $this
             ->addLdapUser()
+            ->addLdapGroups()
             ->addLdapRoles()
             ;
 
@@ -128,6 +129,11 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $this->username;
     }
 
+    public function getGroups()
+    {
+        return $this->ldapUser['groups'];
+    }
+
     public function getRoles()
     {
         return $this->ldapUser['roles'];
@@ -196,50 +202,91 @@ class LdapManagerUser implements LdapManagerUserInterface
      * @throws \InvalidArgumentException | Configuration exception
      * @throws \IMAG\LdapBundle\Exception\ConnectionException | Connection error
      */
+    private function addLdapGroups()
+    {
+        if (null === $this->ldapUser) {
+            throw new \RuntimeException('Cannot get LDAP groups before authenticating user against LDAP');
+        }
+
+        $this->ldapUser['groups'] = array();
+
+        if (true === $this->params['client']['skip_groups']) {
+            return $this;
+        }
+
+        if (!isset($this->params['groups']) && false ===  $this->params['client']['skip_groups']) {
+            throw new \InvalidArgumentException("If you want to skip getting the groups, set config option imag_ldap:client:skip_groups to true");
+        }
+
+        $tab = array();
+
+        $filter = isset($this->params['groups']['filter'])
+            ? $this->params['groups']['filter']
+            : '';
+
+        $entries = $this->ldapConnection
+            ->search(array(
+                'base_dn'  => $this->params['groups']['base_dn'],
+                'filter'   => sprintf('(&%s(%s=%s))',
+                                      $filter,
+                                      $this->params['groups']['user_attribute'],
+                                      $this->ldapConnection->escape($this->getUserId())
+                ),
+                'attrs'    => array(
+                    $this->params['groups']['name_attribute']
+                )
+            ));
+
+        for ($i = 0; $i < $entries['count']; $i++) {
+            array_push($tab, $entries[$i][$this->params['groups']['name_attribute']][0]);
+        }
+
+        $this->ldapUser['groups'] = $tab;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed $this
+     * @throws \RuntimeException | Inconsistent Fails
+     * @throws \InvalidArgumentException | Configuration exception
+     */
     private function addLdapRoles()
     {
         if (null === $this->ldapUser) {
             throw new \RuntimeException('Cannot assign LDAP roles before authenticating user against LDAP');
         }
 
-        $this->ldapUser['roles'] = array();
+        $this->ldapUser['roles'] = array('ROLE_LDAP_USER');
 
         if (true === $this->params['client']['skip_roles']) {
-            $this->ldapUser['roles'] = array('ROLE_USER_DEFAULT');
-
-            return;
+            return $this;
         }
 
-        if (!isset($this->params['role']) && false ===  $this->params['client']['skip_roles']) {
-            throw new \InvalidArgumentException("If you want to skip getting the roles, set config option imag_ldap:client:skip_roles to true");
+        if (!isset($this->params['roles']) && false ===  $this->params['client']['skip_roles']) {
+            throw new \InvalidArgumentException("If you want to skip assigning the roles, set config option imag_ldap:client:skip_roles to true");
         }
 
-        $tab = array();
-
-        $filter = isset($this->params['role']['filter'])
-            ? $this->params['role']['filter']
-            : '';
-
-        $entries = $this->ldapConnection
-            ->search(array(
-                'base_dn'  => $this->params['role']['base_dn'],
-                'filter'   => sprintf('(&%s(%s=%s))',
-                                      $filter,
-                                      $this->params['role']['user_attribute'],
-                                      $this->ldapConnection->escape($this->getUserId())
-                ),
-                'attrs'    => array(
-                    $this->params['role']['name_attribute']
-                )
-            ));
-
-        for ($i = 0; $i < $entries['count']; $i++) {
-            array_push($tab, sprintf('ROLE_%s',
-                                     self::slugify($entries[$i][$this->params['role']['name_attribute']][0])
-            ));
+        if (true === $this->params['client']['groups_as_roles']) {
+            foreach ($this->ldapUser['groups'] as $group) {
+                array_push($this->ldapUser['roles'], sprintf('ROLE_LDAP_GROUP_%s', self::slugify($group)));
+            }
         }
 
-        $this->ldapUser['roles'] = $tab;
+        foreach ($this->params['roles'] as $role => $principals) {
+            $addRole = false;
+            if (isset($principals['users'])) {
+                foreach ($principals['users'] as $user) {
+                    if ($user === $this->username) $addRole = true;
+                }
+            }
+            if (isset($principals['groups'])) {
+                foreach ($principals['groups'] as $group) {
+                    if (in_array($group, $this->ldapUser['groups'], true)) $addRole = true;
+                }
+            }
+            if ($addRole) array_push($this->ldapUser['roles'], $role);
+        }
 
         return $this;
     }
@@ -267,7 +314,7 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     private function getUserId()
     {
-        switch ($this->params['role']['user_id']) {
+        switch ($this->params['groups']['user_id']) {
         case 'dn':
             return $this->ldapUser['dn'];
             break;
@@ -277,7 +324,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             break;
 
         default:
-            throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
+            throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['groups']['user_id']));
         }
     }
 }

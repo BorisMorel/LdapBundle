@@ -89,19 +89,25 @@ imag_ldap:
 #    network_timeout: 10 # Optional
 #    referrals_enabled: true # Optional
 #    bind_username_before: true # Optional
+#    skip_groups: false # Optional
 #    skip_roles: false # Optional
+#    groups_as_roles: false # Optional
 
   user:
     base_dn: ou=people,dc=host,dc=foo
 #    filter: (&(foo=bar)(ObjectClass=Person)) #Optional
     name_attribute: uid
-  role:
+  groups:
     base_dn: ou=group, dc=host, dc=foo
 #    filter: (ou=group) #Optional
     name_attribute: cn
     user_attribute: member
     user_id: [ dn or username ]
-    
+  roles:
+#    ROLE_CUSTOM:
+#      users:  [ 'username', ... ] # Optional
+#      groups: [ 'groupname', ... ] # Optional
+
 #  user_class: IMAG\LdapBundle\User\LdapUser # Optional
 ```
 
