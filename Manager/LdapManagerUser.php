@@ -41,14 +41,14 @@ class LdapManagerUser implements LdapManagerUserInterface
         if (strlen($this->password) === 0) {
             throw new ConnectionException('Password can\'t be empty');
         }
-        
+
         if (null === $this->ldapUser) {
             $this->bindByUsername();
             $this->doPass();
         } else {
             $this->doPass();
             $this->bindByDn();
-        }        
+        }
     }
 
     /**
@@ -273,6 +273,10 @@ class LdapManagerUser implements LdapManagerUserInterface
             break;
 
         case 'username':
+            return $this->username;
+            break;
+
+        case 'uid':
             return $this->username;
             break;
 
