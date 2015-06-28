@@ -216,6 +216,10 @@ class LdapManagerUser implements LdapManagerUserInterface
 
         $tab = array();
 
+        $userIdOrGroupID = !($this->params['role']['open_directory'])
+            ? $this->getUser()
+            : $this->ldapUser['gidnumber'][0];
+
         $filter = isset($this->params['role']['filter'])
             ? $this->params['role']['filter']
             : '';
@@ -226,7 +230,7 @@ class LdapManagerUser implements LdapManagerUserInterface
                 'filter'   => sprintf('(&%s(%s=%s))',
                                       $filter,
                                       $this->params['role']['user_attribute'],
-                                      $this->ldapConnection->escape($this->getUserId())
+                                      $this->ldapConnection->escape($userIdOrGroupID)
                 ),
                 'attrs'    => array(
                     $this->params['role']['name_attribute']
@@ -265,19 +269,19 @@ class LdapManagerUser implements LdapManagerUserInterface
         return $role;
     }
 
-    private function getUserId()
+    private function getUser()
     {
         switch ($this->params['role']['user_id']) {
-        case 'dn':
-            return $this->ldapUser['dn'];
-            break;
+            case 'dn':
+                return $this->ldapUser['dn'];
+                break;
 
-        case 'username':
-            return $this->username;
-            break;
+            case 'username':
+                return $this->username;
+                break;
 
-        default:
-            throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
+            default:
+                throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
         }
     }
 }

@@ -83,6 +83,7 @@ class Configuration implements ConfigurationInterface
                   ->thenInvalid('Only dn or username')
                 ->end()
               ->end()
+              ->scalarNode('open_directory')->defaultValue('false')->end()
           ->end()
           ;
 

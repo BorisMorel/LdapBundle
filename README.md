@@ -101,11 +101,14 @@ imag_ldap:
     name_attribute: cn
     user_attribute: member
     user_id: [ dn or username ]
+#    open_directory: false #Optional
     
 #  user_class: IMAG\LdapBundle\User\LdapUser # Optional
 ```
 
 **You should configure the parameters under the `imag_ldap` section to match your environment.**
+
+**If you're connecting to an Open Directory LDAP server, then the bundle won't be able to get roles. It'll use groups instead and assign the user's role as ROLE_*GROUP*.**
 
 **Note:**
 
