@@ -7,7 +7,7 @@ use Monolog\Logger;
 interface LdapConnectionInterface
 {
     function __construct(array $params, Logger $logger);
-    function search(array $params);
+    function search(array $searchParams);
     function bind($user_dn, $password);
     function getParameters();
     function getHost();

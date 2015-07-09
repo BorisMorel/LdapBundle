@@ -14,8 +14,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface,
     Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface,
     Symfony\Component\Security\Http\Firewall\AbstractAuthenticationListener,
     Symfony\Component\Security\Http\HttpUtils,
-    Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface
-;
+    Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
 
 class LdapListener extends AbstractAuthenticationListener
 {
@@ -42,14 +41,14 @@ class LdapListener extends AbstractAuthenticationListener
             array_merge(array(
                 'username_parameter' => '_username',
                 'password_parameter' => '_password',
-                'csrf_parameter'     => '_csrf_token',
-                'intention'          => 'ldap_authenticate',
-                'post_only'          => true,
+                'csrf_parameter' => '_csrf_token',
+                'intention' => 'ldap_authenticate',
+                'post_only' => true,
             ), $options),
             $logger,
             $dispatcher
         );
-        
+
         $this->csrfProvider = $csrfProvider;
     }
 
