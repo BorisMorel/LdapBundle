@@ -5,13 +5,18 @@ namespace IMAG\LdapBundle\Manager;
 use Monolog\Logger;
 
 use IMAG\LdapBundle\Exception\ConnectionException;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class LdapConnection implements LdapConnectionInterface
 {
     private $params;
     private $logger;
+    private $session;
 
     protected $ress;
+    protected $con;
+
+    const LDAP_SEARCH_CACHE = 'ldap_search_cache';
 
     public function __construct(array $params, Logger $logger)
     {
@@ -19,9 +24,23 @@ class LdapConnection implements LdapConnectionInterface
         $this->logger = $logger;
     }
 
-
-    public function search(array $params)
+    public function setSession(Session $session)
     {
+        $this->session = $session;
+    }
+
+    public function search(array $searchParams)
+    {
+        $attrs = isset($searchParams['attrs']) ? $searchParams['attrs'] : array();
+
+        if ($this->isSearchCacheEnabled() && $this->session->isStarted()) {
+            $cacheId = md5($searchParams['base_dn'] . '-' . $searchParams['filter'] . ' - ' . print_r($attrs, true));
+            $cache = $this->session->get(self::LDAP_SEARCH_CACHE, []);
+            if (array_key_exists($cacheId, $cache)) {
+                return json_decode($cache[$cacheId], true);
+            }
+        }
+
         $this->connect();
 
         $ref = array(
@@ -29,42 +48,47 @@ class LdapConnection implements LdapConnectionInterface
             'filter' => '',
         );
 
-        if (count($diff = array_diff_key($ref, $params))) {
-            throw new \Exception(sprintf('You must defined %s', print_r($diff, true)));
+        if (count($diff = array_diff_key($ref, $searchParams))) {
+            throw new \Exception(sprintf('You must define %s', print_r($diff, true)));
         }
-
-        $attrs = isset($params['attrs']) ? $params['attrs'] : array();
 
         $this->info(
             sprintf(
                 'ldap_search base_dn %s, filter %s',
-                print_r($params['base_dn'], true),
-                print_r($params['filter'], true)
+                print_r($searchParams['base_dn'], true),
+                print_r($searchParams['filter'], true)
             )
         );
 
-        $search = @ldap_search(
-            $this->ress,
-            $params['base_dn'],
-            $params['filter'],
-            $attrs
-        );
-        $this->checkLdapError();
+        $search = @ldap_search($this->ress, $searchParams['base_dn'], $searchParams['filter'], $attrs);
+        $this->checkLdapError($this->ress);
 
         if ($search) {
             $entries = ldap_get_entries($this->ress, $search);
 
             @ldap_free_result($search);
 
-            return is_array($entries) ? $entries : false;
+
+            $result = is_array($entries) ? $entries : false;
+
+            if ($result && $this->isSearchCacheEnabled() && $this->session->isStarted()) {
+                $cache[$cacheId] = json_encode($result);
+                $this->session->set(self::LDAP_SEARCH_CACHE, $cache);
+            }
+
+            return $result;
         }
 
         return false;
     }
 
     /**
+     * @param string $user_dn
+     * @param string $password
+     * @param connection $ress
      * @return true
-     * @throws \IMAG\LdapBundle\Exceptions\ConnectionException | Connection error
+     * @throws ConnectionException
+     * @throws \Exception
      */
     public function bind($user_dn, $password = '', $ress = null)
     {
@@ -76,13 +100,13 @@ class LdapConnection implements LdapConnectionInterface
             $ress = $this->ress;
         }
 
-        if (empty($user_dn) || ! is_string($user_dn)) {
+        if (empty($user_dn) || !is_string($user_dn)) {
             throw new ConnectionException("LDAP user's DN (user_dn) must be provided (as a string).");
         }
 
         // According to the LDAP RFC 4510-4511, the password can be blank.
         @ldap_bind($ress, $user_dn, $password);
-        $this->checkLdapError();
+        $this->checkLdapError($ress);
 
         return true;
     }
@@ -100,6 +124,16 @@ class LdapConnection implements LdapConnectionInterface
     public function getPort()
     {
         return $this->params['client']['port'];
+    }
+
+    public function isTLSEnabled()
+    {
+        return $this->params['client']['tls'];
+    }
+
+    public function isSearchCacheEnabled()
+    {
+        return $this->params['client']['cache_search'];
     }
 
     public function getBaseDn($index)
@@ -124,9 +158,7 @@ class LdapConnection implements LdapConnectionInterface
 
     private function connect()
     {
-        $port = isset($this->params['client']['port'])
-            ? $this->params['client']['port']
-            : '389';
+        $port = isset($this->params['client']['port']) ? $this->params['client']['port'] : '389';
 
         $ress = @ldap_connect($this->params['client']['host'], $port);
 
@@ -140,6 +172,11 @@ class LdapConnection implements LdapConnectionInterface
 
         if (isset($this->params['client']['network_timeout'])) {
             ldap_set_option($ress, LDAP_OPT_NETWORK_TIMEOUT, $this->params['client']['network_timeout']);
+        }
+
+        if ($this->isTLSEnabled()) {
+            @ldap_start_tls($ress);
+            $this->checkLdapError($ress);
         }
 
         if (isset($this->params['client']['username'])) {
@@ -232,7 +269,7 @@ class LdapConnection implements LdapConnectionInterface
         $quotedMetaChars = array();
 
         foreach ($metaChars as $key => $value) {
-            $quotedMetaChars[$key] = '\\'.str_pad(dechex(ord($value)), 2, '0');
+            $quotedMetaChars[$key] = '\\' . str_pad(dechex(ord($value)), 2, '0');
         }
 
         $str = str_replace($metaChars, $quotedMetaChars, $str);

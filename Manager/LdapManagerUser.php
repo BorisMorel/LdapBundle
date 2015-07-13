@@ -4,6 +4,7 @@ namespace IMAG\LdapBundle\Manager;
 
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapManagerUser implements LdapManagerUserInterface
@@ -13,8 +14,7 @@ class LdapManagerUser implements LdapManagerUserInterface
         $username,
         $password,
         $params,
-        $ldapUser
-        ;
+        $ldapUser;
 
     public function __construct(LdapConnectionInterface $conn)
     {
@@ -29,8 +29,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     {
         $this
             ->setUsername($username)
-            ->addLdapUser()
-            ;
+            ->addLdapUser();
     }
 
     /**
@@ -39,16 +38,16 @@ class LdapManagerUser implements LdapManagerUserInterface
     public function auth()
     {
         if (strlen($this->password) === 0) {
-            throw new ConnectionException('Password can\'t be empty');
+            throw new BadCredentialsException('Password can\'t be empty');
         }
-        
+
         if (null === $this->ldapUser) {
             $this->bindByUsername();
             $this->doPass();
         } else {
             $this->doPass();
             $this->bindByDn();
-        }        
+        }
     }
 
     /**
@@ -58,8 +57,7 @@ class LdapManagerUser implements LdapManagerUserInterface
     {
         $this
             ->addLdapUser()
-            ->addLdapRoles()
-            ;
+            ->addLdapRoles();
 
         return $this;
     }
@@ -171,9 +169,9 @@ class LdapManagerUser implements LdapManagerUserInterface
             ->search(array(
                 'base_dn' => $this->params['user']['base_dn'],
                 'filter' => sprintf('(&%s(%s=%s))',
-                                    $filter,
-                                    $this->params['user']['name_attribute'],
-                                    $this->ldapConnection->escape($this->username)
+                    $filter,
+                    $this->params['user']['name_attribute'],
+                    $this->ldapConnection->escape($this->username)
                 )
             ));
 
@@ -210,7 +208,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             return;
         }
 
-        if (!isset($this->params['role']) && false ===  $this->params['client']['skip_roles']) {
+        if (!isset($this->params['role']) && false === $this->params['client']['skip_roles']) {
             throw new \InvalidArgumentException("If you want to skip getting the roles, set config option imag_ldap:client:skip_roles to true");
         }
 
@@ -222,20 +220,20 @@ class LdapManagerUser implements LdapManagerUserInterface
 
         $entries = $this->ldapConnection
             ->search(array(
-                'base_dn'  => $this->params['role']['base_dn'],
-                'filter'   => sprintf('(&%s(%s=%s))',
-                                      $filter,
-                                      $this->params['role']['user_attribute'],
-                                      $this->ldapConnection->escape($this->getUserId())
+                'base_dn' => $this->params['role']['base_dn'],
+                'filter' => sprintf('(&%s(%s=%s))',
+                    $filter,
+                    $this->params['role']['user_attribute'],
+                    $this->ldapConnection->escape($this->getUserId())
                 ),
-                'attrs'    => array(
+                'attrs' => array(
                     $this->params['role']['name_attribute']
                 )
             ));
 
         for ($i = 0; $i < $entries['count']; $i++) {
             array_push($tab, sprintf('ROLE_%s',
-                                     self::slugify($entries[$i][$this->params['role']['name_attribute']][0])
+                self::slugify($entries[$i][$this->params['role']['name_attribute']][0])
             ));
         }
 
@@ -268,16 +266,16 @@ class LdapManagerUser implements LdapManagerUserInterface
     private function getUserId()
     {
         switch ($this->params['role']['user_id']) {
-        case 'dn':
-            return $this->ldapUser['dn'];
-            break;
+            case 'dn':
+                return $this->ldapUser['dn'];
+                break;
 
-        case 'username':
-            return $this->username;
-            break;
+            case 'username':
+                return $this->username;
+                break;
 
-        default:
-            throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s",$this->params['role']['user_id']));
+            default:
+                throw new \Exception(sprintf("The value can't be retrieved for this user_id : %s", $this->params['role']['user_id']));
         }
     }
 }

@@ -28,6 +28,9 @@
       <argument>%imag_ldap.ldap_connection.params%</argument>
       <tag name="monolog.logger" channel="ldap_connection" />
       <argument type="service" id="logger" />
+      <call method="setSession">
+        <argument type="service" id="session" />
+      </call>
     </service>
 
     <service id="imag_ldap.ldap_manager" class="%imag_ldap.ldap_manager.class%">
