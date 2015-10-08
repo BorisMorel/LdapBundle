@@ -125,7 +125,13 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function getUsername()
     {
-        return $this->username;
+        $name_attr = $this->params['user']['name_attribute'];
+
+        if (isset($this->ldapUser[$name_attr][0])) {
+            return $this->ldapUser[$name_attr][0];
+        } else {
+            return $this->username;
+        }
     }
 
     public function getRoles()
@@ -273,7 +279,7 @@ class LdapManagerUser implements LdapManagerUserInterface
             break;
 
         case 'username':
-            return $this->username;
+            return $this->getUsername();
             break;
 
         default:
