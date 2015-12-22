@@ -48,11 +48,17 @@ class LdapFactory extends AbstractFactory
     protected function createAuthProvider(ContainerBuilder $container, $id, $config, $userProviderId)
     {
         $dao = 'security.authentication.provider.dao.'.$id;
-        $container
+        $definition = $container
             ->setDefinition($dao, new DefinitionDecorator('security.authentication.provider.dao'))
             ->replaceArgument(0, new Reference($userProviderId))
             ->replaceArgument(2, $id)
         ;
+
+        if ($container->hasDefinition('security.user_checker')) {
+            $definition
+                ->replaceArgument(1, new Reference('security.user_checker.'.$id))
+            ;
+        }
 
         $provider = 'imag_ldap.security.authentication.provider.'.$id;
         $container
