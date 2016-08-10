@@ -24,7 +24,7 @@
       <argument>%imag_ldap.model.user_class%</argument>
     </service>
 
-    <service id="imag_ldap.ldap_connection" class="%imag_ldap.ldap_connection.class%" public="false">
+    <service id="imag_ldap.ldap_connection" class="%imag_ldap.ldap_connection.class%">
       <argument>%imag_ldap.ldap_connection.params%</argument>
       <tag name="monolog.logger" channel="ldap_connection" />
       <argument type="service" id="logger" />
