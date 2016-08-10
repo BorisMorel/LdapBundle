@@ -8,7 +8,7 @@ use IMAG\LdapBundle\Exception\ConnectionException;
 
 class LdapManagerUser implements LdapManagerUserInterface
 {
-    private
+    protected
         $ldapConnection,
         $username,
         $password,
