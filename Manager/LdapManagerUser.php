@@ -215,6 +215,12 @@ class LdapManagerUser implements LdapManagerUserInterface
         }
 
         $tab = array();
+        
+        if (empty($this->params['role'])) {
+            $this->_ldapUser['roles'] = $tab;
+
+            return $this;
+        }
 
         $filter = isset($this->params['role']['filter'])
             ? $this->params['role']['filter']
