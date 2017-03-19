@@ -1,36 +1,15 @@
 {
-    "name": "imag/ldap-bundle",
-    "description": "LDAP Bundle for Symfony 2",
-    "homepage": "http://github.com/BorisMorel/LdapBundle",
-    "license": "CeCILL",
+    "name": "svajiraya/ldap-bundle",
+    "description": "LDAP Bundle for Symfony 3 (backward compatible)",
+    "homepage": "http://github.com/svajiraya/LdapBundle",
+    "license": "MIT",
     "authors": [
         {
-            "name": "Boris Morel",
-            "email": "boris.morel@imag.fr",
-            "role": "Developer",
-            "homepage" : "https://github.com/BorisMorel"
-        },
-        {
-            "name": "Juti Noppornpitak",
-            "email": "jutin@nationalfibre.net",
-            "role": "Fork Maintainer",
-            "homepage": "https://github.com/instaclick"
-        },
-        {
-            "name": "John Kary",
-            "email": "john@johnkary.net",
-            "role": "Fork Maintainer",
-            "homepage": "https://github.com/johnkary"
-        },
-        {
-            "name": "Shiroyuki",
-            "role": "Fork Maintainer",
-            "homepage": "https://github.com/shiroyuki"
+            "name": "Subramanya Vajiraya",
+            "role": "Maintainer",
+            "homepage": "https://github.com/svajiraya"
         }
     ],
-    "support": {
-        "irc": "irc://irc.freenode.org/sf-grenoble"
-    },
     "require": {
         "php": ">=5.3.3",
         "ext-ldap": "*",
