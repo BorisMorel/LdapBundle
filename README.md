@@ -26,9 +26,17 @@ Add LdapBundle in your project's `composer.json`
 ```json
 {
     "require": {
-        "imag/ldap-bundle": "dev-master"
+        "svajiraya/ldap-bundle": "dev-master"
     }
 }
+```
+
+or
+
+``` shell
+
+composer require svajiraya/ldap-bundle
+
 ```
 
 ### Enable the Bundle
