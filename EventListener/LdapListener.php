@@ -10,6 +10,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface,
     Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken,
     Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException,
     Symfony\Component\Security\Core\Security,
+    Symfony\Component\Security\Csrf\CsrfTokenManagerInterface,
     Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface,
     Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface,
     Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface,
@@ -30,7 +31,7 @@ class LdapListener extends AbstractAuthenticationListener
                                 array $options = array(),
                                 LoggerInterface $logger = null,
                                 EventDispatcherInterface $dispatcher = null,
-                                CsrfProviderInterface $csrfProvider = null)
+                                CsrfTokenManagerInterface $csrfProvider = null)
     {
         parent::__construct(
             $securityContext,
@@ -87,7 +88,7 @@ class LdapListener extends AbstractAuthenticationListener
         $username = trim($request->get($this->options['username_parameter'], null, true));
         $password = $request->get($this->options['password_parameter'], null, true);
 
-        $request->getSession()->set(SecurityContextInterface::LAST_USERNAME, $username);
+        $request->getSession()->set(Security::LAST_USERNAME, $username);
 
         return $this->authenticationManager->authenticate(new UsernamePasswordToken($username, $password, $this->providerKey));
     }
