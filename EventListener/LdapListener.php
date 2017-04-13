@@ -9,7 +9,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface,
     Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface,
     Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken,
     Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException,
-    Symfony\Component\Security\Core\SecurityContextInterface,
+    Symfony\Component\Security\Core\Security,
+    Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface,
     Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface,
     Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface,
     Symfony\Component\Security\Http\Firewall\AbstractAuthenticationListener,
@@ -19,7 +20,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface,
 
 class LdapListener extends AbstractAuthenticationListener
 {
-    public function __construct(SecurityContextInterface $securityContext,
+    public function __construct(TokenStorageInterface $securityContext,
                                 AuthenticationManagerInterface $authenticationManager,
                                 SessionAuthenticationStrategyInterface $sessionStrategy,
                                 HttpUtils $httpUtils,
