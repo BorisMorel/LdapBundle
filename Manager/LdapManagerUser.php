@@ -203,8 +203,9 @@ class LdapManagerUser implements LdapManagerUserInterface
         }
 
         $this->ldapUser['roles'] = array();
-
-        if (true === $this->params['client']['skip_roles']) {
+        
+        $skipRoles = !empty($this->params['client']['skip_roles']) ? $this->params['client']['skip_roles'] : false;
+        if ($skipRoles) {
             $this->ldapUser['roles'] = array('ROLE_USER_DEFAULT');
 
             return;

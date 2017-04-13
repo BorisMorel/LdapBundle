@@ -45,7 +45,7 @@
 
     <service id="imag_ldap.security.authentication.listener" class="%imag_ldap.security.authentication.listener.class%" public="false">
       <tag name="monolog.logger" channel="security" />
-      <argument type="service" id="security.context" />
+      <argument type="service" id="security.token_storage" />
       <argument type="service" id="security.authentication.manager" />
       <argument type="service" id="security.authentication.session_strategy" />
       <argument type="service" id="security.http_utils" />
