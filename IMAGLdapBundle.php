@@ -26,9 +26,10 @@ class IMAGLdapBundle extends Bundle
 {
     public function boot()
     {
-        if (!function_exists('ldap_connect')) {
-            throw new \Exception("module php-ldap isn't install");
-        }
+        // Commented by svajiraya to prevent app crashing in IIS environments like Azure.
+        // if (!function_exists('ldap_connect')) {
+        //     throw new \Exception("module php-ldap isn't install");
+        // }
     }
 
     /**
