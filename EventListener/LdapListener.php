@@ -8,8 +8,9 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface,
     Psr\Log\LoggerInterface,
     Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface,
     Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken,
+    Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface,
     Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException,
-    Symfony\Component\Security\Core\SecurityContextInterface,
+    Symfony\Component\Security\Core\Security,
     Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface,
     Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface,
     Symfony\Component\Security\Http\Firewall\AbstractAuthenticationListener,
@@ -19,7 +20,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface,
 
 class LdapListener extends AbstractAuthenticationListener
 {
-    public function __construct(SecurityContextInterface $securityContext,
+    public function __construct(TokenStorageInterface $tokenStorage,
                                 AuthenticationManagerInterface $authenticationManager,
                                 SessionAuthenticationStrategyInterface $sessionStrategy,
                                 HttpUtils $httpUtils,
@@ -32,7 +33,7 @@ class LdapListener extends AbstractAuthenticationListener
                                 CsrfProviderInterface $csrfProvider = null)
     {
         parent::__construct(
-            $securityContext,
+            $tokenStorage,
             $authenticationManager,
             $sessionStrategy,
             $httpUtils,
@@ -86,7 +87,7 @@ class LdapListener extends AbstractAuthenticationListener
         $username = trim($request->get($this->options['username_parameter'], null, true));
         $password = $request->get($this->options['password_parameter'], null, true);
 
-        $request->getSession()->set(SecurityContextInterface::LAST_USERNAME, $username);
+        $request->getSession()->set(Security::LAST_USERNAME, $username);
 
         return $this->authenticationManager->authenticate(new UsernamePasswordToken($username, $password, $this->providerKey));
     }
