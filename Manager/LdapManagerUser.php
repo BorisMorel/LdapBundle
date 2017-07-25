@@ -274,18 +274,12 @@ class LdapManagerUser implements LdapManagerUserInterface
         }
 
         foreach ($this->params['roles'] as $role => $principals) {
-            $addRole = false;
-            if (isset($principals['users'])) {
-                foreach ($principals['users'] as $user) {
-                    if ($user === $this->username) $addRole = true;
-                }
+            if (
+                (isset($principals['users']) and in_array($this->username, $principals['users'])) or
+                (isset($principals['groups'])) and !empty(array_intersect($this->ldapUser['groups'], $principals['groups']))
+            ) {
+                array_push($this->ldapUser['roles'], $role);
             }
-            if (isset($principals['groups'])) {
-                foreach ($principals['groups'] as $group) {
-                    if (in_array($group, $this->ldapUser['groups'], true)) $addRole = true;
-                }
-            }
-            if ($addRole) array_push($this->ldapUser['roles'], $role);
         }
 
         return $this;
