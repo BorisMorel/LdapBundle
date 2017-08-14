@@ -2,7 +2,7 @@ login:
   path:              /login
   defaults:             { _controller: IMAGLdapBundle:Default:login }
   requirements:
-    _method:            GET
+    methods:            [GET]
 
 login_check:
   path:              /login_check
