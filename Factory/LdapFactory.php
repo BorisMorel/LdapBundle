@@ -54,11 +54,13 @@ class LdapFactory extends AbstractFactory
             ->replaceArgument(0, new Reference($userProviderId))
             ->replaceArgument(2, $id)
         ;
-        /* symfony 2.8 security fix */
+        if(intval(\Symfony\Component\HttpKernel\Kernel::VERSION) > "2.8"){
+	/* symfony 2.8 security fix */
         if ($container->hasDefinition('security.user_checker')) {
             $definition->replaceArgument(1, new Reference('security.user_checker.'.$id));
         }
         /* end of security fix */
+	}
         $provider = 'imag_ldap.security.authentication.provider.'.$id;
         $container
             ->setDefinition($provider, new DefinitionDecorator('imag_ldap.security.authentication.provider'))
