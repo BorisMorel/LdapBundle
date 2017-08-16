@@ -13,7 +13,7 @@
     "require": {
         "php": ">=5.3.3",
         "ext-ldap": "*",
-        "symfony/symfony": ">2.8"
+        "symfony/symfony": ">2.3"
     },
     "autoload": {
         "psr-0": { "IMAG\\LdapBundle": "" }
