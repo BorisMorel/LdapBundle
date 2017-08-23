@@ -54,7 +54,7 @@ class LdapFactory extends AbstractFactory
             ->replaceArgument(0, new Reference($userProviderId))
             ->replaceArgument(2, $id)
         ;
-        if(intval(\Symfony\Component\HttpKernel\Kernel::VERSION) > "2.8"){
+        if(floatval(\Symfony\Component\HttpKernel\Kernel::VERSION) > 2.7){
 	/* symfony 2.8 security fix */
         if ($container->hasDefinition('security.user_checker')) {
             $definition->replaceArgument(1, new Reference('security.user_checker.'.$id));
