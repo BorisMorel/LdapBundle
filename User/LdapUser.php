@@ -66,7 +66,7 @@ class LdapUser implements LdapUserInterface
 
     public function getPassword()
     {
-        return null;
+        return '';
     }
 
     public function getSalt()
