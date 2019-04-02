@@ -77,15 +77,15 @@ class LdapListener extends AbstractAuthenticationListener
         }
 
         if (null !== $this->csrfProvider) {
-            $csrfToken = $request->get($this->options['csrf_parameter'], null, true);
+            $csrfToken = $request->get($this->options['csrf_parameter']);
 
             if (false === $this->csrfProvider->isCsrfTokenValid($this->options['intention'], $csrfToken)) {
                 throw new InvalidCsrfTokenException('Invalid CSRF token.');
             }
         }
 
-        $username = trim($request->get($this->options['username_parameter'], null, true));
-        $password = $request->get($this->options['password_parameter'], null, true);
+        $username = trim($request->get($this->options['username_parameter']));
+        $password = $request->get($this->options['password_parameter']);
 
         $request->getSession()->set(Security::LAST_USERNAME, $username);
 
