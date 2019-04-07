@@ -48,19 +48,26 @@ class LdapFactory extends AbstractFactory
     protected function createAuthProvider(ContainerBuilder $container, $id, $config, $userProviderId)
     {
         $dao = 'security.authentication.provider.dao.'.$id;
-        $container
+        //$container
+        $definition=$container
             ->setDefinition($dao, new DefinitionDecorator('security.authentication.provider.dao'))
             ->replaceArgument(0, new Reference($userProviderId))
             ->replaceArgument(2, $id)
         ;
-
+        if(floatval(\Symfony\Component\HttpKernel\Kernel::VERSION) > 2.7){
+	/* symfony 2.8 security fix */
+        if ($container->hasDefinition('security.user_checker')) {
+            $definition->replaceArgument(1, new Reference('security.user_checker.'.$id));
+        }
+        /* end of security fix */
+	}
         $provider = 'imag_ldap.security.authentication.provider.'.$id;
         $container
             ->setDefinition($provider, new DefinitionDecorator('imag_ldap.security.authentication.provider'))
             ->replaceArgument(0, new Reference($userProviderId))
             ->replaceArgument(1, new Reference($dao))
             ->replaceArgument(4, $id)
-            ;
+        ;
 
         return $provider;
     }

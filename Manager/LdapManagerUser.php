@@ -130,7 +130,12 @@ class LdapManagerUser implements LdapManagerUserInterface
 
     public function getRoles()
     {
-        return $this->ldapUser['roles'];
+        if(true === $this->params['client']['active_directory']){
+            return $this->ldapUser['memberof'];
+        }
+        else{
+            return $this->ldapUser['roles'];
+        }
     }
 
     public function setUsername($username)

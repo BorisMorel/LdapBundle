@@ -42,6 +42,7 @@ class Configuration implements ConfigurationInterface
               ->scalarNode('referrals_enabled')->end()
               ->scalarNode('network_timeout')->end()
               ->booleanNode('skip_roles')->defaultFalse()->end()
+              ->booleanNode('active_directory')->defaultFalse()->end()
            ->end()
           ;
 

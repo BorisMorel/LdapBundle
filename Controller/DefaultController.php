@@ -12,6 +12,7 @@ namespace IMAG\LdapBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\SecurityContext;
 
 class DefaultController extends Controller
@@ -21,7 +22,7 @@ class DefaultController extends Controller
         $error = $this->getAuthenticationError();
 
         return $this->render('IMAGLdapBundle:Default:login.html.twig', array(
-            'last_username' => $this->get('request')->getSession()->get(SecurityContext::LAST_USERNAME),
+            'last_username' => $this->get('request_stack')->getCurrentRequest()->getSession()->get(Security::LAST_USERNAME),
             'error'         => $error,
             'token'         => $this->generateToken(),
         ));
@@ -29,17 +30,17 @@ class DefaultController extends Controller
 
     protected function getAuthenticationError()
     {
-        if ($this->get('request')->attributes->has(SecurityContext::AUTHENTICATION_ERROR)) {
-            return $this->get('request')->attributes->get(SecurityContext::AUTHENTICATION_ERROR);
+        if ($this->get('request_stack')->getCurrentRequest()->attributes->has(Security::AUTHENTICATION_ERROR)) {
+            return $this->get('request_stack')->getCurrentRequest()->attributes->get(Security::AUTHENTICATION_ERROR);
         }
 
-        return $this->get('request')->getSession()->get(SecurityContext::AUTHENTICATION_ERROR);
+        return $this->get('request_stack')->getCurrentRequest()->getSession()->get(Security::AUTHENTICATION_ERROR);
     }
 
     protected function generateToken()
     {
-        $token = $this->get('form.csrf_provider')
-                      ->generateCsrfToken('authenticate');
+        $token = $this->get('security.csrf.token_manager')
+                      ->getToken('authenticate');
 
         return $token;
     }

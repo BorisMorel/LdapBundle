@@ -1,11 +1,15 @@
+# Support
+
+Dropping support for symfony versions < 3.0. Recent patches might not be compatible with versions lower than 3.0 since some of the core methods were deprecated and removed from this package. 
+
 # LdapBundle
 
 LdapBundle provides LDAP authentication without using Apache's `mod_ldap`. The bundle instead relies on PHP's [LDAP extension](http://php.net/manual/en/book.ldap.php) along with a form to authenticate users. LdapBundle can also be used for authorization by retrieving the user's roles defined in LDAP.
 
-## Contact
-
-Nick: aways
-IRC: irc.freenode.net - #symfony-fr
+## Credits 
+This Bundle was originally created by BorisMorel. Since this bundle is used frequently in almost all our projects, and since the original bundle was not being maintained by anyone we have tried to add 
+our own mods to the project. Anyone is free to use this bundle and modify it as they please. I will try to keep this bundle upto date, but with my busy schedule that may not the case all the time.
+if you do manage to update the project, please submit a pull request and I would be happy to examine and merge it. 
 
 ## Install
 
@@ -26,9 +30,17 @@ Add LdapBundle in your project's `composer.json`
 ```json
 {
     "require": {
-        "imag/ldap-bundle": "dev-master"
+        "svajiraya/ldap-bundle": "dev-master"
     }
 }
+```
+
+or
+
+``` shell
+
+composer require svajiraya/ldap-bundle
+
 ```
 
 ### Enable the Bundle
