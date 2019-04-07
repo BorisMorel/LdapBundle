@@ -16,6 +16,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface,
 ;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class LdapListener extends AbstractAuthenticationListener
@@ -78,8 +79,7 @@ class LdapListener extends AbstractAuthenticationListener
 
         if (null !== $this->csrfProvider) {
             $csrfToken = $request->get($this->options['csrf_parameter']);
-
-            if (false === $this->csrfProvider->isCsrfTokenValid($this->options['intention'], $csrfToken)) {
+            if (false === $this->csrfProvider->isTokenValid($csrfToken)) {
                 throw new InvalidCsrfTokenException('Invalid CSRF token.');
             }
         }
