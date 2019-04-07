@@ -1,6 +1,6 @@
 {
     "name": "svajiraya/ldap-bundle",
-    "description": "LDAP Bundle for Symfony 3 (backward compatible)",
+    "description": "LDAP Bundle for Symfony 3.0+",
     "homepage": "http://github.com/svajiraya/LdapBundle",
     "license": "MIT",
     "authors": [
@@ -13,7 +13,7 @@
     "require": {
         "php": ">=5.3.3",
         "ext-ldap": "*",
-        "symfony/symfony": ">2.3"
+        "symfony/symfony": ">3.0"
     },
     "autoload": {
         "psr-0": { "IMAG\\LdapBundle": "" }

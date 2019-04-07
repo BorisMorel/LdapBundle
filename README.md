@@ -1,3 +1,7 @@
+# Support
+
+Dropping support for symfony versions < 3.0. Recent patches might not be compatible with versions lower than 3.0 since some of the core methods were deprecated and removed from this package. 
+
 # LdapBundle
 
 LdapBundle provides LDAP authentication without using Apache's `mod_ldap`. The bundle instead relies on PHP's [LDAP extension](http://php.net/manual/en/book.ldap.php) along with a form to authenticate users. LdapBundle can also be used for authorization by retrieving the user's roles defined in LDAP.
